@@ -18,91 +18,78 @@ body { font-family: 'Inter', sans-serif; background-color: var(--fm-bg); color: 
 .glow-green { box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); }
 .glow-gold { box-shadow: 0 0 25px rgba(245, 158, 11, 0.2); }
 
-/* Inputs estilo Football Manager */
-.input-fm {
-    width: 100%;
-    padding: 10px 15px;
-    background-color: var(--fm-bg);
-    border: 1px solid var(--fm-border);
-    border-radius: 6px;
-    color: white;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.2s;
-}
+.input-fm { width: 100%; padding: 10px 15px; background-color: var(--fm-bg); border: 1px solid var(--fm-border); border-radius: 6px; color: white; font-size: 14px; outline: none; transition: all 0.2s; }
 .input-fm:focus { border-color: var(--fm-accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
 
-/* Selector de color */
-.color-picker {
-    appearance: none;
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 3px solid transparent;
-    transition: transform 0.2s;
-}
+.color-picker { appearance: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; }
 .color-picker:checked { border-color: white; transform: scale(1.15); box-shadow: 0 0 15px currentColor; }
 
-/* Menú de Navegación Lateral (Sidebar) */
-.nav-btn {
-    width: 100%;
-    text-align: left;
-    padding: 12px 16px;
-    color: #cbd5e1;
-    border-radius: 6px;
-    transition: all 0.2s;
-    font-size: 14px;
-    font-weight: 500;
-}
+.nav-btn { width: 100%; text-align: left; padding: 12px 16px; color: #cbd5e1; border-radius: 6px; transition: all 0.2s; font-size: 14px; font-weight: 500; }
 .nav-btn:hover { background-color: rgba(59, 130, 246, 0.1); color: white; }
 .nav-btn.active { background-color: var(--fm-accent); color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
 
-/* Escudo y Forma */
 .clip-shield { clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0); }
 
 /* Tablas estilo FM */
 .fm-table { width: 100%; font-size: 13px; }
-.fm-table th { background-color: var(--fm-panel); padding: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--fm-border); position: sticky; top: 0;}
+.fm-table th { background-color: var(--fm-panel); padding: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--fm-border); position: sticky; top: 0; z-index: 10;}
 .fm-table td { padding: 12px; border-bottom: 1px solid var(--fm-border); vertical-align: middle; }
 .fm-table tr:hover td { background-color: rgba(255,255,255,0.02); }
 
-/* Etiquetas de posición */
+/* Fotos Jugadores */
+.player-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fm-border); background: var(--fm-bg); }
+
+/* Moral Bar */
+.morale-bar-bg { width: 100%; height: 6px; background-color: #334155; border-radius: 3px; overflow: hidden; margin-top: 4px;}
+.morale-bar-fill { height: 100%; transition: width 0.5s ease; }
+
 .pos-badge { padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; width: 45px; text-align: center; }
 .pos-del { background: #2563eb; color: white; }
 .pos-med { background: #16a34a; color: white; }
 .pos-def { background: #d97706; color: white; }
 .pos-por { background: #e11d48; color: white; }
 
-/* Botones de filtro del mercado */
 .filter-btn { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; background: var(--fm-bg); border: 1px solid var(--fm-border); color: #94a3b8; cursor: pointer; transition: 0.2s; }
 .filter-btn:hover { border-color: var(--fm-accent); color: white; }
 .filter-btn.active { background: var(--fm-accent); border-color: var(--fm-accent); color: white; }
 
-/* Botones de compra */
 .btn-buy { padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; border: none; }
 .btn-buy.basic { background: var(--fm-panel); color: #4ade80; border: 1px solid #166534; }
 .btn-buy.basic:hover { background: #14532d; color: white; }
 .btn-buy.premium { background: linear-gradient(to right, #d97706, #fbbf24); color: black; box-shadow: 0 2px 5px rgba(245,158,11,0.3); }
 .btn-buy.premium:hover { filter: brightness(1.1); }
 
-/* SCROLLBAR */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--fm-bg); }
 ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--fm-accent); }
 
-/* Utilidades CSS Puras para Pestañas */
+.hidden { display: none !important; }
 .fm-tab { display: none; animation: fadeIn 0.3s ease; }
 .fm-tab.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Tácticas Pitch */
+/* Tácticas y Jugadores en el campo */
 .pitch-player {
     position: absolute; transform: translate(-50%, -50%);
-    width: 30px; height: 30px; background: rgba(0,0,0,0.8);
-    border: 2px solid white; border-radius: 50%;
+    width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s ease; z-index: 10;
+}
+.pitch-shirt {
+    width: 36px; height: 36px; border-radius: 50%; border: 2px solid white;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold; color: white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    transition: all 0.5s ease;
+    font-size: 12px; font-weight: bold; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+}
+.pitch-player:hover { transform: translate(-50%, -50%) scale(1.1); z-index: 20;}
+.pitch-name { background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; white-space: nowrap; font-weight: bold; }
+.player-selected .pitch-shirt { border-color: #f59e0b; box-shadow: 0 0 15px #f59e0b; }
+
+.bench-player { cursor: pointer; transition: all 0.2s; }
+.bench-player:hover { background-color: rgba(255,255,255,0.05); }
+.bench-player.selected { background-color: rgba(245, 158, 11, 0.2); border-left: 3px solid #f59e0b; }
+
+/* Vista Partido Inmersiva */
+.stadium-bg {
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1920&auto=format&fit=crop');
+    background-size: cover; background-position: center;
 }

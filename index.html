@@ -22,7 +22,7 @@
         <div class="absolute inset-0 bg-slate-900/85"></div>
         <div class="relative z-10 bg-slate-800/90 p-8 rounded-xl max-w-md w-full border border-slate-700 glow-blue backdrop-blur-sm">
             <h1 class="text-4xl font-gaming text-center text-white mb-2">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
-            <p class="text-center text-slate-400 mb-6 text-sm font-mono tracking-widest">DATABASE V.24.1</p>
+            <p class="text-center text-slate-400 mb-6 text-sm font-mono tracking-widest">DATABASE V.24.2</p>
             <form id="auth-form" class="space-y-4">
                 <input type="text" id="reg-user" class="input-fm" placeholder="Usuario" required>
                 <input type="email" id="reg-email" class="input-fm" placeholder="Email" required>
@@ -52,6 +52,55 @@
         </div>
     </main>
 
+    <main id="view-match" class="view-section absolute inset-0 z-50 stadium-bg hidden flex flex-col">
+        <header class="h-20 bg-slate-900/90 border-b border-slate-700 flex items-center justify-between px-8 shadow-2xl backdrop-blur-sm">
+            <div class="w-1/3 flex items-center gap-4">
+                <div id="sim-home-shield" class="w-12 h-14 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-lg"></div>
+                <div>
+                    <h2 id="sim-home-name" class="font-bold text-white text-xl uppercase">Local</h2>
+                    <p class="text-slate-400 text-sm">OVR: <span id="sim-home-ovr" class="text-yellow-400 font-bold">0</span></p>
+                </div>
+            </div>
+            
+            <div class="w-1/3 text-center">
+                <div class="text-xs text-slate-400 font-mono tracking-widest mb-1">TIEMPO REGLAMENTARIO</div>
+                <div class="font-gaming text-5xl text-white tracking-widest glow-blue px-6 py-2 rounded bg-black/50 border border-slate-700 inline-block">
+                    <span id="sim-home-score">0</span> - <span id="sim-away-score">0</span>
+                </div>
+            </div>
+
+            <div class="w-1/3 flex items-center justify-end gap-4 text-right">
+                <div>
+                    <h2 id="sim-away-name" class="font-bold text-red-400 text-xl uppercase">Rival FC</h2>
+                    <p class="text-slate-400 text-sm">OVR: <span id="sim-away-ovr" class="text-yellow-400 font-bold">0</span></p>
+                </div>
+                <div class="w-12 h-14 bg-slate-800 clip-shield border-2 border-red-500/50"></div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex items-center justify-center p-8">
+            <div class="w-full max-w-3xl bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-xl p-6 shadow-2xl flex flex-col">
+                <h3 class="font-gaming text-slate-300 border-b border-slate-700 pb-3 mb-4 text-lg">COMENTARIOS EN DIRECTO</h3>
+                <div id="match-narrative" class="flex-1 min-h-[300px] overflow-y-auto space-y-3 font-mono text-sm text-slate-300 pr-4">
+                    </div>
+                
+                <div id="match-post" class="mt-6 border-t border-slate-700 pt-6 hidden">
+                    <div class="flex justify-around mb-6">
+                        <div class="text-center bg-slate-800 p-4 rounded-lg w-1/3 border border-slate-700">
+                            <div class="text-xs text-slate-400 uppercase">Ingresos Partido</div>
+                            <div id="match-coins" class="text-green-400 font-bold font-mono text-xl">+0 €</div>
+                        </div>
+                        <div class="text-center bg-slate-800 p-4 rounded-lg w-1/3 border border-slate-700">
+                            <div class="text-xs text-slate-400 uppercase">Variación ELO/Rep</div>
+                            <div id="match-rep" class="text-yellow-400 font-bold font-mono text-xl">+0</div>
+                        </div>
+                    </div>
+                    <button onclick="endMatchAndReturn()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-4 rounded-lg font-bold shadow-lg transition text-xl tracking-wider">VOLVER AL VESTUARIO</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <div id="app-layout" class="hidden flex h-screen w-full">
         <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col z-20 shadow-xl relative">
             <div class="p-6 border-b border-slate-700 flex items-center gap-4">
@@ -63,9 +112,9 @@
             </div>
             <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
                 <button id="nav-inbox" class="nav-btn active" onclick="switchTab('inbox')">📥 Buzón</button>
-                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')">👥 Plantilla</button>
-                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">📋 Tácticas</button>
-                <button id="nav-market" class="nav-btn" onclick="switchTab('market')">🌍 Mercado</button>
+                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')">👥 Plantilla y Moral</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">📋 Pizarra y Sustituciones</button>
+                <button id="nav-market" class="nav-btn" onclick="switchTab('market')">🌍 Ojeo y Mercado</button>
             </nav>
             <div class="p-4 border-t border-slate-700 bg-slate-900/50">
                 <div class="text-xs text-slate-400 mb-1">Reputación Mundial</div>
@@ -86,8 +135,8 @@
             <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 shadow-md z-10">
                 <h1 id="page-title" class="text-xl font-gaming text-slate-200 uppercase tracking-widest">Buzón de Entrada</h1>
                 
-                <button onclick="playMatch()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 py-2.5 rounded shadow-[0_0_15px_rgba(59,130,246,0.4)] font-gaming font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
-                    CONTINUAR ⏭
+                <button onclick="startMatch()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 py-2.5 rounded shadow-[0_0_15px_rgba(59,130,246,0.4)] font-gaming font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+                    CONTINUAR AL PARTIDO ⏭
                 </button>
             </header>
 
@@ -99,76 +148,68 @@
                             <span>Bandeja de Entrada</span>
                             <span class="text-slate-400 text-sm" id="date-display">1 Jul 2026</span>
                         </div>
-                        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="inbox-list">
-                            </div>
+                        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="inbox-list"></div>
                     </div>
                 </div>
 
                 <div id="tab-squad" class="fm-tab">
                     <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden">
                         <div class="bg-slate-700 p-3 border-b border-slate-600 flex justify-between items-center">
-                            <span class="font-bold">Plantilla del Primer Equipo</span>
-                            <span class="text-sm text-slate-400">Total: <span id="squad-count">0</span> Jugadores | OVR Media: <span id="squad-ovr" class="font-bold text-yellow-400">0</span></span>
+                            <span class="font-bold">Plantilla Completa</span>
+                            <span class="text-sm text-slate-400">Jugadores: <span id="squad-count">0</span> | OVR Titulares: <span id="squad-ovr" class="font-bold text-yellow-400">0</span></span>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto h-[70vh]">
                             <table class="fm-table w-full text-left border-collapse">
                                 <thead>
                                     <tr>
+                                        <th>Foto</th>
                                         <th>Pos</th>
                                         <th>Nombre</th>
                                         <th>OVR</th>
+                                        <th>Moral</th>
                                         <th>PAC</th>
                                         <th>SHO</th>
                                         <th>PAS</th>
                                         <th>DEF</th>
                                         <th>PHY</th>
-                                        <th>Valor</th>
                                     </tr>
                                 </thead>
-                                <tbody id="squad-tbody">
-                                    </tbody>
+                                <tbody id="squad-tbody"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
                 <div id="tab-tactics" class="fm-tab">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6">
-                            <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                                <h3 class="font-bold text-lg">Pizarra Táctica</h3>
-                                <select id="tactics-formation" class="input-fm w-auto py-1 px-3 text-sm" onchange="changeFormation()">
-                                    <option value="4-4-2">4-4-2 Estándar</option>
-                                    <option value="4-3-3">4-3-3 Ofensiva</option>
-                                    <option value="5-3-2">5-3-2 Defensiva</option>
-                                </select>
-                            </div>
-                            <div class="pitch bg-green-800 border-2 border-white/30 rounded relative mx-auto" style="height: 400px; max-width: 500px; background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.1) 40px, rgba(0,0,0,0.1) 80px);">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Instrucciones al Equipo</h2>
+                        <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-sm">
+                            <span class="text-slate-400 mr-2">Formación:</span>
+                            <select id="tactics-formation" class="bg-slate-900 border border-slate-600 text-white p-1 rounded outline-none" onchange="changeFormation()">
+                                <option value="4-4-2">4-4-2 Estándar</option>
+                                <option value="4-3-3">4-3-3 Ofensiva</option>
+                                <option value="5-3-2">5-3-2 Defensiva</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-6 h-[65vh]">
+                        <div class="flex-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg relative p-4 flex items-center justify-center">
+                            <div class="absolute top-2 left-2 text-xs text-slate-400">Selecciona un jugador del campo y luego uno del banquillo para intercambiarlos.</div>
+                            
+                            <div class="pitch bg-green-800 border-2 border-white/30 rounded relative w-full max-w-[600px] h-[500px]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.1) 50px, rgba(0,0,0,0.1) 100px);">
                                 <div class="absolute inset-0 border-white/30 border-2 m-4 opacity-50"></div>
                                 <div class="absolute top-1/2 left-0 w-full h-0 border-t-2 border-white/30"></div>
-                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white/30 rounded-full"></div>
-                                
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/30 rounded-full"></div>
                                 <div id="pitch-players" class="absolute inset-0"></div>
                             </div>
                         </div>
-                        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6 flex flex-col">
-                            <h3 class="font-bold border-b border-slate-700 pb-2 mb-4">Análisis del Equipo</h3>
-                            <div class="space-y-4 flex-1">
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1"><span>Ataque</span><span id="tac-atk" class="text-blue-400">0</span></div>
-                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-atk" class="h-full bg-blue-500 rounded" style="width:0%"></div></div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1"><span>Control Medio</span><span id="tac-mid" class="text-green-400">0</span></div>
-                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-mid" class="h-full bg-green-500 rounded" style="width:0%"></div></div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1"><span>Defensa</span><span id="tac-def" class="text-yellow-400">0</span></div>
-                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-def" class="h-full bg-yellow-500 rounded" style="width:0%"></div></div>
-                                </div>
-                            </div>
-                            <div class="mt-4 p-3 bg-slate-900 rounded text-xs text-slate-400 border border-slate-700">
-                                La formación elegida y los atributos de tus jugadores determinan estos valores, clave para ganar en el simulador.
+
+                        <div class="w-80 flex flex-col gap-4">
+                            <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden">
+                                <div class="bg-slate-700 p-3 border-b border-slate-600 font-bold text-sm">Banquillo y Reservas</div>
+                                <div id="bench-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+                                    </div>
                             </div>
                         </div>
                     </div>
@@ -184,67 +225,26 @@
                                 <button id="filter-DEF" class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
                                 <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
                             </div>
-                            <div class="text-sm text-yellow-400 font-bold">Ojeadores del Club</div>
+                            <div class="text-sm text-yellow-400 font-bold">Radar de Ojeo</div>
                         </div>
                         <div class="overflow-auto flex-1">
                             <table class="fm-table w-full text-left border-collapse">
                                 <thead>
                                     <tr>
+                                        <th>Perfil</th>
                                         <th>Jugador</th>
-                                        <th>Pos</th>
                                         <th>OVR</th>
                                         <th>Rep Req.</th>
-                                        <th>Precio (€)</th>
-                                        <th>Premium (🪙)</th>
-                                        <th>Acción</th>
+                                        <th>Traspaso (€)</th>
+                                        <th>Cláusula (🪙)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="market-tbody">
-                                    </tbody>
+                                <tbody id="market-tbody"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-
-    <div id="match-modal" class="overlay hidden z-[100]">
-        <div class="bg-slate-900 border border-slate-600 p-8 rounded-xl max-w-2xl w-full text-center glow-blue shadow-2xl relative overflow-hidden">
-            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518605368461-1e12d53787b4?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
-            <h2 id="match-header" class="text-3xl font-gaming mb-6 relative z-10 tracking-widest text-slate-200">MOTOR DE SIMULACIÓN 3D</h2>
-            
-            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-lg border border-slate-700 relative z-10 mb-6">
-                <div class="w-1/3 text-right">
-                    <h3 id="sim-home-name" class="font-bold text-xl text-blue-400 truncate">Local</h3>
-                    <div class="text-xs text-slate-400">OVR: <span id="sim-home-ovr">0</span></div>
-                </div>
-                <div class="w-1/3 font-gaming text-4xl text-white">
-                    <span id="sim-home-score">0</span> - <span id="sim-away-score">0</span>
-                </div>
-                <div class="w-1/3 text-left">
-                    <h3 id="sim-away-name" class="font-bold text-xl text-red-400 truncate">Visitante</h3>
-                    <div class="text-xs text-slate-400">OVR: <span id="sim-away-ovr">0</span></div>
-                </div>
-            </div>
-
-            <div id="match-narrative" class="bg-black/50 h-32 rounded border border-slate-700 p-4 text-left font-mono text-sm text-green-400 overflow-y-auto relative z-10 mb-6 flex flex-col gap-1">
-                Preparando el terreno de juego...
-            </div>
-
-            <div id="match-post" class="hidden relative z-10">
-                <div class="bg-slate-800 p-4 rounded border border-slate-700 mb-6 flex justify-around">
-                    <div class="text-center">
-                        <div class="text-xs text-slate-400 uppercase tracking-wide">Ingresos</div>
-                        <div id="match-coins" class="text-green-400 font-bold font-mono text-lg">+0 €</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-xs text-slate-400 uppercase tracking-wide">Reputación</div>
-                        <div id="match-rep" class="text-yellow-400 font-bold font-mono text-lg">+0</div>
-                    </div>
-                </div>
-                <button onclick="closeMatch()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-3 rounded font-bold shadow-lg transition">VOLVER AL VESTUARIO</button>
             </div>
         </div>
     </div>
