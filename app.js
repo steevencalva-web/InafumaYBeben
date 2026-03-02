@@ -1,365 +1,403 @@
-// --- BASE DE DATOS DE JUGADORES MOCK ---
-const DATABASE = [
-    { id: 1, name: "E. Inafuma", pos: "DEL", rating: 120, reqRep: 5000, priceBas: 80000000, pricePrem: 10000 },
-    { id: 2, name: "M. Beben", pos: "MED", rating: 115, reqRep: 4000, priceBas: 70000000, pricePrem: 8000 },
-    { id: 3, name: "S. Aris", pos: "DEL", rating: 105, reqRep: 2000, priceBas: 45000000, pricePrem: 5000 },
-    { id: 4, name: "L. Yashin", pos: "POR", rating: 98, reqRep: 1500, priceBas: 30000000, pricePrem: 3500 },
-    { id: 5, name: "P. Maldini", pos: "DEF", rating: 95, reqRep: 1200, priceBas: 25000000, pricePrem: 3000 },
-    { id: 6, name: "K. Vision", pos: "MED", rating: 90, reqRep: 800, priceBas: 15000000, pricePrem: 2000 },
-    { id: 7, name: "J. Cazador", pos: "DEL", rating: 85, reqRep: 500, priceBas: 8000000, pricePrem: 1000 },
-    { id: 8, name: "F. Roca", pos: "DEF", rating: 82, reqRep: 300, priceBas: 5000000, pricePrem: 800 },
-    { id: 9, name: "A. Motor", pos: "MED", rating: 78, reqRep: 100, priceBas: 3000000, pricePrem: 500 },
-    { id: 10, name: "R. Veloz", pos: "DEL", rating: 75, reqRep: 50, priceBas: 2000000, pricePrem: 300 },
-    { id: 11, name: "C. Tronco", pos: "DEF", rating: 68, reqRep: 0, priceBas: 800000, pricePrem: 100 },
-    { id: 12, name: "D. Manco", pos: "POR", rating: 62, reqRep: 0, priceBas: 400000, pricePrem: 50 },
-    { id: 13, name: "L. Novato", pos: "MED", rating: 58, reqRep: 0, priceBas: 200000, pricePrem: 20 },
-    { id: 14, name: "P. Cojo", pos: "DEL", rating: 55, reqRep: 0, priceBas: 100000, pricePrem: 10 }
+// --- BASE DE DATOS AVANZADA (Estilo FM24) ---
+// Atributos: PAC (Ritmo), SHO (Tiro), PAS (Pase), DEF (Defensa), PHY (Físico).
+const PLAYERS_DB = [
+    { id: 1, name: "E. Inafuma", pos: "DEL", pac: 98, sho: 99, pas: 85, def: 30, phy: 88, rep: 5000, priceBasic: 120000000, pricePrem: 10000 },
+    { id: 2, name: "M. Beben", pos: "MED", pac: 85, sho: 88, pas: 98, def: 75, phy: 82, rep: 4000, priceBasic: 85000000, pricePrem: 8000 },
+    { id: 3, name: "S. Aris", pos: "DEL", pac: 95, sho: 92, pas: 80, def: 25, phy: 78, rep: 2000, priceBasic: 50000000, pricePrem: 4500 },
+    { id: 4, name: "P. Maldini", pos: "DEF", pac: 80, sho: 40, pas: 75, def: 99, phy: 90, rep: 1500, priceBasic: 40000000, pricePrem: 3000 },
+    { id: 5, name: "L. Yashin", pos: "POR", pac: 50, sho: 20, pas: 60, def: 98, phy: 95, rep: 1000, priceBasic: 35000000, pricePrem: 2500 },
+    { id: 6, name: "K. Vision", pos: "MED", pac: 75, sho: 80, pas: 92, def: 70, phy: 75, rep: 800, priceBasic: 20000000, pricePrem: 1500 },
+    { id: 7, name: "F. Roca", pos: "DEF", pac: 70, sho: 35, pas: 65, def: 88, phy: 92, rep: 500, priceBasic: 12000000, pricePrem: 800 },
+    { id: 8, name: "J. Cazador", pos: "DEL", pac: 88, sho: 85, pas: 70, def: 20, phy: 70, rep: 300, priceBasic: 8000000, pricePrem: 600 },
+    { id: 9, name: "C. Tronco", pos: "DEF", pac: 55, sho: 30, pas: 50, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150 },
+    { id: 10, name: "L. Novato", pos: "MED", pac: 65, sho: 60, pas: 68, def: 60, phy: 65, rep: 0, priceBasic: 1000000, pricePrem: 100 },
+    { id: 11, name: "D. Manco", pos: "POR", pac: 40, sho: 10, pas: 40, def: 65, phy: 70, rep: 0, priceBasic: 500000, pricePrem: 50 },
 ];
 
-const IAP_PACKAGES = [
-    { eur: 5, coins: 100 }, { eur: 10, coins: 250 }, { eur: 20, coins: 600 },
-    { eur: 50, coins: 1600 }, { eur: 100, coins: 3500 }, { eur: 200, coins: 8000 }
-];
+// Calcula la media (OVR) visual basada en posición
+function calcPlayerOVR(p) {
+    if(p.pos === 'DEL') return Math.round((p.pac*0.2) + (p.sho*0.5) + (p.phy*0.1) + (p.pas*0.2));
+    if(p.pos === 'MED') return Math.round((p.pac*0.1) + (p.pas*0.5) + (p.def*0.2) + (p.phy*0.2));
+    if(p.pos === 'DEF') return Math.round((p.pac*0.2) + (p.def*0.5) + (p.phy*0.2) + (p.pas*0.1));
+    if(p.pos === 'POR') return Math.round((p.def*0.8) + (p.phy*0.2));
+    return 50;
+}
 
-// --- ESTADO GLOBAL (Guardado en LocalStorage) ---
+// Inicializar y calcular OVRs en la DB
+PLAYERS_DB.forEach(p => p.ovr = calcPlayerOVR(p));
+
+// --- ESTADO GLOBAL ---
 let state = {
     auth: null,
     team: null,
     economy: { coins: 0, premium: 0 },
-    stats: { rep: 0 },
-    roster: []
+    stats: { rep: 0, matches: 0 },
+    roster: [],
+    inbox: [],
+    formation: '4-4-2'
 };
-const SAVE_KEY = 'inafuma_data_v1';
+const SAVE_KEY = 'inafuma_fm_v1';
 
-// --- INICIALIZACIÓN ---
 window.onload = () => {
-    checkCookies();
+    if(!localStorage.getItem('inafuma_fm_cookies')) {
+        document.getElementById('modal-cookies').classList.remove('hidden');
+    }
     loadState();
     routeView();
-    renderStore();
+    // Iniciar reloj superior
+    document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-function saveState() {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    updateUI();
+function saveState() { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); updateUI(); }
+function loadState() { const saved = localStorage.getItem(SAVE_KEY); if(saved) state = JSON.parse(saved); }
+
+function acceptCookies() {
+    localStorage.setItem('inafuma_fm_cookies', 'true');
+    document.getElementById('modal-cookies').classList.add('hidden');
 }
 
-function loadState() {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if(saved) state = JSON.parse(saved);
-}
-
-// --- UTILIDADES MODALES ---
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-function toggleDropdown() { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
-
-// --- RUTAS Y VISTAS ---
 function routeView() {
-    document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    document.getElementById('app-layout').classList.add('hidden');
     
     if(!state.auth) {
         document.getElementById('view-landing').classList.remove('hidden');
-        document.getElementById('main-header').classList.add('hidden');
     } else if(!state.team) {
         document.getElementById('view-setup').classList.remove('hidden');
-        document.getElementById('main-header').classList.add('hidden');
     } else {
-        document.getElementById('view-dashboard').classList.remove('hidden');
-        document.getElementById('main-header').classList.remove('hidden');
+        document.getElementById('app-layout').classList.remove('hidden');
         updateUI();
+        switchTab('inbox'); // Empieza siempre en el buzón (Como en FM)
     }
 }
 
-// --- COOKIES ---
-function checkCookies() {
-    if(!localStorage.getItem('inafuma_cookies_ok')) openModal('cookie-modal');
-}
-function acceptCookies() {
-    localStorage.setItem('inafuma_cookies_ok', 'true');
-    closeModal('cookie-modal');
-}
-
-// --- AUTH Y REGISTRO ---
-document.getElementById('register-form').addEventListener('submit', (e) => {
+// --- AUTH ---
+document.getElementById('auth-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const user = document.getElementById('reg-user').value;
-    state.auth = { username: user };
-    state.economy = { coins: 10000000, premium: 0 }; // 10 Millones
-    state.stats = { rep: 0 };
-    state.roster = [];
-    saveState();
-    routeView();
+    state.auth = { user: document.getElementById('reg-user').value };
+    saveState(); routeView();
 });
 
 document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    state.team = {
-        name: document.getElementById('set-team').value,
-        manager: document.getElementById('set-manager').value,
-        color: document.querySelector('input[name="color"]:checked').value
+    const color = document.querySelector('input[name="color"]:checked').value;
+    state.team = { 
+        name: document.getElementById('set-team').value, 
+        manager: document.getElementById('set-manager').value, 
+        color: color 
     };
-    saveState();
-    routeView();
+    state.economy = { coins: 10000000, premium: 0 };
+    state.stats = { rep: 0, matches: 0 };
+    
+    // Correo de bienvenida en el buzón
+    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la junta directiva confía en usted para llevar al ${state.team.name} a la gloria. Tiene 10M€ de presupuesto inicial. Use el mercado con inteligencia.`);
+    
+    saveState(); routeView();
 });
 
 function logout() {
-    state.auth = null;
-    state.team = null;
-    saveState();
-    routeView();
-    document.getElementById('profile-dropdown').classList.add('hidden');
+    if(confirm("¿Guardar y salir al menú principal?")) {
+        state.auth = null; state.team = null; saveState(); routeView();
+    }
 }
 
-// --- ACTUALIZACIÓN DE UI ---
-function updateUI() {
-    if(!state.auth || !state.team) return;
+// --- BUZÓN DE NOTICIAS (INBOX) ---
+function addEmail(sender, subject, body) {
+    const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
+    state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
+}
 
-    // Header Format
-    const formatNum = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num >= 1000 ? (num/1000).toFixed(1)+'K' : num;
+function renderInbox() {
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = '';
+    if(state.inbox.length === 0) { list.innerHTML = '<p class="text-slate-500 text-sm">Bandeja vacía.</p>'; return; }
+    
+    state.inbox.forEach(mail => {
+        const dot = mail.read ? '' : '<div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>';
+        list.innerHTML += `
+        <div class="bg-slate-700/50 p-4 rounded border ${mail.read ? 'border-slate-600 opacity-75' : 'border-blue-500/50'} cursor-pointer hover:bg-slate-700 transition flex gap-3" onclick="readEmail(${mail.id})">
+            ${dot}
+            <div class="flex-1">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span class="text-sm font-bold text-slate-200">${mail.sender}</span>
+                    <span class="text-xs text-slate-400">${mail.date}</span>
+                </div>
+                <h4 class="text-md font-bold ${mail.read ? 'text-slate-300' : 'text-white'}">${mail.subject}</h4>
+                <p class="text-sm text-slate-400 mt-2 line-clamp-2">${mail.body}</p>
+            </div>
+        </div>`;
+    });
+}
+
+function readEmail(id) {
+    const mail = state.inbox.find(m => m.id === id);
+    if(mail) { mail.read = true; saveState(); renderInbox(); }
+}
+
+// --- NAVEGACIÓN Y TABS ---
+function switchTab(tabId) {
+    document.querySelectorAll('.fm-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+    
+    const titles = { 'inbox': 'Buzón de Entrada', 'squad': 'Plantilla del Primer Equipo', 'tactics': 'Pizarra Táctica', 'market': 'Centro de Ojeo (Mercado)' };
+    document.getElementById('page-title').textContent = titles[tabId];
+
+    if(tabId === 'market') filterMarket('ALL');
+    if(tabId === 'tactics') calculateTactics();
+}
+
+// --- UI GLOBALS ---
+function updateUI() {
+    if(!state.team) return;
+    
+    const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
     
     document.getElementById('ui-rep').textContent = state.stats.rep;
-    document.getElementById('ui-coins').textContent = formatNum(state.economy.coins);
+    document.getElementById('ui-coins').textContent = formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
     
     const shield = document.getElementById('ui-shield');
     shield.style.backgroundColor = state.team.color;
-    shield.textContent = state.team.name.charAt(0).toUpperCase();
-
-    document.getElementById('drop-teamname').textContent = state.team.name;
-    document.getElementById('drop-username').textContent = "@" + state.auth.username;
-
-    // Dashboard
-    document.getElementById('dash-manager').textContent = state.team.manager;
-    document.getElementById('dash-team').textContent = state.team.name;
-    document.getElementById('roster-count').textContent = state.roster.length;
+    shield.textContent = state.team.name.substring(0,3).toUpperCase();
     
-    // OVR Calculation
-    let ovr = 30; // Base amateur
-    if(state.roster.length > 0) {
-        const sum = state.roster.reduce((a,b) => a + b.rating, 0);
-        ovr = Math.round(sum / state.roster.length);
-    }
-    document.getElementById('dash-ovr').textContent = ovr;
+    document.getElementById('ui-teamname').textContent = state.team.name;
+    document.getElementById('ui-manager').textContent = state.team.manager;
 
-    // Render Roster list
-    const rList = document.getElementById('roster-list');
-    rList.innerHTML = '';
-    const sorted = [...state.roster].sort((a,b) => b.rating - a.rating);
+    renderInbox();
+    renderSquad();
+    if(document.getElementById('tab-market').classList.contains('active')) filterMarket(currentMarketFilter);
+}
+
+// --- SQUAD (Plantilla Table) ---
+function renderSquad() {
+    const tbody = document.getElementById('squad-tbody');
+    tbody.innerHTML = '';
+    document.getElementById('squad-count').textContent = state.roster.length;
+    
+    let sumOvr = 0;
+    const sorted = [...state.roster].sort((a,b) => b.ovr - a.ovr);
+    
     sorted.forEach(p => {
-        let bg = p.pos==='DEL'?'bg-del':p.pos==='MED'?'bg-med':p.pos==='DEF'?'bg-def':'bg-por';
-        rList.innerHTML += `
-        <div class="player-row">
-            <div><span class="pos-tag ${bg}">${p.pos}</span> <strong>${p.name}</strong></div>
-            <span class="text-gold gaming-font">${p.rating}</span>
-        </div>`;
+        sumOvr += p.ovr;
+        let pClass = `pos-${p.pos.toLowerCase()}`;
+        tbody.innerHTML += `
+        <tr>
+            <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="font-bold text-white">${p.name}</td>
+            <td class="font-gaming text-yellow-400 font-bold">${p.ovr}</td>
+            <td class="text-slate-300">${p.pac}</td>
+            <td class="text-slate-300">${p.sho}</td>
+            <td class="text-slate-300">${p.pas}</td>
+            <td class="text-slate-300">${p.def}</td>
+            <td class="text-slate-300">${p.phy}</td>
+            <td class="text-green-400 font-mono">€${(p.priceBasic/1000000).toFixed(1)}M</td>
+        </tr>`;
     });
+
+    const avg = state.roster.length > 0 ? Math.round(sumOvr / state.roster.length) : 0;
+    document.getElementById('squad-ovr').textContent = avg;
 }
 
-// --- TIENDA PREMIUM ---
-function renderStore() {
-    const container = document.getElementById('store-packages');
-    container.innerHTML = '';
-    IAP_PACKAGES.forEach(pkg => {
-        container.innerHTML += `
-        <div class="market-item text-center" onclick="buyIAP(${pkg.coins}, ${pkg.eur})">
-            <div class="gaming-font text-gold text-2xl mb-10">${pkg.coins} 🪙</div>
-            <div class="bg-blue rounded font-bold py-2 text-white">${pkg.eur}.00 €</div>
-        </div>`;
-    });
+// --- TÁCTICAS ---
+function changeFormation() {
+    state.formation = document.getElementById('tactics-formation').value;
+    saveState();
+    calculateTactics();
 }
-function buyIAP(coins, eur) {
-    if(confirm(`¿Autorizas el cargo simulado de ${eur}€ para comprar ${coins} Monedas Premium?`)){
-        state.economy.premium += coins;
-        saveState();
-        closeModal('store-modal');
-        alert("¡Compra exitosa!");
-    }
+
+function calculateTactics() {
+    document.getElementById('tactics-formation').value = state.formation;
+    const pitch = document.getElementById('pitch-players');
+    pitch.innerHTML = '';
+
+    // Dibujar layout en la pizarra basado en CSS absolute positioning
+    const layouts = {
+        '4-4-2': [ {x:50,y:90,c:'POR'}, {x:20,y:70,c:'DEF'},{x:40,y:75,c:'DEF'},{x:60,y:75,c:'DEF'},{x:80,y:70,c:'DEF'}, {x:20,y:40,c:'MED'},{x:40,y:45,c:'MED'},{x:60,y:45,c:'MED'},{x:80,y:40,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ],
+        '4-3-3': [ {x:50,y:90,c:'POR'}, {x:20,y:75,c:'DEF'},{x:40,y:80,c:'DEF'},{x:60,y:80,c:'DEF'},{x:80,y:75,c:'DEF'}, {x:30,y:50,c:'MED'},{x:50,y:45,c:'MED'},{x:70,y:50,c:'MED'}, {x:20,y:20,c:'DEL'},{x:50,y:15,c:'DEL'},{x:80,y:20,c:'DEL'} ],
+        '5-3-2': [ {x:50,y:90,c:'POR'}, {x:10,y:70,c:'DEF'},{x:30,y:80,c:'DEF'},{x:50,y:82,c:'DEF'},{x:70,y:80,c:'DEF'},{x:90,y:70,c:'DEF'}, {x:30,y:45,c:'MED'},{x:50,y:50,c:'MED'},{x:70,y:45,c:'MED'}, {x:40,y:20,c:'DEL'},{x:60,y:20,c:'DEL'} ]
+    };
+
+    layouts[state.formation].forEach(pos => {
+        let color = pos.c==='POR'?'#e11d48':pos.c==='DEF'?'#d97706':pos.c==='MED'?'#16a34a':'#2563eb';
+        pitch.innerHTML += `<div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%; border-color:${color}">${pos.c}</div>`;
+    });
+
+    // Calcular estadísticas base (Sumatorios simplificados para el MVP)
+    let atk = 0, mid = 0, def = 0;
+    state.roster.forEach(p => {
+        if(p.pos === 'DEL') atk += p.sho + p.pac;
+        if(p.pos === 'MED') mid += p.pas + p.phy;
+        if(p.pos === 'DEF' || p.pos === 'POR') def += p.def + p.phy;
+    });
+
+    // Modificadores por formación
+    if(state.formation === '4-3-3') { atk*=1.2; def*=0.9; }
+    if(state.formation === '5-3-2') { def*=1.3; atk*=0.8; }
+    
+    // Normalizar para barra (Max 1000 para el MVP visual)
+    const norm = (val) => Math.min(100, Math.round((val / (state.roster.length * 100 || 1)) * 100));
+    
+    document.getElementById('tac-atk').textContent = Math.round(atk);
+    document.getElementById('bar-atk').style.width = norm(atk) + '%';
+    
+    document.getElementById('tac-mid').textContent = Math.round(mid);
+    document.getElementById('bar-mid').style.width = norm(mid) + '%';
+    
+    document.getElementById('tac-def').textContent = Math.round(def);
+    document.getElementById('bar-def').style.width = norm(def) + '%';
 }
 
 // --- MERCADO ---
-let marketMode = 'buy'; // 'buy' o 'sell'
-let currentFilter = 'ALL';
+let currentMarketFilter = 'ALL';
+function filterMarket(pos) {
+    currentMarketFilter = pos;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.currentTarget?.classList.add('active');
 
-function openMarket() {
-    openModal('market-panel');
-    switchMarketTab('buy');
-}
-function closeMarket() {
-    document.getElementById('market-panel').classList.add('hidden');
-}
+    const tbody = document.getElementById('market-tbody');
+    tbody.innerHTML = '';
 
-function switchMarketTab(mode) {
-    marketMode = mode;
-    document.getElementById('tab-buy').classList.toggle('active', mode === 'buy');
-    document.getElementById('tab-sell').classList.toggle('active', mode === 'sell');
-    renderMarket(currentFilter);
-}
+    // Filtrar los que ya tengo
+    let available = PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id));
+    if(pos !== 'ALL') available = available.filter(p => p.pos === pos);
 
-function renderMarket(filterPos) {
-    currentFilter = filterPos;
-    const btns = document.querySelectorAll('.filter-btn');
-    btns.forEach(b => b.classList.remove('active'));
-    event.target.classList?.add('active'); // Update clicked button visually
-
-    const grid = document.getElementById('market-grid');
-    grid.innerHTML = '';
-
-    let items = [];
-    if(marketMode === 'buy') {
-        // Filtrar los que ya tengo
-        items = DATABASE.filter(p => !state.roster.find(r => r.id === p.id));
-    } else {
-        items = state.roster;
-    }
-
-    if(filterPos !== 'ALL') items = items.filter(p => p.pos === filterPos);
-
-    if(items.length === 0) {
-        grid.innerHTML = '<p class="text-gray text-center" style="grid-column: span 2;">No hay jugadores aquí.</p>';
+    if(available.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores que coincidan con la búsqueda.</td></tr>';
         return;
     }
 
-    items.forEach(p => {
-        let bg = p.pos==='DEL'?'bg-del':p.pos==='MED'?'bg-med':p.pos==='DEF'?'bg-def':'bg-por';
+    available.forEach(p => {
+        let pClass = `pos-${p.pos.toLowerCase()}`;
+        const canRep = state.stats.rep >= p.rep;
+        const formatM = (p.priceBasic/1000000).toFixed(1)+'M';
         
-        if(marketMode === 'buy') {
-            const formatM = (p.priceBas/1000000).toFixed(1)+'M';
-            const canRep = state.stats.rep >= p.reqRep;
-            grid.innerHTML += `
-            <div class="market-item">
-                <div class="flex-between mb-10">
-                    <div><span class="pos-tag ${bg}">${p.pos}</span> <strong>${p.name}</strong></div>
-                    <div class="gaming-font text-gold text-xl">${p.rating}</div>
-                </div>
-                <div class="text-small mb-10 ${canRep?'text-green':'text-red'}">Req. Reputación: ${p.reqRep} 🏆</div>
-                <div class="flex gap-10">
-                    <button class="buy-btn-basic" onclick="buyPlayer(${p.id}, 'basic')">💰 ${formatM}</button>
-                    <button class="buy-btn-prem" onclick="buyPlayer(${p.id}, 'prem')">🪙 ${p.pricePrem}</button>
-                </div>
-            </div>`;
-        } else {
-            const sellPrice = Math.floor(p.priceBas / 2);
-            const formatM = (sellPrice/1000000).toFixed(1)+'M';
-            grid.innerHTML += `
-            <div class="market-item" style="border-color: var(--neon-red);">
-                <div class="flex-between mb-10">
-                    <div><span class="pos-tag ${bg}">${p.pos}</span> <strong>${p.name}</strong></div>
-                    <div class="gaming-font text-gold text-xl">${p.rating}</div>
-                </div>
-                <button class="buy-btn-basic" style="color: var(--neon-red); border-color: var(--neon-red);" onclick="sellPlayer(${p.id}, ${sellPrice})">Vender por 💰 ${formatM}</button>
-            </div>`;
-        }
+        tbody.innerHTML += `
+        <tr>
+            <td class="font-bold text-white">${p.name}</td>
+            <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="font-gaming text-yellow-400 font-bold">${p.ovr}</td>
+            <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">${p.rep} 🏆</td>
+            <td><button class="btn-buy basic w-full" onclick="buy(${p.id}, 'basic')">€${formatM}</button></td>
+            <td><button class="btn-buy premium w-full" onclick="buy(${p.id}, 'prem')">🪙 ${p.pricePrem}</button></td>
+        </tr>`;
     });
 }
 
-function buyPlayer(id, currency) {
-    const p = DATABASE.find(x => x.id === id);
-    if(!p) return;
-
-    if(state.stats.rep < p.reqRep) return alert(`Reputación insuficiente. Requiere: ${p.reqRep}`);
-
-    if(currency === 'basic') {
-        if(state.economy.coins < p.priceBas) return alert("Monedas insuficientes.");
-        state.economy.coins -= p.priceBas;
+function buy(id, curr) {
+    const p = PLAYERS_DB.find(x => x.id === id);
+    if(state.stats.rep < p.rep) return alert("El jugador rechaza negociar: El club no tiene la reputación necesaria.");
+    
+    if(curr === 'basic') {
+        if(state.economy.coins < p.priceBasic) return alert("Presupuesto de traspasos insuficiente.");
+        state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return openModal('store-modal');
+        if(state.economy.premium < p.pricePrem) return alert("Monedas premium insuficientes. Haz clic en el '+' superior.");
         state.economy.premium -= p.pricePrem;
     }
 
     state.roster.push(p);
+    addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Nos complace anunciar que las negociaciones han sido un éxito. ${p.name} (OVR: ${p.ovr}) ya se ha incorporado a la plantilla del ${state.team.name}.`);
     saveState();
-    renderMarket(currentFilter);
 }
 
-function sellPlayer(id, price) {
-    if(confirm("¿Vender jugador por " + (price/1000000).toFixed(1) + "M?")) {
-        state.roster = state.roster.filter(p => p.id !== id);
-        state.economy.coins += price;
+function buyIAP() {
+    const val = prompt("Tienda de Desarrollo (MVP):\n\nIntroduce cuántas monedas premium quieres generar gratis (Max 10000):", "1000");
+    if(val && !isNaN(val)) {
+        state.economy.premium += parseInt(val);
         saveState();
-        renderMarket(currentFilter);
     }
 }
 
 // --- MOTOR DE PARTIDO ---
-function startMatch() {
-    if(state.roster.length === 0) return alert("¡Ficha al menos 1 jugador en el mercado antes de jugar!");
+function playMatch() {
+    if(state.roster.length < 5) return alert("Segundo Entrenador: Míster, necesitamos al menos 5 jugadores en la plantilla para poder competir dignamente.");
 
-    openModal('match-modal');
+    document.getElementById('modal-match').classList.remove('hidden');
     document.getElementById('match-btn-close').classList.add('hidden');
-    document.getElementById('match-title').textContent = "SIMULANDO...";
     
-    const myOvr = document.getElementById('dash-ovr').textContent;
-    // Rival dinámico
-    const oppOvr = Math.max(20, parseInt(myOvr) + (Math.floor(Math.random() * 31) - 15));
-    
+    // Configuración inicial UI
     document.getElementById('match-myteam').textContent = state.team.name;
+    const myOvr = document.getElementById('squad-ovr').textContent;
     document.getElementById('match-myovr').textContent = `OVR: ${myOvr}`;
-    document.getElementById('match-oppovr').textContent = `OVR: ${oppOvr}`;
     
-    let mScore = 0; let oScore = 0; let time = 0;
+    const botOvr = Math.max(30, parseInt(myOvr) + (Math.floor(Math.random() * 21) - 10));
+    document.getElementById('match-oppovr').textContent = `OVR: ${botOvr}`;
     
-    const probBase = 0.10;
-    const diff = parseInt(myOvr) - oppOvr;
-    const myProb = probBase + (diff * 0.005);
-    const opProb = probBase - (diff * 0.005);
+    document.getElementById('match-title').textContent = "SIMULANDO...";
+    document.getElementById('match-score').textContent = "0 - 0";
+    const logDiv = document.getElementById('match-log');
+    logDiv.innerHTML = "";
 
-    const logBox = document.getElementById('match-log');
-    document.getElementById('match-score').textContent = `0 - 0`;
+    // Lógica matemática del motor FM simplificada
+    const diff = parseInt(myOvr) - botOvr;
+    const myProb = 0.08 + (diff * 0.003); 
+    const oppProb = 0.08 - (diff * 0.003);
 
-    const interval = setInterval(() => {
-        time += 15;
-        if(time > 90) {
-            clearInterval(interval);
-            finishMatch(mScore, oScore);
+    let myGoals = 0, oppGoals = 0, min = 0;
+    
+    const commentary = [
+        "Juego trabado en el centro del campo.", "Disparo lejano que se va desviado.", 
+        "Corte providencial de la defensa.", "Falta táctica para evitar la contra.", 
+        "Fuera de juego por milímetros.", "El portero atrapa con seguridad."
+    ];
+
+    const matchInterval = setInterval(() => {
+        min += 12;
+        if(min > 90) {
+            clearInterval(matchInterval);
+            finishMatch(myGoals, oppGoals);
             return;
         }
 
-        let msg = `Min ${time}': Posesión disputada en el medio campo...`;
-        const rand = Math.random();
-        
+        let eventText = commentary[Math.floor(Math.random() * commentary.length)];
+        let rand = Math.random();
+
         if(rand < myProb) {
-            mScore++;
-            msg = `Min ${time}': ¡GOL de ${state.team.name}! ⚽`;
-        } else if(rand > 1 - opProb) {
-            oScore++;
-            msg = `Min ${time}': ¡Gol del rival! ⚽`;
+            myGoals++;
+            eventText = `<span class="text-blue-400 font-bold">¡GOLAZO! Jugada espectacular del ${state.team.name}.</span>`;
+        } else if (rand > 1 - oppProb) {
+            oppGoals++;
+            eventText = `<span class="text-red-400 font-bold">Gol del rival. Error en las marcas defensivas.</span>`;
         }
 
-        logBox.textContent = msg;
-        document.getElementById('match-score').textContent = `${mScore} - ${oScore}`;
+        logDiv.innerHTML += `<div><strong>Min ${min}':</strong> ${eventText}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        document.getElementById('match-score').textContent = `${myGoals} - ${oppGoals}`;
 
-    }, 400);
+    }, 500); // 0.5s por cada 12 minutos
 }
 
-function finishMatch(myScore, oppScore) {
-    const title = document.getElementById('match-title');
-    const log = document.getElementById('match-log');
-    const rew = document.getElementById('match-rewards');
+function finishMatch(mG, oG) {
+    document.getElementById('match-title').textContent = "FINAL DEL PARTIDO";
+    document.getElementById('match-btn-close').classList.remove('hidden');
     
-    let coins = 0; let rep = 0;
+    state.stats.matches++;
+    let coins = 0; let rep = 0; let resultText = "";
 
-    if(myScore > oppScore) {
-        title.textContent = "¡VICTORIA!";
-        title.className = "gaming-font text-3xl mb-20 text-green glow-green";
-        log.textContent = "El árbitro pita el final. ¡Excelente partido!";
-        coins = 150000; rep = 25;
-    } else if (myScore === oppScore) {
-        title.textContent = "EMPATE";
-        title.className = "gaming-font text-3xl mb-20 text-gold glow-gold";
-        log.textContent = "Reparto de puntos. Faltó acierto arriba.";
-        coins = 40000; rep = 5;
+    if(mG > oG) {
+        coins = 200000; rep = 50; resultText = "¡Victoria importante!";
+    } else if (mG === oG) {
+        coins = 75000; rep = 15; resultText = "Empate disputado.";
     } else {
-        title.textContent = "DERROTA";
-        title.className = "gaming-font text-3xl mb-20 text-red";
-        log.textContent = "Toca volver a entrenar duro...";
-        coins = 5000; rep = 0;
+        coins = 15000; rep = -5; resultText = "Derrota dolorosa. Hay que revisar la táctica.";
     }
 
     state.economy.coins += coins;
-    state.stats.rep += rep;
+    state.stats.rep = Math.max(0, state.stats.rep + rep);
+    
+    // Mandar email al buzón con el resumen
+    addEmail('Segundo Entrenador', `Análisis Post-Partido: ${mG}-${oG}`, `${resultText} El equipo jugó con la formación ${state.formation}. Hemos recibido +€${(coins/1000).toFixed(0)}K por ingresos de taquilla y derechos televisivos.`);
+    
     saveState();
+    
+    const rDiv = document.getElementById('match-rewards');
+    rDiv.innerHTML = `<span class="text-green-400">+€${(coins/1000).toFixed(0)}K</span> | <span class="${rep>0?'text-blue-400':'text-red-400'}">${rep>0?'+':''}${rep} Reputación</span>`;
+}
 
-    rew.innerHTML = `<span class="text-green">+${coins.toLocaleString()} 💰</span> | <span class="text-gold">+${rep} 🏆</span>`;
-    document.getElementById('match-btn-close').classList.remove('hidden');
+function closeMatch() {
+    document.getElementById('modal-match').classList.add('hidden');
+    switchTab('inbox'); // Redirige al buzón para leer el informe post-partido (Como en FM)
 }

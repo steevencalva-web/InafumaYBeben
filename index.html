@@ -3,184 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inafuma y Beben - Football Manager</title>
+    <title>Inafuma y Beben - FM24 Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 flex flex-col h-screen overflow-hidden">
 
-    <div id="cookie-modal" class="overlay">
-        <div class="modal-box neon-blue text-center">
-            <h2 class="gaming-font title-neon">Aviso de Cookies</h2>
-            <p>Utilizamos almacenamiento local (LocalStorage) para guardar el progreso de tu club, tu economía y tu plantilla en Inafuma y Beben. Debes aceptar para poder jugar.</p>
-            <button class="btn btn-primary mt-20" onclick="acceptCookies()">Aceptar Cookies</button>
+    <div id="modal-cookies" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-md w-full glow-blue text-center">
+            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Aviso de Privacidad</h2>
+            <p class="text-slate-300 mb-6 text-sm">El motor de Inafuma y Beben requiere LocalStorage para guardar tu partida, tácticas y base de datos de jugadores.</p>
+            <button class="w-full py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-500" onclick="acceptCookies()">Aceptar y Cargar Datos</button>
         </div>
     </div>
 
-    <div id="terms-modal" class="overlay hidden">
-        <div class="modal-box neon-green">
-            <h2 class="gaming-font title-neon">Términos y Condiciones Legales</h2>
-            <div class="scroll-box text-small">
-                <p><strong>1. Aceptación:</strong> Al registrarte en Inafuma y Beben, aceptas todas nuestras reglas de juego.</p>
-                <p><strong>2. Economía Virtual:</strong> Las monedas base (M) y las monedas Premium (🪙) no tienen valor económico real. Las compras realizadas con dinero real en la tienda Premium son definitivas y no reembolsables bajo ninguna circunstancia.</p>
-                <p><strong>3. Cuentas y Seguridad:</strong> Eres el único responsable de la seguridad de tus credenciales. El uso de software de terceros, bots o manipulación del código (exploits) resultará en el borrado permanente del club.</p>
-                <p><strong>4. Privacidad:</strong> Tus datos se almacenan de forma local en esta versión MVP. No recopilamos ni vendemos tu email a terceros.</p>
-            </div>
-            <button class="btn btn-primary mt-20 w-full" onclick="closeModal('terms-modal')">Cerrar Documento</button>
-        </div>
-    </div>
-
-    <div id="store-modal" class="overlay hidden">
-        <div class="modal-box neon-gold max-w-lg">
-            <div class="flex-between">
-                <h2 class="gaming-font title-neon">Tienda Premium</h2>
-                <span class="close-btn" onclick="closeModal('store-modal')">✖</span>
-            </div>
-            <p class="mb-20 text-small text-gray">Adquiere monedas premium para fichar a las superestrellas del mercado.</p>
-            <div class="grid-3" id="store-packages">
-                </div>
-        </div>
-    </div>
-
-    <header id="main-header" class="hidden">
-        <div class="logo gaming-font">INAFUMA <span class="text-blue">&</span> BEBEN</div>
-        <div class="header-stats">
-            <div class="stat-badge" title="Reputación">🏆 <span id="ui-rep">0</span></div>
-            <div class="stat-badge" title="Monedas Base">💰 <span id="ui-coins">10.0M</span></div>
-            <div class="stat-badge premium-badge" title="Monedas Premium">🪙 <span id="ui-prem">0</span>
-                <button class="add-btn" onclick="openModal('store-modal')">+</button>
-            </div>
-            <div class="profile-container">
-                <div id="ui-shield" class="shield" onclick="toggleDropdown()"></div>
-                <div id="profile-dropdown" class="dropdown hidden">
-                    <div class="dropdown-header">
-                        <strong id="drop-teamname">Club</strong><br>
-                        <span id="drop-username" class="text-small text-gray">@user</span>
-                    </div>
-                    <a href="#">Ajustes</a>
-                    <a href="#" class="text-red" onclick="logout()">Cerrar Sesión</a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main id="view-landing" class="view">
-        <div class="landing-container neon-blue">
-            <h1 class="gaming-font text-center text-4xl mb-10">INAFUMA<br><span class="text-blue">BEBEN</span></h1>
-            <form id="register-form" class="flex-col">
-                <input type="text" id="reg-user" class="input-form" placeholder="Nombre de Usuario" required>
-                <input type="email" id="reg-email" class="input-form" placeholder="Correo Electrónico" required>
-                <input type="password" id="reg-pass" class="input-form" placeholder="Contraseña" required>
-                <div class="flex-start mt-10">
-                    <input type="checkbox" id="reg-terms" required>
-                    <label for="reg-terms" class="text-small ml-10">Acepto los <a href="#" class="text-blue" onclick="openModal('terms-modal')">Términos y Condiciones</a></label>
-                </div>
-                <button type="submit" class="btn btn-primary mt-20 font-bold">CREAR CUENTA / ENTRAR</button>
+    <main id="view-landing" class="view-section absolute inset-0 z-50 flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center">
+        <div class="absolute inset-0 bg-slate-900/85"></div>
+        <div class="relative z-10 bg-slate-800/90 p-8 rounded-xl max-w-md w-full border border-slate-700 glow-blue backdrop-blur-sm">
+            <h1 class="text-4xl font-gaming text-center text-white mb-2">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
+            <p class="text-center text-slate-400 mb-6 text-sm font-mono tracking-widest">DATABASE V.24.1</p>
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="reg-user" class="input-fm" placeholder="Usuario" required>
+                <input type="email" id="reg-email" class="input-fm" placeholder="Email" required>
+                <input type="password" id="reg-pass" class="input-fm" placeholder="Contraseña" required>
+                <button type="submit" class="w-full bg-blue-600 py-3 rounded font-bold hover:bg-blue-500 font-gaming tracking-wider mt-4">INICIAR CARRERA</button>
             </form>
         </div>
     </main>
 
-    <main id="view-setup" class="view hidden">
-        <div class="setup-container neon-green">
-            <h2 class="gaming-font text-center mb-20">Funda tu Club</h2>
-            <form id="setup-form" class="flex-col">
-                <label>Nombre del Equipo</label>
-                <input type="text" id="set-team" class="input-form" placeholder="Ej: Real Beben FC" required>
-                <label class="mt-10">Nombre del Entrenador</label>
-                <input type="text" id="set-manager" class="input-form" placeholder="Tu nombre" required>
-                <label class="mt-10 text-center">Color del Escudo</label>
-                <div class="flex-center gap-15 mt-10 mb-20">
-                    <input type="radio" name="color" value="#e11d48" class="color-picker" style="background: #e11d48;" checked>
-                    <input type="radio" name="color" value="#2563eb" class="color-picker" style="background: #2563eb;">
-                    <input type="radio" name="color" value="#16a34a" class="color-picker" style="background: #16a34a;">
-                    <input type="radio" name="color" value="#d97706" class="color-picker" style="background: #d97706;">
-                    <input type="radio" name="color" value="#9333ea" class="color-picker" style="background: #9333ea;">
+    <main id="view-setup" class="view-section absolute inset-0 z-50 flex items-center justify-center bg-slate-900 hidden">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-lg w-full border border-slate-700 glow-green">
+            <h2 class="text-2xl font-gaming text-center text-white mb-6">Configuración del Club</h2>
+            <form id="setup-form" class="space-y-4">
+                <input type="text" id="set-team" class="input-fm" placeholder="Nombre del Club (Ej: Beben FC)" required>
+                <input type="text" id="set-manager" class="input-fm" placeholder="Tu Nombre (Manager)" required>
+                <div class="text-center pt-4">
+                    <label class="text-sm text-slate-400 mb-2 block">Color Primario del Club</label>
+                    <div class="flex justify-center gap-4">
+                        <input type="radio" name="color" value="#e11d48" class="color-picker" style="background:#e11d48" checked>
+                        <input type="radio" name="color" value="#2563eb" class="color-picker" style="background:#2563eb">
+                        <input type="radio" name="color" value="#16a34a" class="color-picker" style="background:#16a34a">
+                        <input type="radio" name="color" value="#f59e0b" class="color-picker" style="background:#f59e0b">
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary font-bold">FIRMAR CONTRATO</button>
+                <button type="submit" class="w-full bg-green-600 py-3 rounded font-bold hover:bg-green-500 font-gaming mt-6">FIRMAR CONTRATO</button>
             </form>
         </div>
     </main>
 
-    <main id="view-dashboard" class="view dashboard-layout hidden">
-        <aside class="sidebar neon-panel">
-            <div class="manager-card">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Manager" alt="Manager" class="manager-img">
-                <h3 id="dash-manager" class="gaming-font mt-10">Mister</h3>
-                <p id="dash-team" class="text-blue font-bold">Equipo FC</p>
-                <div class="ovr-badge mt-10">OVR: <span id="dash-ovr" class="text-gold gaming-font">0</span></div>
+    <div id="app-layout" class="hidden flex h-screen w-full">
+        <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col z-20 shadow-xl relative">
+            <div class="p-6 border-b border-slate-700 flex items-center gap-4">
+                <div id="ui-shield" class="w-12 h-14 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-lg shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-105 transition" onclick="logout()">X</div>
+                <div>
+                    <h2 id="ui-teamname" class="font-bold text-white text-lg leading-tight truncate w-36">Beben FC</h2>
+                    <p id="ui-manager" class="text-xs text-slate-400 truncate w-36">Manager</p>
+                </div>
             </div>
-            <div class="roster-section mt-20">
-                <h3 class="gaming-font border-bottom pb-10 mb-10">Mi Plantilla (<span id="roster-count">0</span>)</h3>
-                <div id="roster-list" class="roster-list scroll-box">
-                    </div>
+            <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
+                <button class="nav-btn active" onclick="switchTab('inbox')">📥 Buzón</button>
+                <button class="nav-btn" onclick="switchTab('squad')">👥 Plantilla</button>
+                <button class="nav-btn" onclick="switchTab('tactics')">📋 Tácticas</button>
+                <button class="nav-btn" onclick="switchTab('market')">🌍 Mercado</button>
+            </nav>
+            <div class="p-4 border-t border-slate-700 bg-slate-900/50">
+                <div class="text-xs text-slate-400 mb-1">Reputación Mundial</div>
+                <div class="font-gaming text-blue-400 text-lg mb-3">🏆 <span id="ui-rep">1000</span></div>
+                
+                <div class="text-xs text-slate-400 mb-1">Presupuesto Traspasos</div>
+                <div class="font-mono text-green-400 text-sm mb-3">💰 <span id="ui-coins">10,000,000</span> €</div>
+                
+                <div class="text-xs text-slate-400 mb-1">Monedas Premium</div>
+                <div class="font-mono text-yellow-400 text-sm flex justify-between items-center">
+                    <span>🪙 <span id="ui-prem">0</span></span>
+                    <button class="bg-yellow-500 hover:bg-yellow-400 text-black px-2 rounded font-bold text-xs" onclick="buyIAP()">+</button>
+                </div>
             </div>
         </aside>
 
-        <section class="main-actions">
-            <div class="action-card match-card neon-blue text-center">
-                <h2 class="gaming-font text-3xl mb-10">DÍA DE PARTIDO</h2>
-                <p class="text-gray mb-20">Compite contra un rival de tu nivel para ganar monedas y reputación.</p>
-                <button class="btn btn-play gaming-font" onclick="startMatch()">JUGAR SIMULACIÓN ⚽</button>
-            </div>
+        <div class="flex-1 flex flex-col bg-slate-900 relative">
+            <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 shadow-md z-10">
+                <h1 id="page-title" class="text-xl font-gaming text-slate-200 uppercase tracking-widest">Buzón de Entrada</h1>
+                
+                <button onclick="playMatch()" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 py-2.5 rounded shadow-[0_0_15px_rgba(59,130,246,0.4)] font-gaming font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+                    CONTINUAR ⏭
+                </button>
+            </header>
 
-            <div class="grid-2 gap-20">
-                <div class="action-card market-card neon-green text-center cursor-pointer" onclick="openMarket()">
-                    <div class="icon text-4xl mb-10">🛒</div>
-                    <h3 class="gaming-font text-xl">Compra / Venta</h3>
-                    <p class="text-gray text-small mt-10">Ficha jugadores globales o vende tus estrellas.</p>
-                </div>
-                <div class="action-card edit-card neon-gold text-center cursor-pointer" onclick="alert('Función de formaciones próximamente en el Parche 2.0')">
-                    <div class="icon text-4xl mb-10">📋</div>
-                    <h3 class="gaming-font text-xl">Editar Plantilla</h3>
-                    <p class="text-gray text-small mt-10">Gestiona titulares, suplentes y tácticas.</p>
-                </div>
-            </div>
-
-            <div id="market-panel" class="neon-panel mt-20 hidden">
-                <div class="flex-between border-bottom pb-10 mb-10">
-                    <h2 class="gaming-font text-xl">Mercado Global</h2>
-                    <span class="close-btn" onclick="closeMarket()">✖</span>
-                </div>
-                <div class="flex mb-20">
-                    <button id="tab-buy" class="tab active" onclick="switchMarketTab('buy')">Comprar</button>
-                    <button id="tab-sell" class="tab" onclick="switchMarketTab('sell')">Vender</button>
-                </div>
-                <div class="filters flex gap-10 mb-20">
-                    <button class="filter-btn active" onclick="renderMarket('ALL')">TODOS</button>
-                    <button class="filter-btn" onclick="renderMarket('DEL')">DEL</button>
-                    <button class="filter-btn" onclick="renderMarket('MED')">MED</button>
-                    <button class="filter-btn" onclick="renderMarket('DEF')">DEF</button>
-                    <button class="filter-btn" onclick="renderMarket('POR')">POR</button>
-                </div>
-                <div id="market-grid" class="grid-2 scroll-box" style="max-height: 400px;">
+            <div class="flex-1 overflow-y-auto p-6 relative">
+                
+                <div id="tab-inbox" class="fm-tab active max-w-4xl mx-auto">
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden flex flex-col h-[70vh]">
+                        <div class="bg-slate-700 p-3 border-b border-slate-600 font-bold flex justify-between">
+                            <span>Bandeja de Entrada</span>
+                            <span class="text-slate-400 text-sm" id="date-display">1 Jul 2026</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="inbox-list">
+                            </div>
                     </div>
-            </div>
-        </section>
-    </main>
+                </div>
 
-    <div id="match-modal" class="overlay hidden z-[100]">
-        <div class="modal-box neon-blue text-center w-full max-w-lg">
-            <h2 id="match-title" class="gaming-font text-3xl mb-20">SIMULANDO...</h2>
-            <div class="match-scoreboard flex-between mb-20">
-                <div class="w-2/5 text-right">
-                    <h3 id="match-myteam" class="font-bold text-blue">Local</h3>
-                    <span id="match-myovr" class="text-small text-gray">OVR: 0</span>
+                <div id="tab-squad" class="fm-tab hidden">
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden">
+                        <div class="bg-slate-700 p-3 border-b border-slate-600 flex justify-between items-center">
+                            <span class="font-bold">Plantilla del Primer Equipo</span>
+                            <span class="text-sm text-slate-400">Total: <span id="squad-count">0</span> Jugadores | OVR Media: <span id="squad-ovr" class="font-bold text-yellow-400">0</span></span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="fm-table w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th>Pos</th>
+                                        <th>Nombre</th>
+                                        <th>OVR</th>
+                                        <th>PAC</th>
+                                        <th>SHO</th>
+                                        <th>PAS</th>
+                                        <th>DEF</th>
+                                        <th>PHY</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="squad-tbody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div id="match-score" class="w-1/5 gaming-font text-3xl">0 - 0</div>
-                <div class="w-2/5 text-left">
-                    <h3 id="match-oppteam" class="font-bold text-red">Rival FC</h3>
-                    <span id="match-oppovr" class="text-small text-gray">OVR: 0</span>
+
+                <div id="tab-tactics" class="fm-tab hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6">
+                            <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                                <h3 class="font-bold text-lg">Pizarra Táctica</h3>
+                                <select id="tactics-formation" class="input-fm w-auto py-1 px-3 text-sm" onchange="changeFormation()">
+                                    <option value="4-4-2">4-4-2 Estándar</option>
+                                    <option value="4-3-3">4-3-3 Ofensiva</option>
+                                    <option value="5-3-2">5-3-2 Defensiva</option>
+                                </select>
+                            </div>
+                            <div class="pitch bg-green-800 border-2 border-white/30 rounded relative mx-auto" style="height: 400px; max-width: 500px; background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.1) 40px, rgba(0,0,0,0.1) 80px);">
+                                <div class="absolute inset-0 border-white/30 border-2 m-4 opacity-50"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-0 border-t-2 border-white/30"></div>
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white/30 rounded-full"></div>
+                                
+                                <div id="pitch-players" class="absolute inset-0"></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6 flex flex-col">
+                            <h3 class="font-bold border-b border-slate-700 pb-2 mb-4">Análisis del Equipo</h3>
+                            <div class="space-y-4 flex-1">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1"><span>Ataque</span><span id="tac-atk" class="text-blue-400">0</span></div>
+                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-atk" class="h-full bg-blue-500 rounded" style="width:0%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1"><span>Control Medio</span><span id="tac-mid" class="text-green-400">0</span></div>
+                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-mid" class="h-full bg-green-500 rounded" style="width:0%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1"><span>Defensa</span><span id="tac-def" class="text-yellow-400">0</span></div>
+                                    <div class="h-2 bg-slate-700 rounded"><div id="bar-def" class="h-full bg-yellow-500 rounded" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-slate-900 rounded text-xs text-slate-400 border border-slate-700">
+                                La formación elegida y los atributos de tus jugadores determinan estos valores, clave para el simulador de partidos.
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="tab-market" class="fm-tab hidden">
+                    <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden flex flex-col h-[75vh]">
+                        <div class="bg-slate-700 p-3 border-b border-slate-600 flex justify-between items-center gap-4">
+                            <div class="flex gap-2">
+                                <button class="filter-btn active" onclick="filterMarket('ALL')">Todos</button>
+                                <button class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
+                                <button class="filter-btn" onclick="filterMarket('MED')">MED</button>
+                                <button class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
+                                <button class="filter-btn" onclick="filterMarket('POR')">POR</button>
+                            </div>
+                            <div class="text-sm text-yellow-400 font-bold">Ojeadores del Club</div>
+                        </div>
+                        <div class="overflow-auto flex-1">
+                            <table class="fm-table w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th>Jugador</th>
+                                        <th>Pos</th>
+                                        <th>OVR</th>
+                                        <th>Rep Req.</th>
+                                        <th>Precio (€)</th>
+                                        <th>Premium (🪙)</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="market-tbody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div id="match-log" class="text-small text-gray mb-20 h-10">Min 0': Rueda el balón...</div>
-            <div id="match-rewards" class="font-bold text-lg h-10 mb-20"></div>
-            <button id="match-btn-close" class="btn btn-primary w-full hidden" onclick="closeModal('match-modal')">Continuar</button>
         </div>
     </div>
 
-    <footer class="mt-auto">
-        <p>© 2026 Inafuma y Beben - <a href="#" class="text-blue" onclick="openModal('terms-modal')">Términos y Condiciones</a></p>
-    </footer>
+    <div id="match-modal" class="overlay hidden z-[100]">
+        <div class="bg-slate-900 border border-slate-600 p-8 rounded-xl max-w-2xl w-full text-center glow-blue shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518605368461-1e12d53787b4?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
+            <h2 id="match-header" class="text-3xl font-gaming mb-6 relative z-10 tracking-widest text-slate-200">MOTOR DE SIMULACIÓN 3D</h2>
+            
+            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-lg border border-slate-700 relative z-10 mb-6">
+                <div class="w-1/3 text-right">
+                    <h3 id="sim-home-name" class="font-bold text-xl text-blue-400 truncate">Local</h3>
+                    <div class="text-xs text-slate-400">OVR: <span id="sim-home-ovr">0</span></div>
+                </div>
+                <div class="w-1/3 font-gaming text-4xl text-white">
+                    <span id="sim-home-score">0</span> - <span id="sim-away-score">0</span>
+                </div>
+                <div class="w-1/3 text-left">
+                    <h3 id="sim-away-name" class="font-bold text-xl text-red-400 truncate">Visitante</h3>
+                    <div class="text-xs text-slate-400">OVR: <span id="sim-away-ovr">0</span></div>
+                </div>
+            </div>
+
+            <div id="match-narrative" class="bg-black/50 h-32 rounded border border-slate-700 p-4 text-left font-mono text-sm text-green-400 overflow-y-auto relative z-10 mb-6 flex flex-col gap-1">
+                Preparando el terreno de juego...
+            </div>
+
+            <div id="match-post" class="hidden relative z-10">
+                <div class="bg-slate-800 p-4 rounded border border-slate-700 mb-6 flex justify-around">
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 uppercase tracking-wide">Ingresos</div>
+                        <div id="match-coins" class="text-green-400 font-bold font-mono text-lg">+0 €</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 uppercase tracking-wide">Reputación</div>
+                        <div id="match-rep" class="text-yellow-400 font-bold font-mono text-lg">+0</div>
+                    </div>
+                </div>
+                <button onclick="closeMatch()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-3 rounded font-bold shadow-lg transition">CONTINUAR AL BUZÓN</button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
