@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inafuma y Beben - Football Manager</title>
+    <title>Inafuma y Beben - FM24 Style</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -95,7 +95,7 @@
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col relative z-10">
+        <div class="flex-1 flex flex-col relative z-10 overflow-hidden">
             <header class="h-20 glass-panel border-b border-slate-700/50 flex items-center justify-between px-8 shadow-md">
                 <h1 id="page-title" class="text-2xl font-gaming text-white uppercase tracking-widest drop-shadow-md">Panel de Control</h1>
                 <button onclick="startMatch()" class="btn-action px-10 py-3 text-lg flex items-center gap-2" style="animation: pulseGlow 2s infinite;">
@@ -233,7 +233,7 @@
     </div>
 
     <div id="match-modal" class="view-section absolute inset-0 z-[100] stadium-bg hidden flex-col">
-        <header class="h-24 bg-slate-900/95 border-b border-slate-700 flex items-center justify-between px-10 shadow-2xl backdrop-blur-md">
+        <header class="h-24 bg-slate-900/95 border-b border-slate-700 flex items-center justify-between px-10 shadow-2xl backdrop-blur-md shrink-0">
             <div class="w-1/3 flex items-center gap-6">
                 <div id="sim-home-shield" class="w-16 h-20 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-2xl shadow-lg border-2 border-white/20"></div>
                 <div>
@@ -259,25 +259,44 @@
             </div>
         </header>
 
-        <div class="flex-1 flex items-center justify-center p-8">
-            <div class="w-full max-w-4xl glass-panel border border-slate-600 rounded-2xl p-8 shadow-2xl flex flex-col">
-                <h3 class="font-gaming text-slate-200 border-b border-slate-600 pb-4 mb-6 text-xl tracking-widest">RETRANSMISIÓN EN DIRECTO</h3>
-                <div id="match-narrative" class="flex-1 min-h-[350px] overflow-y-auto space-y-4 font-mono text-base text-slate-300 pr-4"></div>
+        <div class="flex-1 flex items-center justify-center p-6 md:p-10 overflow-hidden">
+            <div class="w-full max-w-4xl h-full glass-panel border border-slate-600 rounded-2xl p-6 md:p-8 shadow-2xl flex flex-col">
+                <h3 class="font-gaming text-slate-200 border-b border-slate-600 pb-4 mb-4 text-xl tracking-widest shrink-0">RETRANSMISIÓN EN DIRECTO</h3>
                 
-                <div id="match-post" class="mt-8 border-t border-slate-600 pt-8 hidden">
-                    <div class="flex justify-around mb-8">
-                        <div class="text-center bg-slate-800/80 p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
-                            <div class="text-sm text-slate-400 uppercase tracking-widest mb-2">Ingresos de Partido</div>
-                            <div id="match-coins" class="text-green-400 font-bold font-mono text-3xl">+0 €</div>
+                <div id="match-narrative" class="flex-1 overflow-y-auto space-y-4 font-mono text-base text-slate-300 pr-4"></div>
+                
+                <div id="match-post" class="mt-6 border-t border-slate-600 pt-6 hidden shrink-0">
+                    <div class="flex justify-around mb-6">
+                        <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
+                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Ingresos de Partido</div>
+                            <div id="match-coins" class="text-green-400 font-bold font-mono text-2xl md:text-3xl">+0 €</div>
                         </div>
-                        <div class="text-center bg-slate-800/80 p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
-                            <div class="text-sm text-slate-400 uppercase tracking-widest mb-2">Reputación Obtenida</div>
-                            <div id="match-rep" class="text-yellow-400 font-bold font-mono text-3xl">+0</div>
+                        <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
+                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Reputación Obtenida</div>
+                            <div id="match-rep" class="text-yellow-400 font-bold font-mono text-2xl md:text-3xl">+0</div>
                         </div>
                     </div>
-                    <button onclick="endMatchAndReturn()" class="w-full btn-action py-5 text-2xl tracking-widest glow-blue">VOLVER AL VESTUARIO</button>
+                    <button onclick="endMatchAndReturn()" class="w-full btn-action py-4 md:py-5 text-xl md:text-2xl tracking-widest glow-blue">VOLVER AL VESTUARIO</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-cookies" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm hidden">
+        <div class="glass-panel p-8 rounded-xl max-w-md w-full glow-blue text-center">
+            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Aviso de Privacidad</h2>
+            <p class="text-slate-300 mb-6 text-sm">El motor de Inafuma y Beben requiere LocalStorage para guardar tu partida, tácticas y base de datos.</p>
+            <button class="w-full btn-action py-3 rounded font-bold" onclick="acceptCookies()">Aceptar y Cargar Datos</button>
+        </div>
+    </div>
+
+    <div id="modal-store" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm hidden">
+        <div class="glass-panel p-8 rounded-xl max-w-lg w-full glow-gold text-center relative">
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl" onclick="document.getElementById('modal-store').classList.add('hidden')">&times;</button>
+            <h2 class="text-2xl font-gaming text-yellow-400 mb-6">Tienda de Desarrollo</h2>
+            <p class="text-slate-300 mb-6 text-sm">Inserta la cantidad de monedas Premium que quieres generar (Función temporal para MVP).</p>
+            <input type="number" id="dev-coins-input" class="input-fm mb-6 text-center text-2xl font-mono text-yellow-400" value="10000">
+            <button class="w-full btn-action py-3 rounded font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.5)]" onclick="confirmIAP()">GENERAR MONEDAS</button>
         </div>
     </div>
 
