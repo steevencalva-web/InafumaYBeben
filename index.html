@@ -22,7 +22,7 @@
         <div class="absolute inset-0 bg-slate-900/85"></div>
         <div class="relative z-10 m-auto glass-panel p-10 rounded-2xl max-w-md w-full glow-blue">
             <h1 class="text-5xl font-gaming text-center text-white mb-2 tracking-wider">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
-            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.5.0</p>
+            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.6.0</p>
             
             <div class="flex mb-6 border-b border-slate-600">
                 <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold">Iniciar Sesión</button>
@@ -37,7 +37,7 @@
 
             <form id="register-form" class="space-y-4 hidden">
                 <input type="text" id="reg-user" class="input-fm" placeholder="Nuevo Usuario" required>
-                <input type="email" id="reg-email" class="input-fm" placeholder="Email" required>
+                <input type="email" id="reg-email" class="input-fm" placeholder="Email (@gmail, @outlook...)" required>
                 <input type="password" id="reg-pass" class="input-fm" placeholder="Contraseña" required>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg mt-4 uppercase tracking-wider transition">Crear Cuenta</button>
             </form>
@@ -74,7 +74,7 @@
         
         <aside class="w-64 glass-panel border-r border-slate-700 flex flex-col z-20 shadow-2xl relative">
             <div class="p-6 border-b border-slate-700/50 text-center bg-slate-800/30">
-                <h1 class="text-2xl font-gaming text-white tracking-widest">BEBEN<span class="text-blue-500">.FM</span></h1>
+                <h1 class="text-xl font-gaming text-white tracking-widest leading-tight">INAFUMA<br><span class="text-blue-500">& BEBEN</span></h1>
             </div>
             
             <nav class="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
@@ -103,14 +103,14 @@
         </aside>
 
         <div class="flex-1 flex flex-col relative z-10 overflow-hidden">
-            <header class="h-20 glass-panel border-b border-slate-700/50 flex items-center justify-between px-8 shadow-md">
+            <header class="h-20 glass-panel border-b border-slate-700/50 flex items-center justify-between px-8 shadow-md relative z-50">
                 <div>
                     <h1 id="page-title" class="text-2xl font-gaming text-white uppercase tracking-widest drop-shadow-md">Panel de Control</h1>
                     <p class="text-slate-400 text-sm font-mono mt-1">Jornada <span id="ui-jornada">1</span>/38</p>
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <button onclick="startMatch()" class="btn-action px-6 py-2.5 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                    <button onclick="startMatch()" class="btn-action px-5 py-2 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                         CONTINUAR LIGA ⏭
                     </button>
 
@@ -123,37 +123,37 @@
                             <div id="top-shield" class="w-10 h-12 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-sm shadow-md border border-white/20"></div>
                         </div>
                         <div id="profile-dropdown" class="dropdown-menu hidden">
-                            <a href="#" class="dropdown-item">⚙️ Configuración</a>
-                            <a href="#" class="dropdown-item">📊 Mis Estadísticas</a>
-                            <a href="#" onclick="logout()" class="dropdown-item text-red-400 hover:bg-red-500/10">🚪 Cerrar Sesión</a>
+                            <a href="#" class="dropdown-item">Configuración</a>
+                            <a href="#" class="dropdown-item">Mis Estadísticas</a>
+                            <a href="#" onclick="logout()" class="dropdown-item text-red-400 hover:bg-red-500/10">Cerrar Sesión</a>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-8">
+            <div class="flex-1 overflow-y-auto p-8 relative z-0">
                 
                 <div id="tab-dash" class="fm-tab active max-w-5xl mx-auto space-y-6">
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center glow-blue col-span-2 md:col-span-1 flex flex-col justify-center">
                             <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2 tracking-widest">OVR Global</h3>
-                            <div class="text-4xl font-gaming text-white" id="dash-ovr-big">0</div>
+                            <div class="text-4xl font-bold font-mono text-white" id="dash-ovr-big">0</div>
                         </div>
                         <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
                             <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2 tracking-widest">Jugados</h3>
-                            <div class="text-4xl font-gaming text-blue-400" id="dash-matches">0</div>
+                            <div class="text-4xl font-bold font-mono text-blue-400" id="dash-matches">0</div>
                         </div>
                         <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
                             <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2 tracking-widest">Victorias</h3>
-                            <div class="text-4xl font-gaming text-green-400" id="dash-wins">0</div>
+                            <div class="text-4xl font-bold font-mono text-green-400" id="dash-wins">0</div>
                         </div>
                         <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
                             <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2 tracking-widest">Empates</h3>
-                            <div class="text-4xl font-gaming text-yellow-400" id="dash-draws">0</div>
+                            <div class="text-4xl font-bold font-mono text-yellow-400" id="dash-draws">0</div>
                         </div>
                         <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
                             <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2 tracking-widest">Derrotas</h3>
-                            <div class="text-4xl font-gaming text-red-400" id="dash-losses">0</div>
+                            <div class="text-4xl font-bold font-mono text-red-400" id="dash-losses">0</div>
                         </div>
                     </div>
                     <div class="glass-panel rounded-xl border border-slate-600 overflow-hidden flex flex-col h-[50vh]">
@@ -167,8 +167,8 @@
 
                 <div id="tab-league" class="fm-tab max-w-5xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl overflow-hidden shadow-2xl">
-                        <div class="bg-slate-800/80 p-4 border-b border-slate-600 font-bold text-sm tracking-widest uppercase">Clasificación Global - Temporada Regular</div>
-                        <div class="overflow-x-auto h-[65vh]">
+                        <div class="bg-slate-800/80 p-4 border-b border-slate-600 font-bold text-lg">Clasificación Global - Temporada Regular</div>
+                        <div class="overflow-y-auto h-[65vh]">
                             <table class="fm-table league-table">
                                 <thead>
                                     <tr>
@@ -226,7 +226,7 @@
                 <div id="tab-talk" class="fm-tab max-w-5xl mx-auto space-y-6">
                     <div class="glass-panel p-6 border border-slate-600 rounded-xl">
                         <h2 class="text-2xl font-gaming mb-2">Vestuario</h2>
-                        <p class="text-slate-400 text-sm">Tus palabras afectan al rendimiento del equipo antes del partido. Elige bien según la situación. <br><span id="talk-status" class="font-bold text-yellow-400 mt-2 block"></span></p>
+                        <p class="text-slate-400 text-sm">Tus palabras afectan al rendimiento del equipo antes del partido. <br><span id="talk-status" class="font-bold text-yellow-400 mt-2 block"></span></p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-blue-500 transition">
@@ -239,7 +239,7 @@
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-red-500 transition">
                             <div>
                                 <h3 class="font-bold text-xl mb-2 text-red-400 uppercase tracking-widest">Tono Agresivo</h3>
-                                <p class="text-slate-400 text-sm mb-6">"¡Es inaceptable! ¡Quiero ver sangre en el campo hoy o habrá consecuencias!"<br><br><span class="text-white text-xs bg-slate-800 p-1 rounded">Riesgo Alto. Puede motivar mucho o hundir al equipo.</span></p>
+                                <p class="text-slate-400 text-sm mb-6">"¡Es inaceptable! ¡Quiero ver sangre en el campo hoy!"<br><br><span class="text-white text-xs bg-slate-800 p-1 rounded">Riesgo Alto. Puede motivar mucho o hundir al equipo.</span></p>
                             </div>
                             <button onclick="executeTalk('aggressive')" class="btn-action w-full py-3" style="background:linear-gradient(135deg, #b91c1c, #ef4444)">Bronca Agresiva</button>
                         </div>
@@ -263,10 +263,10 @@
                 <div id="tab-squad" class="fm-tab max-w-6xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl overflow-hidden shadow-2xl">
                         <div class="bg-slate-800/80 p-4 border-b border-slate-600 flex justify-between items-center text-sm tracking-widest uppercase">
-                            <span class="font-bold text-lg">Plantilla Completa</span>
+                            <span class="font-bold text-lg">Plantilla Completa (<span id="squad-count">0</span> Jugadores)</span>
                             <span class="bg-slate-900 px-4 py-2 rounded-lg border border-slate-700">OVR Titulares: <span id="squad-ovr" class="font-bold text-yellow-400 font-gaming text-lg">0</span></span>
                         </div>
-                        <div class="overflow-x-auto max-h-[70vh]">
+                        <div class="overflow-y-auto h-[60vh] pr-2">
                             <table class="fm-table">
                                 <thead>
                                     <tr>
@@ -329,17 +329,23 @@
 
                 <div id="tab-market" class="fm-tab max-w-6xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[75vh]">
+                        
                         <div class="bg-slate-800/80 p-4 border-b border-slate-600 flex justify-between items-center gap-4">
-                            <div class="flex gap-3">
-                                <button id="filter-ALL" class="filter-btn active" onclick="filterMarket('ALL')">TODOS</button>
-                                <button id="filter-DEL" class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
-                                <button id="filter-MED" class="filter-btn" onclick="filterMarket('MED')">MED</button>
-                                <button id="filter-DEF" class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
-                                <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
+                            <div class="flex gap-4 border-b border-slate-600 w-full pb-2">
+                                <button id="mode-buy" class="text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" onclick="setMarketMode('buy')">Fichar Jugadores</button>
+                                <button id="mode-sell" class="text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm" onclick="setMarketMode('sell')">Vender Jugadores</button>
                             </div>
-                            <div class="text-sm text-yellow-400 font-bold tracking-widest uppercase">Base de Datos</div>
                         </div>
-                        <div class="overflow-auto flex-1 p-2">
+
+                        <div class="p-4 flex gap-3 bg-slate-900/50">
+                            <button id="filter-ALL" class="filter-btn active" onclick="filterMarket('ALL')">TODOS</button>
+                            <button id="filter-DEL" class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
+                            <button id="filter-MED" class="filter-btn" onclick="filterMarket('MED')">MED</button>
+                            <button id="filter-DEF" class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
+                            <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
+                        </div>
+
+                        <div class="overflow-y-auto flex-1 p-2">
                             <table class="fm-table">
                                 <thead>
                                     <tr>
@@ -347,9 +353,8 @@
                                         <th>Nombre</th>
                                         <th>Pos</th>
                                         <th>OVR</th>
-                                        <th>Rep. Min.</th>
-                                        <th>Fichar (€)</th>
-                                        <th>Cláusula (PREM)</th>
+                                        <th>Requisito</th>
+                                        <th colspan="2">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody id="market-tbody"></tbody>
@@ -368,7 +373,7 @@
                 <div id="sim-home-shield" class="w-16 h-20 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-2xl shadow-lg border-2 border-white/20"></div>
                 <div>
                     <h2 id="sim-home-name" class="font-bold text-white text-2xl uppercase tracking-wider">Local</h2>
-                    <p class="text-slate-400 font-mono mt-1">Nivel: <span id="sim-home-ovr" class="text-yellow-400 font-bold">0</span></p>
+                    <p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-home-ovr" class="text-yellow-400 font-bold">0</span></p>
                 </div>
             </div>
             
@@ -383,7 +388,7 @@
             <div class="w-1/3 flex items-center justify-end gap-6 text-right">
                 <div>
                     <h2 id="sim-away-name" class="font-bold text-red-400 text-2xl uppercase tracking-wider">Rival FC</h2>
-                    <p class="text-slate-400 font-mono mt-1">Nivel: <span id="sim-away-ovr" class="text-yellow-400 font-bold">0</span></p>
+                    <p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-away-ovr" class="text-yellow-400 font-bold">0</span></p>
                 </div>
                 <div class="w-16 h-20 bg-slate-800 clip-shield border-2 border-red-500 shadow-lg"></div>
             </div>
@@ -402,8 +407,8 @@
                             <div id="match-coins" class="text-green-400 font-bold font-mono text-2xl md:text-3xl">+0 €</div>
                         </div>
                         <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
-                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Puntos Obtenidos</div>
-                            <div id="match-pts" class="text-yellow-400 font-bold font-mono text-2xl md:text-3xl">+0</div>
+                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Resultados Liga</div>
+                            <div id="match-pts" class="text-white font-bold font-mono text-lg md:text-xl"></div>
                         </div>
                     </div>
                     <button onclick="endMatchAndReturn()" class="w-full btn-action py-4 md:py-5 text-xl md:text-2xl tracking-widest glow-blue">VOLVER AL VESTUARIO</button>
@@ -414,7 +419,7 @@
 
     <div id="modal-store" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm hidden">
         <div class="glass-panel p-8 rounded-xl max-w-lg w-full glow-gold text-center relative">
-            <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl" onclick="document.getElementById('modal-store').classList.add('hidden')">CERRAR</button>
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl" onclick="document.getElementById('modal-store').classList.add('hidden')">X</button>
             <h2 class="text-2xl font-gaming text-yellow-400 mb-6">Tienda Premium</h2>
             <p class="text-slate-300 mb-6 text-sm">Inserta la cantidad de monedas que deseas (Herramienta MVP).</p>
             <input type="number" id="dev-coins-input" class="input-fm mb-6 text-center text-2xl font-mono text-yellow-400" value="10000">

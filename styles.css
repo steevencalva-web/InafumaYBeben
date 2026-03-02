@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
     --fm-bg: #0f172a;
     --fm-panel: rgba(30, 41, 59, 0.85);
@@ -32,12 +28,10 @@ body {
 .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.5); }
 .glow-gold { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.5); }
 .glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.5); }
-.glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.5); }
 
 .input-fm { width: 100%; padding: 12px 16px; background-color: rgba(0,0,0,0.4); border: 1px solid var(--fm-border); border-radius: 8px; color: white; font-size: 14px; outline: none; transition: all 0.3s; }
 .input-fm:focus { border-color: var(--fm-accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
 
-/* Menú Sidebar Limpio */
 .nav-btn { width: 100%; text-align: left; padding: 14px 20px; color: #cbd5e1; border-radius: 8px; transition: all 0.3s; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; border-left: 4px solid transparent;}
 .nav-btn:hover { background-color: rgba(59, 130, 246, 0.15); color: white; transform: translateX(5px);}
 .nav-btn.active { background-color: var(--fm-accent); color: white; border-left-color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
@@ -45,18 +39,20 @@ body {
 .btn-action { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; font-weight: bold; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer;}
 .btn-action:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
 
+.btn-sell { background: linear-gradient(135deg, #b91c1c, #ef4444); color: white; font-weight: bold; border-radius: 6px; padding: 8px 12px; transition: all 0.2s; border: none; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;}
+.btn-sell:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+
 .clip-shield { clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0); }
 .player-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fm-accent); background: #000; transition: transform 0.2s;}
 .player-avatar:hover { transform: scale(1.2); z-index: 10; }
 
 .fm-table { width: 100%; font-size: 13px; text-align: left; border-collapse: separate; border-spacing: 0 8px; }
-.fm-table th { color: #94a3b8; text-transform: uppercase; padding: 0 15px; }
+.fm-table th { color: #94a3b8; text-transform: uppercase; padding: 0 15px; position: sticky; top: 0; background: var(--fm-panel); z-index: 10;}
 .fm-table td { background: rgba(0,0,0,0.3); padding: 12px 15px; }
 .fm-table tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
 .fm-table tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 .fm-table tr:hover td { background: rgba(59, 130, 246, 0.1); cursor: pointer; }
 
-/* Tabla Liga */
 .league-table td { padding: 8px 15px; font-variant-numeric: tabular-nums;}
 .league-table tr.user-row td { background: rgba(59, 130, 246, 0.2); border-top: 1px solid var(--fm-accent); border-bottom: 1px solid var(--fm-accent);}
 
@@ -103,7 +99,7 @@ body {
 
 .stadium-bg { background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
 
-/* Menú Desplegable Perfil */
-.dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 10px; background: var(--fm-panel); border: 1px solid var(--fm-border); border-radius: 8px; width: 200px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; }
+/* Menú Desplegable Perfil - Z-INDEX CORREGIDO PARA QUE SE SOBREPONGA SIEMPRE */
+.dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 10px; background: var(--fm-panel); border: 1px solid var(--fm-border); border-radius: 8px; width: 200px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; overflow: hidden; }
 .dropdown-item { display: block; padding: 12px 15px; color: white; text-decoration: none; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--fm-border); transition: 0.2s;}
 .dropdown-item:hover { background: rgba(255,255,255,0.1); }
