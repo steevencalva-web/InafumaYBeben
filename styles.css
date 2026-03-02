@@ -3,6 +3,7 @@
     --fm-panel: rgba(30, 41, 59, 0.85); 
     --fm-border: #334155;
     --fm-accent: #3b82f6;
+    --neon-blue: #3b82f6;
     --neon-green: #10b981;
     --neon-gold: #f59e0b;
     --neon-red: #ef4444;
@@ -28,15 +29,15 @@ body {
 .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.5); }
 .glow-gold { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.5); }
 .glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.5); }
+.glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.5); }
 
-.input-fm { width: 100%; padding: 10px 16px; background-color: rgba(0,0,0,0.4); border: 1px solid var(--fm-border); border-radius: 6px; color: white; font-size: 13px; outline: none; transition: all 0.3s; }
+.input-fm { width: 100%; padding: 12px 16px; background-color: rgba(0,0,0,0.4); border: 1px solid var(--fm-border); border-radius: 6px; color: white; font-size: 13px; outline: none; transition: all 0.3s; }
 .input-fm:focus { border-color: var(--fm-accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
 
 /* Menú Lateral Limpio */
-.nav-btn { width: 100%; text-align: left; padding: 12px 20px; color: #cbd5e1; border-radius: 8px; transition: all 0.3s; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 12px; cursor: pointer; background: transparent; border-top: none; border-right: none; border-bottom: none;}
+.nav-btn { width: 100%; text-align: left; padding: 14px 20px; color: #cbd5e1; border-radius: 8px; transition: all 0.3s; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 12px; cursor: pointer; background: transparent; border-top: none; border-right: none; border-bottom: none;}
 .nav-btn:hover { background-color: rgba(59, 130, 246, 0.15); color: white; transform: translateX(4px);}
 .nav-btn.active { background-color: var(--fm-accent); color: white; border-left-color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-.nav-icon { width: 20px; text-align: center; opacity: 0.8; font-size: 16px; }
 
 /* Botón Continuar */
 .btn-action { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; font-weight: bold; border-radius: 6px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer;}
@@ -45,7 +46,7 @@ body {
 .btn-sell { background: linear-gradient(135deg, #b91c1c, #ef4444); color: white; font-weight: bold; border-radius: 6px; padding: 8px 12px; transition: all 0.2s; border: none; cursor: pointer; text-transform: uppercase; font-size: 12px; }
 .btn-sell:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
 
-/* Tabla Liga e Interfaz */
+/* Tabla y Avatares */
 .clip-shield { clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0); }
 .player-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fm-accent); background: #000; transition: transform 0.2s;}
 .player-avatar:hover { transform: scale(1.2); z-index: 10; }
@@ -57,16 +58,16 @@ body {
 .fm-table tr td:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
 .fm-table tr:hover td { background: rgba(59, 130, 246, 0.15); }
 
-.league-table th { cursor: help; } /* Cursor de ayuda para tooltips */
+.league-table th { cursor: help; } 
 .league-table td { padding: 8px 15px; font-variant-numeric: tabular-nums;}
 .league-table tr.user-row td { background: rgba(59, 130, 246, 0.25); border-top: 1px solid var(--fm-accent); border-bottom: 1px solid var(--fm-accent);}
 
-/* Posiciones unificadas */
+/* Posiciones unificadas y corregidas */
 .pos-badge { padding: 4px 0; border-radius: 4px; font-weight: 800; font-size: 11px; display: inline-block; width: 45px; text-align: center; letter-spacing: 1px;}
-.pos-del { background: var(--neon-blue); color: white; }
-.pos-med { background: var(--neon-green); color: white; }
-.pos-def { background: var(--neon-gold); color: white; }
-.pos-por { background: var(--neon-red); color: white; }
+.pos-del { background-color: var(--neon-blue); color: white; border: 1px solid rgba(255,255,255,0.2); }
+.pos-med { background-color: var(--neon-green); color: white; border: 1px solid rgba(255,255,255,0.2); }
+.pos-def { background-color: var(--neon-gold); color: black; border: 1px solid rgba(255,255,255,0.2); }
+.pos-por { background-color: var(--neon-red); color: white; border: 1px solid rgba(255,255,255,0.2); }
 
 /* Mercado */
 .filter-btn { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.5); border: 1px solid var(--fm-border); color: #94a3b8; cursor: pointer; transition: 0.2s; }
@@ -96,7 +97,6 @@ body {
 /* Barras Progress */
 .morale-bar-bg { width: 100%; height: 6px; background-color: #334155; border-radius: 3px; overflow: hidden; margin-top: 4px;}
 .morale-bar-fill { height: 100%; transition: width 0.5s ease; }
-
 .match-progress-bg { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-top: 15px;}
 .match-progress-fill { height: 100%; background: var(--fm-accent); width: 0%; transition: width 0.5s linear; box-shadow: 0 0 10px var(--fm-accent);}
 
@@ -113,12 +113,11 @@ body {
 .fm-tab.active { display: block; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Perfil Dropdown (Z-INDEX arreglado) */
+/* Perfil Dropdown Z-Index Corregido */
 .dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 12px; background: var(--fm-panel); border: 1px solid var(--fm-border); border-radius: 8px; width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 9999; overflow: hidden; backdrop-filter: blur(15px); }
 .dropdown-item { display: block; padding: 12px 16px; color: white; text-decoration: none; font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s;}
 .dropdown-item:hover { background: rgba(59, 130, 246, 0.2); padding-left: 20px;}
 
 .stadium-bg { background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
 
-/* Ocultar input radio color por defecto */
 input[type="radio"].color-picker { border: 2px solid transparent; outline: none; }
