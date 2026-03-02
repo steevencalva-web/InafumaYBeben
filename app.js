@@ -41,11 +41,15 @@ function calcPlayerOVR(p) {
 }
 PLAYERS_DB.forEach(p => { p.ovr = calcPlayerOVR(p); p.morale = 100; });
 
-// --- LIGA IA ---
+// --- LIGA IA (19 BOTS PARA HACER 20 EQUIPOS) ---
 const AI_TEAMS = [
     { name: "Madrid Kings", ovr: 88 }, { name: "Catalunya AC", ovr: 87 }, { name: "Atletico Titan", ovr: 85 },
     { name: "Basque Lions", ovr: 82 }, { name: "Sevilla Sur", ovr: 80 }, { name: "Valencia Bats", ovr: 78 },
-    { name: "Galicia CF", ovr: 76 }, { name: "Betis Norte", ovr: 75 }, { name: "Villarreal Sun", ovr: 74 }
+    { name: "Galicia CF", ovr: 76 }, { name: "Betis Norte", ovr: 75 }, { name: "Villarreal Sun", ovr: 74 },
+    { name: "Real Sebastian", ovr: 73 }, { name: "Celta Sky", ovr: 71 }, { name: "Mallorca Red", ovr: 70 },
+    { name: "Osasuna Bulls", ovr: 68 }, { name: "Alaves Blue", ovr: 67 }, { name: "Rayo Thunder", ovr: 66 },
+    { name: "Getafe Light", ovr: 65 }, { name: "Las Palmas FC", ovr: 64 }, { name: "Granada City", ovr: 63 },
+    { name: "Cadiz Yellows", ovr: 62 }
 ];
 
 function initLeague() {
@@ -62,6 +66,15 @@ window.onload = () => {
     if(!localStorage.getItem('inafuma_cookies')) document.getElementById('modal-cookies').classList.remove('hidden');
     const activeUserId = localStorage.getItem('inafuma_active_user');
     if(activeUserId) state = UsersDB.find(u => u.auth.user === activeUserId);
+    
+    // Patch old accounts if missing new fields
+    if(state && (!state.league || state.league.length === 0)) {
+        state.league = initLeague();
+        state.playedTeams = [];
+        state.stats.matchday = 1;
+        state.flags = { canTrain: true, canTalk: true };
+    }
+
     routeView();
     document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 };
@@ -89,7 +102,6 @@ function toggleAuth(mode) {
     }
 }
 
-// REGISTRO
 document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('reg-user').value;
@@ -100,10 +112,10 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     state = {
         auth: { user, pass }, team: null,
         economy: { coins: 50000000, premium: 0 },
-        stats: { rep: 0, matches: 0, wins: 0, draws: 0, losses: 0 },
+        stats: { rep: 0, matches: 0, wins: 0, draws: 0, losses: 0, matchday: 1 },
         roster: [], lineup: [null,null,null,null,null,null,null,null,null,null,null],
-        inbox: [], formation: '4-4-2', league: [],
-        flags: { canTrain: true, canTalk: true } // Controls for matchweek actions
+        inbox: [], formation: '4-4-2', league: [], playedTeams: [],
+        flags: { canTrain: true, canTalk: true } 
     };
     
     UsersDB.push(state);
@@ -112,7 +124,6 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     routeView();
 });
 
-// LOGIN
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('log-user').value;
@@ -121,10 +132,11 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     const foundUser = UsersDB.find(u => u.auth.user === user && u.auth.pass === pass);
     if(foundUser) {
         state = foundUser;
-        // Fix for old accounts missing new stats
+        // Fix for old accounts
         if(state.stats.draws === undefined) state.stats.draws = 0;
         if(state.stats.losses === undefined) state.stats.losses = 0;
         if(!state.flags) state.flags = { canTrain: true, canTalk: true };
+        if(!state.league || state.league.length === 0) { state.league = initLeague(); state.playedTeams = []; state.stats.matchday = 1;}
         
         localStorage.setItem('inafuma_active_user', user);
         routeView();
@@ -133,16 +145,19 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     }
 });
 
-// CREAR EQUIPO
 document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
     state.team = { name: document.getElementById('set-team').value, manager: document.getElementById('set-manager').value, color: document.querySelector('input[name="color"]:checked').value };
     state.league = initLeague();
-    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, tiene 50M EUR de presupuesto. Fiche jugadores, use el Mejor 11 y gane la liga.`);
+    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la liga consta de 38 jornadas. Tiene 50M EUR para formar un once competitivo.`);
     saveState(); routeView();
 });
 
 function logout() { state = null; localStorage.removeItem('inafuma_active_user'); routeView(); }
+
+window.toggleProfileMenu = function() {
+    document.getElementById('profile-dropdown').classList.toggle('hidden');
+}
 
 function routeView() {
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -151,7 +166,6 @@ function routeView() {
     else { document.getElementById('app-layout').classList.remove('hidden'); updateUI(); switchTab('dash'); }
 }
 
-// --- UTILIDADES ---
 function addEmail(sender, subject, body) {
     const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
@@ -182,7 +196,7 @@ function switchTab(tabId) {
     document.getElementById('tab-' + tabId).classList.add('active');
     document.getElementById('nav-' + tabId).classList.add('active');
     
-    const titles = { 'dash': 'Panel de Control', 'squad': 'Plantilla y Moral', 'tactics': 'Pizarra Táctica', 'market': 'Mercado Mundial', 'league': 'Clasificación Liga', 'train': 'Entrenamientos', 'talk': 'Vestuario' };
+    const titles = { 'dash': 'Panel de Control', 'squad': 'Plantilla y Moral', 'tactics': 'Pizarra Táctica', 'market': 'Mercado Mundial', 'league': 'Clasificación Liga', 'train': 'Planificación Semanal', 'talk': 'Gestión de Vestuario' };
     document.getElementById('page-title').textContent = titles[tabId];
 
     if(tabId === 'market') filterMarket('ALL');
@@ -207,10 +221,17 @@ function updateUI() {
     document.getElementById('ui-rep').textContent = state.stats.rep;
     document.getElementById('ui-coins').textContent = formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
+    document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
     
-    const shield = document.getElementById('ui-shield');
-    shield.style.backgroundColor = state.team.color;
-    shield.textContent = state.team.name.substring(0,3).toUpperCase();
+    // Perfil Header
+    document.getElementById('top-teamname').textContent = state.team.name;
+    document.getElementById('top-manager').textContent = state.team.manager;
+    document.getElementById('top-shield').style.backgroundColor = state.team.color;
+    document.getElementById('top-shield').textContent = state.team.name.substring(0,3).toUpperCase();
+
+    // Perfil Sidebar
+    document.getElementById('ui-shield').style.backgroundColor = state.team.color;
+    document.getElementById('ui-shield').textContent = state.team.name.substring(0,3).toUpperCase();
     document.getElementById('ui-teamname').textContent = state.team.name;
     document.getElementById('ui-manager').textContent = state.team.manager;
 
@@ -229,7 +250,6 @@ function renderLeague() {
     const tbody = document.getElementById('league-tbody');
     tbody.innerHTML = '';
     
-    // Sort by points, then goal diff
     const sorted = [...state.league].sort((a,b) => {
         if(b.pts !== a.pts) return b.pts - a.pts;
         return (b.gf - b.ga) - (a.gf - a.ga);
@@ -255,12 +275,9 @@ function renderLeague() {
 
 function simulateLeagueMatches(userOpponentName) {
     let aiTeams = state.league.filter(t => !t.isUser && t.name !== userOpponentName);
-    
     for(let i=0; i<aiTeams.length; i+=2) {
         if(aiTeams[i+1]) {
             let tA = aiTeams[i]; let tB = aiTeams[i+1];
-            
-            // Simular resultado entre bots basado en OVR
             let diff = tA.ovr - tB.ovr;
             let probA = 0.35 + (diff * 0.02); 
             
@@ -283,50 +300,74 @@ function updateTeamStats(team, gf, ga) {
     else { team.l++; }
 }
 
-// --- TAB: ENTRENAMIENTO Y CHARLA ---
+// --- TAB: ENTRENAMIENTO ---
 function renderTrainStatus() {
-    document.getElementById('train-status').textContent = state.flags.canTrain ? "ESTADO: DISPONIBLE" : "ESTADO: DESCANSO REQUERIDO (JUEGA UN PARTIDO)";
-}
-function renderTalkStatus() {
-    document.getElementById('talk-status').textContent = state.flags.canTalk ? "ESTADO: DISPONIBLE" : "ESTADO: YA HAS HABLADO CON ELLOS";
+    document.getElementById('train-status').textContent = state.flags.canTrain ? "ESTADO: PROGRAMACIÓN DISPONIBLE" : "ESTADO: SESIÓN COMPLETADA. JUEGA UN PARTIDO PARA AVANZAR.";
 }
 
-window.executeTraining = function(type) {
-    if(!state.flags.canTrain) return alert("Los jugadores están agotados. Juega un partido de liga para recuperar el entrenamiento.");
+window.executeWeeklyTraining = function() {
+    if(!state.flags.canTrain) return alert("Los jugadores están agotados. Debes jugar la jornada de liga para avanzar de semana.");
     if(state.roster.length === 0) return alert("No tienes jugadores que entrenar.");
 
-    state.roster.forEach(p => {
-        if(type==='atk' && (p.pos==='DEL' || p.pos==='MED')) { p.sho++; p.pas++; }
-        if(type==='def' && (p.pos!=='DEL')) { p.def++; p.phy++; }
-        if(type==='phy') { p.pac+=2; p.phy+=2; p.morale = Math.max(0, p.morale-10); } // Exigente
-        p.ovr = calcPlayerOVR(p);
+    const days = ['mon','tue','wed','thu','fri'];
+    let log = [];
+
+    days.forEach(d => {
+        let type = document.getElementById(`train-${d}`).value;
+        if(type !== 'rest') {
+            state.roster.forEach(p => {
+                if(type==='atk' && (p.pos==='DEL' || p.pos==='MED')) { p.sho++; p.pas++; }
+                if(type==='def' && (p.pos!=='DEL')) { p.def++; p.phy++; }
+                if(type==='phy') { p.pac++; p.phy++; p.morale = Math.max(0, p.morale-5); } 
+                p.ovr = calcPlayerOVR(p);
+            });
+        }
     });
 
     state.flags.canTrain = false;
     saveState(); renderTrainStatus();
-    alert("Entrenamiento completado. Se han mejorado las stats.");
+    alert("Semana de entrenamiento completada. Los atributos de los jugadores han variado.");
 }
 
-window.executeTalk = function(type) {
-    if(!state.flags.canTalk) return alert("Ya has dado la charla de esta semana.");
+// --- TAB: CHARLA DE VESTUARIO ---
+function renderTalkStatus() {
+    document.getElementById('talk-status').textContent = state.flags.canTalk ? "ESTADO: ESPERANDO TUS PALABRAS" : "ESTADO: LA PLANTILLA YA ESTÁ EN EL TÚNEL DE VESTUARIOS";
+}
+
+window.executeTalk = function(tone) {
+    if(!state.flags.canTalk) return alert("Ya has dado la charla pre-partido.");
     if(state.roster.length === 0) return alert("Vestuario vacío.");
 
-    if(type==='motivate') {
-        if(state.economy.coins < 500000) return alert("No tienes fondos para pagar las primas.");
-        state.economy.coins -= 500000;
-        state.roster.forEach(p => p.morale = Math.min(100, p.morale+20));
-    } else if(type==='demand') {
-        getStartingXI().forEach(p => p.morale = Math.min(100, p.morale+25));
-        state.roster.filter(p => !state.lineup.includes(p.id)).forEach(p => p.morale = Math.max(0, p.morale-15));
-    } else {
-        state.roster.forEach(p => p.morale = Math.min(100, p.morale+10));
+    let xi = getStartingXI();
+    let bench = state.roster.filter(p => !state.lineup.includes(p.id));
+
+    if(tone === 'calm') {
+        state.roster.forEach(p => p.morale = Math.min(100, p.morale+5));
+        alert("Efecto: Toda la plantilla sube +5 de Moral de forma segura.");
+    } else if(tone === 'aggressive') {
+        let rand = Math.random();
+        if(rand < 0.7) {
+            state.roster.forEach(p => p.morale = Math.min(100, p.morale+20));
+            alert("Efecto: ¡La bronca ha funcionado! Toda la plantilla se motiva a tope (+20 Moral).");
+        } else {
+            state.roster.forEach(p => p.morale = Math.max(0, p.morale-15));
+            alert("Efecto: Te has pasado de la raya. El equipo está enfadado y presionado (-15 Moral).");
+        }
+    } else if(tone === 'passionate') {
+        state.roster.forEach(p => {
+            let rand = Math.random();
+            if(rand < 0.5) p.morale = Math.min(100, p.morale+15);
+        });
+        alert("Efecto: El discurso ha calado en parte de la plantilla. Algunos suben +15 de Moral.");
+    } else if(tone === 'assertive') {
+        xi.forEach(p => p.morale = Math.min(100, p.morale+10));
+        bench.forEach(p => p.morale = Math.max(0, p.morale-5));
+        alert("Efecto: Los titulares ganan confianza (+10 Moral), pero los suplentes se sienten desplazados (-5 Moral).");
     }
 
     state.flags.canTalk = false;
     saveState(); renderTalkStatus();
-    alert("Charla finalizada. La moral del equipo ha cambiado.");
 }
-
 
 // --- PLANTILLA ---
 function renderSquad() {
@@ -478,38 +519,41 @@ window.buyPlayer = function(id, curr) {
         if(state.economy.coins < p.priceBasic) return alert("Presupuesto de traspasos insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return alert("Monedas Premium insuficientes.");
+        if(state.economy.premium < p.pricePrem) return alert("Moneda Premium insuficiente.");
         state.economy.premium -= p.pricePrem;
     }
 
-    state.roster.push(JSON.parse(JSON.stringify(p))); // Clonar para evitar referencias
+    state.roster.push(JSON.parse(JSON.stringify(p)));
     const emptySlot = state.lineup.findIndex(slot => slot === null);
     if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
 
-    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso. La afición está eufórica.`);
+    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso.`);
     saveState(); filterMarket(currentMarketFilter);
 }
 
-window.buyIAP = function() {
-    document.getElementById('modal-store').classList.remove('hidden');
-}
+window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); }
 window.confirmIAP = function() {
     const val = document.getElementById('dev-coins-input').value;
     state.economy.premium += parseInt(val);
-    saveState();
-    document.getElementById('modal-store').classList.add('hidden');
+    saveState(); document.getElementById('modal-store').classList.add('hidden');
 }
 
-// --- MOTOR DE LIGA Y PARTIDO ---
+// --- MOTOR DE PARTIDO (LIGA REAL) ---
 let currentOpponent = null;
 
 window.startMatch = function() {
     const xi = getStartingXI();
     if(xi.length < 11) return alert(`Faltan jugadores. Usa "MEJOR 11" en Tácticas.`);
 
-    // Elegir rival de la liga
-    const aiTeams = state.league.filter(t => !t.isUser);
-    currentOpponent = aiTeams[Math.floor(Math.random() * aiTeams.length)];
+    // 1. Elegir rival (El primero que no hayamos jugado de la liga)
+    if(!state.playedTeams) state.playedTeams = [];
+    const unplayedTeams = state.league.filter(t => !t.isUser && !state.playedTeams.includes(t.name));
+    
+    if(unplayedTeams.length === 0) {
+        return alert("¡Enhorabuena Míster! Has terminado la temporada. Funcionalidad de 'Nueva Temporada' próximamente.");
+    }
+    
+    currentOpponent = unplayedTeams[Math.floor(Math.random() * unplayedTeams.length)];
 
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('match-modal').classList.remove('hidden');
@@ -572,36 +616,38 @@ function finishMatch(mG, oG) {
     document.getElementById('match-narrative').innerHTML += `<div class="mt-4 text-yellow-400 font-bold text-2xl">¡FINAL DEL PARTIDO!</div>`;
     document.getElementById('match-narrative').scrollTop = document.getElementById('match-narrative').scrollHeight;
 
-    let coins = 0; let rep = 0;
+    let ptsEarned = 0; let coins = 0; let rep = 0;
 
-    // Update User Stats
-    if(mG > oG) { coins = 5000000; rep = 150; state.stats.wins++; } 
-    else if (mG === oG) { coins = 1500000; rep = 50; state.stats.draws++; } 
-    else { coins = 500000; rep = -10; state.stats.losses++; }
+    if(mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; } 
+    else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; } 
+    else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
 
-    // Update League User
+    // Actualizar equipo del usuario en la liga
     let userLeague = state.league.find(t => t.isUser);
     updateTeamStats(userLeague, mG, oG);
     
-    // Update League Opponent
+    // Actualizar rival en la liga
     let oppLeague = state.league.find(t => t.name === currentOpponent.name);
     updateTeamStats(oppLeague, oG, mG);
 
-    // Simulate rest of league
+    // Simular el resto de partidos de la jornada
     simulateLeagueMatches(currentOpponent.name);
 
+    state.playedTeams.push(currentOpponent.name);
     state.stats.matches++;
+    state.stats.matchday++;
     state.economy.coins += coins;
     state.stats.rep = Math.max(0, state.stats.rep + rep);
     
-    // Reset actions
+    // Resetear Entrenamientos y Charla para la siguiente semana
     state.flags.canTrain = true;
     state.flags.canTalk = true;
 
-    addEmail('Cuerpo Técnico', `Resumen de Jornada`, `Resultado final: ${mG}-${oG}. Ingresos: +€${(coins/1000000).toFixed(1)}M. Revisa la clasificación de liga.`);
+    addEmail('Cuerpo Técnico', `Resumen Jornada ${state.stats.matchday-1}`, `Resultado final: ${mG}-${oG} frente a ${currentOpponent.name}. Ingresos de taquilla: +€${(coins/1000000).toFixed(1)}M. Tienes disponible una nueva sesión de entrenamiento.`);
     saveState();
     
     document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;
+    document.getElementById('match-pts').textContent = `+${ptsEarned} PTS`;
     document.getElementById('match-rep').textContent = rep > 0 ? `+${rep}` : rep;
     document.getElementById('match-rep').className = rep > 0 ? "text-blue-400 font-bold font-mono text-3xl" : "text-red-400 font-bold font-mono text-3xl";
 }
@@ -610,4 +656,4 @@ window.endMatchAndReturn = function() {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     switchTab('league'); 
-}
+}º
