@@ -5,7 +5,7 @@ function getAvatar(name) { return `https://ui-avatars.com/api/?name=${encodeURIC
 
 const PLAYERS_DB = [
     { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://i.pravatar.cc/150?u=messi" },
-    { id: 102, name: "C. Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://i.pravatar.cc/150?u=cr7" },
+    { id: 102, name: "C. Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkZdsY7pTk8W1bVJYdl__FK0pFjSWsygb5Pg&s" },
     { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://i.pravatar.cc/150?u=mbappe" },
     { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.pravatar.cc/150?u=kdb" },
     { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://i.pravatar.cc/150?u=vandijk" },
