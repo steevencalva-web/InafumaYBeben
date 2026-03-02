@@ -1,44 +1,48 @@
-// --- BASE DE DATOS REAL CON AVATARES ---
+// --- BASE DE DATOS REAL (ESTILO FM24) ---
 function getAvatar(name) {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`;
 }
 
+// 35 Jugadores para que puedas comprar rápido con 50M
 const PLAYERS_DB = [
     { id: 101, name: "L. Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: getAvatar("L Messi") },
     { id: 102, name: "C. Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: getAvatar("C Ronaldo") },
     { id: 103, name: "K. Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: getAvatar("K Mbappe") },
-    { id: 104, name: "E. Haaland", pos: "DEL", pac: 89, sho: 96, pas: 70, def: 45, phy: 93, rep: 4000, priceBasic: 125000000, pricePrem: 9500, img: getAvatar("E Haaland") },
-    { id: 105, name: "Vini Jr.", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: getAvatar("Vini Jr") },
-    { id: 106, name: "A. Griezmann", pos: "DEL", pac: 80, sho: 85, pas: 88, def: 50, phy: 70, rep: 2000, priceBasic: 55000000, pricePrem: 4500, img: getAvatar("A Griezmann") },
-    { id: 107, name: "L. Yamal", pos: "DEL", pac: 85, sho: 78, pas: 82, def: 40, phy: 60, rep: 1200, priceBasic: 35000000, pricePrem: 2800, img: getAvatar("L Yamal") },
-    { id: 108, name: "A. Morata", pos: "DEL", pac: 78, sho: 82, pas: 75, def: 45, phy: 78, rep: 500, priceBasic: 15000000, pricePrem: 1200, img: getAvatar("A Morata") },
-    { id: 109, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Joselu") },
+    { id: 104, name: "Vini Jr.", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: getAvatar("Vini Jr") },
+    { id: 105, name: "L. Yamal", pos: "DEL", pac: 85, sho: 78, pas: 82, def: 40, phy: 60, rep: 1200, priceBasic: 35000000, pricePrem: 2800, img: getAvatar("L Yamal") },
+    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Joselu") },
+    { id: 107, name: "B. Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("B Iglesias") },
+    { id: 108, name: "C. Ávila", pos: "DEL", pac: 78, sho: 76, pas: 65, def: 45, phy: 80, rep: 0, priceBasic: 3500000, pricePrem: 250, img: getAvatar("Chimy Avila") },
+    { id: 109, name: "H. Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("H Duro") },
+    { id: 110, name: "K. García", pos: "DEL", pac: 55, sho: 78, pas: 60, def: 35, phy: 88, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("Kike G") },
 
     { id: 201, name: "K. De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: getAvatar("K DeBruyne") },
     { id: 202, name: "J. Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: getAvatar("J Bellingham") },
     { id: 203, name: "Pedri", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("Pedri") },
     { id: 204, name: "F. Valverde", pos: "MED", pac: 88, sho: 78, pas: 85, def: 80, phy: 82, rep: 2500, priceBasic: 65000000, pricePrem: 5000, img: getAvatar("F Valverde") },
     { id: 205, name: "T. Kroos", pos: "MED", pac: 55, sho: 80, pas: 95, def: 70, phy: 70, rep: 1800, priceBasic: 40000000, pricePrem: 3000, img: getAvatar("T Kroos") },
-    { id: 206, name: "E. Camavinga", pos: "MED", pac: 85, sho: 72, pas: 82, def: 82, phy: 85, rep: 1000, priceBasic: 25000000, pricePrem: 2000, img: getAvatar("E Camavinga") },
-    { id: 207, name: "Koke", pos: "MED", pac: 65, sho: 72, pas: 85, def: 75, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 1000, img: getAvatar("Koke") },
-    { id: 208, name: "M. Zubimendi", pos: "MED", pac: 70, sho: 68, pas: 82, def: 78, phy: 72, rep: 100, priceBasic: 8000000, pricePrem: 600, img: getAvatar("M Zubimendi") },
-    { id: 209, name: "S. Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("S Darder") },
+    { id: 206, name: "S. Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("S Darder") },
+    { id: 207, name: "A. García", pos: "MED", pac: 65, sho: 70, pas: 82, def: 68, phy: 65, rep: 0, priceBasic: 3500000, pricePrem: 250, img: getAvatar("A Garcia") },
+    { id: 208, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: getAvatar("Pepelu") },
+    { id: 209, name: "Isco", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Isco") },
 
     { id: 301, name: "V. van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: getAvatar("V vanDijk") },
     { id: 302, name: "A. Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("A Rudiger") },
-    { id: 303, name: "R. Dias", pos: "DEF", pac: 68, sho: 45, pas: 72, def: 92, phy: 88, rep: 3000, priceBasic: 65000000, pricePrem: 5200, img: getAvatar("R Dias") },
-    { id: 304, name: "R. Araújo", pos: "DEF", pac: 82, sho: 45, pas: 65, def: 88, phy: 85, rep: 2000, priceBasic: 45000000, pricePrem: 3500, img: getAvatar("R Araujo") },
-    { id: 305, name: "A. Davies", pos: "DEF", pac: 95, sho: 68, pas: 80, def: 80, phy: 78, rep: 1500, priceBasic: 35000000, pricePrem: 2800, img: getAvatar("A Davies") },
-    { id: 306, name: "D. Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: getAvatar("D Carvajal") },
-    { id: 307, name: "P. Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 300, priceBasic: 10000000, pricePrem: 800, img: getAvatar("P Cubarsi") },
-    { id: 308, name: "H. Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("H Maguire") },
+    { id: 303, name: "R. Araújo", pos: "DEF", pac: 82, sho: 45, pas: 65, def: 88, phy: 85, rep: 2000, priceBasic: 45000000, pricePrem: 3500, img: getAvatar("R Araujo") },
+    { id: 304, name: "D. Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: getAvatar("D Carvajal") },
+    { id: 305, name: "P. Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 300, priceBasic: 10000000, pricePrem: 800, img: getAvatar("P Cubarsi") },
+    { id: 306, name: "D. García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: getAvatar("D Garcia") },
+    { id: 307, name: "R. Le Normand", pos: "DEF", pac: 70, sho: 40, pas: 65, def: 83, phy: 80, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("R LeNormand") },
+    { id: 308, name: "M. Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 0, priceBasic: 2500000, pricePrem: 200, img: getAvatar("M Maffeo") },
+    { id: 309, name: "J. Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("J Navas") },
 
     { id: 401, name: "T. Courtois", pos: "POR", pac: 40, sho: 20, pas: 65, def: 95, phy: 88, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: getAvatar("T Courtois") },
     { id: 402, name: "Alisson", pos: "POR", pac: 45, sho: 25, pas: 80, def: 92, phy: 85, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: getAvatar("Alisson") },
     { id: 403, name: "M. ter Stegen", pos: "POR", pac: 42, sho: 20, pas: 85, def: 90, phy: 80, rep: 2000, priceBasic: 45000000, pricePrem: 3500, img: getAvatar("M terStegen") },
-    { id: 404, name: "J. Oblak", pos: "POR", pac: 40, sho: 15, pas: 60, def: 91, phy: 82, rep: 1000, priceBasic: 25000000, pricePrem: 2000, img: getAvatar("J Oblak") },
-    { id: 405, name: "U. Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: getAvatar("U Simon") },
-    { id: 406, name: "Mamardashvili", pos: "POR", pac: 42, sho: 20, pas: 70, def: 84, phy: 80, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("G Mamarda") }
+    { id: 404, name: "U. Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: getAvatar("U Simon") },
+    { id: 405, name: "A. Remiro", pos: "POR", pac: 40, sho: 15, pas: 70, def: 82, phy: 75, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("A Remiro") },
+    { id: 406, name: "D. Soria", pos: "POR", pac: 35, sho: 10, pas: 60, def: 80, phy: 78, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("D Soria") },
+    { id: 407, name: "G. Gazzaniga", pos: "POR", pac: 42, sho: 15, pas: 68, def: 78, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("G Gazzaniga") }
 ];
 
 function calcPlayerOVR(p) {
@@ -57,17 +61,15 @@ let state = {
     team: null,
     economy: { coins: 0, premium: 0 },
     stats: { rep: 0, matches: 0 },
-    roster: [],    // Todos los jugadores comprados
-    lineup: [],    // IDs de los 11 titulares
+    roster: [],
+    lineup: [], // Array de IDs de los 11 titulares (Longitud estricta de 11)
     inbox: [],
     formation: '4-4-2'
 };
-const SAVE_KEY = 'inafuma_fm_v2';
+const SAVE_KEY = 'inafuma_fm_v3';
 
 window.onload = () => {
-    if(!localStorage.getItem('inafuma_fm_cookies')) {
-        document.getElementById('modal-cookies').classList.remove('hidden');
-    }
+    if(!localStorage.getItem('inafuma_fm_cookies')) document.getElementById('modal-cookies').classList.remove('hidden');
     loadState();
     routeView();
     document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -75,11 +77,7 @@ window.onload = () => {
 
 function saveState() { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); updateUI(); }
 function loadState() { const saved = localStorage.getItem(SAVE_KEY); if(saved) state = JSON.parse(saved); }
-
-function acceptCookies() {
-    localStorage.setItem('inafuma_fm_cookies', 'true');
-    document.getElementById('modal-cookies').classList.add('hidden');
-}
+function acceptCookies() { localStorage.setItem('inafuma_fm_cookies', 'true'); document.getElementById('modal-cookies').classList.add('hidden'); }
 
 function routeView() {
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -106,11 +104,13 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const color = document.querySelector('input[name="color"]:checked').value;
     state.team = { name: document.getElementById('set-team').value, manager: document.getElementById('set-manager').value, color: color };
-    state.economy = { coins: 10000000, premium: 0 };
+    
+    // PRESUPUESTO INICIAL A 50 MILLONES
+    state.economy = { coins: 50000000, premium: 0 };
     state.stats = { rep: 0, matches: 0 };
+    state.lineup = [null,null,null,null,null,null,null,null,null,null,null]; // 11 huecos
     
-    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, confiamos en usted. Tiene 10M€ de presupuesto inicial. Para poder competir en la liga necesita fichar al menos 5 jugadores. Los jugadores seleccionados en Tácticas serán los que jueguen.`);
-    
+    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, confiamos en usted. Tiene 50M€ de presupuesto inicial. Fiche una plantilla completa (al menos 11 jugadores) y arrástrelos al campo en la pestaña de Tácticas.`);
     saveState(); routeView();
 });
 
@@ -120,7 +120,7 @@ function logout() {
     }
 }
 
-// --- BUZÓN DE NOTICIAS ---
+// --- BUZÓN ---
 function addEmail(sender, subject, body) {
     const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
@@ -147,34 +147,27 @@ function renderInbox() {
         </div>`;
     });
 }
+function readEmail(id) { const mail = state.inbox.find(m => m.id === id); if(mail) { mail.read = true; saveState(); renderInbox(); } }
 
-function readEmail(id) {
-    const mail = state.inbox.find(m => m.id === id);
-    if(mail) { mail.read = true; saveState(); }
-}
-
-// --- NAVEGACIÓN Y TABS ---
+// --- NAVEGACIÓN ---
 function switchTab(tabId) {
     document.querySelectorAll('.fm-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
     const targetTab = document.getElementById('tab-' + tabId);
     if(targetTab) targetTab.classList.add('active');
-    
     const navBtn = document.getElementById('nav-' + tabId);
     if(navBtn) navBtn.classList.add('active');
     
-    const titles = { 'inbox': 'Buzón de Entrada', 'squad': 'Plantilla del Primer Equipo', 'tactics': 'Pizarra Táctica', 'market': 'Centro de Ojeo (Mercado)' };
+    const titles = { 'inbox': 'Buzón de Entrada', 'squad': 'Plantilla y Moral', 'tactics': 'Pizarra y Sustituciones', 'market': 'Centro de Ojeo (Mercado)' };
     document.getElementById('page-title').textContent = titles[tabId];
 
     if(tabId === 'market') filterMarket('ALL');
     if(tabId === 'tactics') renderTactics();
 }
 
-// --- ACTUALIZAR UI ---
 function updateUI() {
     if(!state.team) return;
-    
     const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
     
     document.getElementById('ui-rep').textContent = state.stats.rep;
@@ -184,48 +177,36 @@ function updateUI() {
     const shield = document.getElementById('ui-shield');
     shield.style.backgroundColor = state.team.color;
     shield.textContent = state.team.name.substring(0,3).toUpperCase();
-    
     document.getElementById('ui-teamname').textContent = state.team.name;
     document.getElementById('ui-manager').textContent = state.team.manager;
 
     renderInbox();
     renderSquad();
-    
     if(document.getElementById('tab-market').classList.contains('active')) filterMarket(currentMarketFilter);
     if(document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
 }
 
-// --- CÁLCULO TITULARES (OVR Real) ---
 function getStartingXI() {
-    // Si lineup no existe o está vacío, intentamos auto-llenarlo
-    if(!state.lineup) state.lineup = [];
-    return state.roster.filter(p => state.lineup.includes(p.id));
+    if(!state.lineup) state.lineup = [null,null,null,null,null,null,null,null,null,null,null];
+    return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p !== undefined);
 }
 
 function getTeamOvr() {
     const xi = getStartingXI();
     if(xi.length === 0) return 0;
-    
-    // El OVR del equipo se ve afectado por la moral de los jugadores titulares
     const sum = xi.reduce((acc, p) => {
-        const moralMod = 1 + ((p.morale - 50) / 200); // 100 moral = +25% stat, 0 = -25%
+        const moralMod = 1 + ((p.morale - 50) / 200); 
         return acc + (p.ovr * moralMod);
     }, 0);
     return Math.round(sum / xi.length);
 }
+function getColorByMorale(morale) { if(morale >= 80) return '#10b981'; if(morale >= 40) return '#f59e0b'; return '#ef4444'; }
 
-function getColorByMorale(morale) {
-    if(morale >= 80) return '#10b981'; // Green
-    if(morale >= 40) return '#f59e0b'; // Yellow
-    return '#ef4444'; // Red
-}
-
-// --- PLANTILLA (FOTOS Y MORAL) ---
+// --- PLANTILLA ---
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
     tbody.innerHTML = '';
     document.getElementById('squad-count').textContent = state.roster.length;
-    
     const sorted = [...state.roster].sort((a,b) => b.ovr - a.ovr);
     
     sorted.forEach(p => {
@@ -247,45 +228,51 @@ function renderSquad() {
             <td class="text-slate-300">${p.phy}</td>
         </tr>`;
     });
-
     document.getElementById('squad-ovr').textContent = getTeamOvr();
 }
 
-// --- SISTEMA DE TÁCTICAS Y CAMBIOS ---
-let selectedPlayerForSwap = null; // Guardará el ID del jugador clickeado
+// --- SISTEMA DRAG AND DROP (TÁCTICAS) ---
+let dragSrc = { id: null, slot: null };
+
+window.dragStart = function(e, pId, slotIndex) {
+    dragSrc = { id: pId, slot: slotIndex };
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => e.target.classList.add('opacity-50'), 0); // Efecto visual
+};
+window.dragEnd = function(e) {
+    e.target.classList.remove('opacity-50');
+};
+window.allowDrop = function(e) {
+    e.preventDefault();
+};
+window.dropOnPitch = function(e, targetSlotIndex) {
+    e.preventDefault();
+    if(!dragSrc.id) return;
+
+    const targetPlayerId = state.lineup[targetSlotIndex];
+
+    if (dragSrc.slot !== null) {
+        // Mover de Campo a Campo (Intercambio)
+        state.lineup[dragSrc.slot] = targetPlayerId;
+        state.lineup[targetSlotIndex] = dragSrc.id;
+    } else {
+        // Mover de Banquillo a Campo
+        state.lineup[targetSlotIndex] = dragSrc.id;
+    }
+    saveState();
+};
+window.dropOnBench = function(e) {
+    e.preventDefault();
+    if (dragSrc.slot !== null) {
+        // Mover de Campo a Banquillo (Lo quita del 11)
+        state.lineup[dragSrc.slot] = null;
+        saveState();
+    }
+};
 
 function changeFormation() {
     state.formation = document.getElementById('tactics-formation').value;
     saveState();
-    renderTactics();
-}
-
-function selectForSwap(id) {
-    if(!selectedPlayerForSwap) {
-        selectedPlayerForSwap = id;
-        renderTactics(); // Re-render to show selection highlight
-    } else {
-        if (selectedPlayerForSwap !== id) {
-            // Swap logic
-            const lineupIndex = state.lineup.indexOf(selectedPlayerForSwap);
-            const targetIndex = state.lineup.indexOf(id);
-
-            if (lineupIndex !== -1 && targetIndex === -1) {
-                // Changing Starter with Bench
-                state.lineup[lineupIndex] = id;
-            } else if (lineupIndex === -1 && targetIndex !== -1) {
-                // Changing Bench with Starter
-                state.lineup[targetIndex] = selectedPlayerForSwap;
-            } else if (lineupIndex !== -1 && targetIndex !== -1) {
-                // Swap two starters
-                state.lineup[lineupIndex] = id;
-                state.lineup[targetIndex] = selectedPlayerForSwap;
-            }
-            saveState();
-        }
-        selectedPlayerForSwap = null;
-        renderTactics();
-    }
 }
 
 function renderTactics() {
@@ -295,46 +282,48 @@ function renderTactics() {
     pitch.innerHTML = '';
     benchContainer.innerHTML = '';
 
-    // Coordenadas base
     const layouts = {
         '4-4-2': [ {x:50,y:85,c:'POR'}, {x:20,y:65,c:'DEF'},{x:40,y:70,c:'DEF'},{x:60,y:70,c:'DEF'},{x:80,y:65,c:'DEF'}, {x:20,y:35,c:'MED'},{x:40,y:40,c:'MED'},{x:60,y:40,c:'MED'},{x:80,y:35,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ],
         '4-3-3': [ {x:50,y:85,c:'POR'}, {x:20,y:70,c:'DEF'},{x:40,y:75,c:'DEF'},{x:60,y:75,c:'DEF'},{x:80,y:70,c:'DEF'}, {x:30,y:45,c:'MED'},{x:50,y:40,c:'MED'},{x:70,y:45,c:'MED'}, {x:20,y:20,c:'DEL'},{x:50,y:15,c:'DEL'},{x:80,y:20,c:'DEL'} ],
         '5-3-2': [ {x:50,y:85,c:'POR'}, {x:10,y:65,c:'DEF'},{x:30,y:75,c:'DEF'},{x:50,y:78,c:'DEF'},{x:70,y:75,c:'DEF'},{x:90,y:65,c:'DEF'}, {x:30,y:40,c:'MED'},{x:50,y:45,c:'MED'},{x:70,y:40,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ]
     };
 
-    // Asegurar que state.lineup tiene tamaño 11 (Rellenar con nulos si faltan)
     while(state.lineup.length < 11) state.lineup.push(null);
 
+    // RENDERIZAR CAMPO (Drop Zones)
     layouts[state.formation].forEach((pos, index) => {
         let color = pos.c==='POR'?'#e11d48':pos.c==='DEF'?'#d97706':pos.c==='MED'?'#16a34a':'#2563eb';
         const playerId = state.lineup[index];
         const player = state.roster.find(p => p.id === playerId);
 
+        let innerHTML = '';
         if(player) {
-            const isSel = selectedPlayerForSwap === player.id ? 'player-selected' : '';
-            pitch.innerHTML += `
-            <div class="pitch-player ${isSel}" style="left:${pos.x}%; top:${pos.y}%;" onclick="selectForSwap(${player.id})">
-                <div class="pitch-shirt" style="background-color:${color};">${player.ovr}</div>
+            innerHTML = `
+                <div class="pitch-shirt" style="background-color:${color};" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)">
+                    ${player.ovr}
+                </div>
                 <div class="pitch-name">${player.name.split(' ')[0]}</div>
-            </div>`;
+            `;
         } else {
-            pitch.innerHTML += `
-            <div class="pitch-player opacity-50" style="left:${pos.x}%; top:${pos.y}%;">
-                <div class="pitch-shirt" style="border-color:${color}; border-style:dashed; background:transparent;">+</div>
-            </div>`;
+            innerHTML = `<div class="pitch-shirt" style="border-color:${color}; border-style:dashed; background:transparent;">+</div>`;
         }
+
+        pitch.innerHTML += `
+        <div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">
+            ${innerHTML}
+        </div>`;
     });
 
-    // Render Banquillo
+    // RENDERIZAR BANQUILLO (Draggable)
     const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
     if(benchPlayers.length === 0) {
-        benchContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">Banquillo vacío.</p>';
+        benchContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">No tienes reservas.</p>';
     } else {
         benchPlayers.forEach(p => {
             let pClass = `pos-${p.pos.toLowerCase()}`;
-            const isSel = selectedPlayerForSwap === p.id ? 'selected' : '';
             benchContainer.innerHTML += `
-            <div class="bench-player flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-700 ${isSel}" onclick="selectForSwap(${p.id})">
+            <div class="bench-player flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-700" 
+                 draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
                 <div class="flex items-center gap-2">
                     <span class="pos-badge ${pClass}">${p.pos}</span>
                     <span class="text-white text-sm font-bold truncate w-24">${p.name}</span>
@@ -347,7 +336,6 @@ function renderTactics() {
 
 // --- MERCADO ---
 let currentMarketFilter = 'ALL';
-
 function filterMarket(pos) {
     currentMarketFilter = pos;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -359,6 +347,11 @@ function filterMarket(pos) {
 
     let available = PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id));
     if(pos !== 'ALL') available = available.filter(p => p.pos === pos);
+
+    if(available.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">Has vaciado esta zona del mercado.</td></tr>';
+        return;
+    }
 
     available.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
@@ -385,44 +378,33 @@ function filterMarket(pos) {
 function buyPlayer(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
     if(!p) return;
-
-    if(state.stats.rep < p.rep) return alert(`La directiva bloquea el fichaje: El club no tiene la reputación mundial necesaria (${p.rep} 🏆).`);
+    if(state.stats.rep < p.rep) return alert(`La directiva bloquea el fichaje: Reputación insuficiente (${p.rep} 🏆).`);
     
     if(curr === 'basic') {
         if(state.economy.coins < p.priceBasic) return alert("Presupuesto de traspasos insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return alert("Monedas Premium insuficientes. Compra más en la barra superior (+).");
+        if(state.economy.premium < p.pricePrem) return alert("Monedas Premium insuficientes.");
         state.economy.premium -= p.pricePrem;
     }
 
     state.roster.push(p);
-    
-    // Auto-añadir al once titular si hay hueco
+    // Auto-añadir al campo si hay hueco libre
     const emptySlot = state.lineup.findIndex(slot => slot === null);
-    if(emptySlot !== -1) {
-        state.lineup[emptySlot] = p.id;
-    }
+    if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
 
-    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso de ${p.name} (OVR: ${p.ovr}). El jugador ya está disponible en la pestaña Plantilla.`);
     saveState();
 }
 
 function buyIAP() {
-    const val = prompt("Herramienta de MVP:\n\nIntroduce cuántas monedas premium quieres añadir:", "10000");
-    if(val && !isNaN(val)) {
-        state.economy.premium += parseInt(val);
-        saveState();
-    }
+    const val = prompt("MVP DEV:\n\nMonedas premium a generar gratis:", "10000");
+    if(val && !isNaN(val)) { state.economy.premium += parseInt(val); saveState(); }
 }
 
-// --- MOTOR DE SIMULACIÓN DE PARTIDO ---
+// --- MOTOR DE PARTIDO ---
 function startMatch() {
     const xi = getStartingXI();
-    if(xi.length < 5) {
-        alert("¡Míster! Ve a Tácticas y pon al menos 5 jugadores en el once titular para poder saltar al campo.");
-        return;
-    }
+    if(xi.length < 11) return alert(`Entrenador, no podemos salir a jugar con ${xi.length} jugadores. Arrastra a 11 jugadores al campo en la pestaña "Tácticas".`);
 
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('view-match').classList.remove('hidden');
@@ -438,6 +420,7 @@ function startMatch() {
     const botOvr = Math.max(40, myOvr + (Math.floor(Math.random() * 21) - 10));
     document.getElementById('sim-away-ovr').textContent = botOvr;
     
+    document.getElementById('match-header').textContent = "SIMULANDO...";
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     
@@ -449,13 +432,7 @@ function startMatch() {
     const oppProb = 0.08 - (diff * 0.003);
 
     let mG = 0, oG = 0, time = 0;
-    
-    const commentary = [
-        "Posesión larga en el medio campo.", "Disparo potente que despeja el portero a córner.", 
-        "Falta táctica dura. Tarjeta amarilla.", "El delantero no llega al centro por milímetros.", 
-        "Corte espectacular del defensa central.", "Juego muy trabado en la medular.",
-        "El portero sale de puños y despeja el peligro.", "Falta peligrosa al borde del área que se va a las nubes."
-    ];
+    const commentary = ["Posesión larga.", "Disparo potente desviado.", "Falta táctica dura.", "Corte espectacular de la defensa.", "Juego muy trabado."];
 
     const matchInterval = setInterval(() => {
         time += 10;
@@ -464,52 +441,45 @@ function startMatch() {
             finishMatch(mG, oG); 
             return;
         }
-
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
         let rand = Math.random();
 
         if(rand < myProb) {
             mG++;
-            // Obtener el nombre de un jugador ofensivo al azar para el gol
             const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
-            const scorerName = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el equipo";
-            eventText = `<span class="text-blue-400 font-bold">¡GOLAZO! Disparo imparable de ${scorerName}. Se cae el estadio.</span>`;
+            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el equipo";
+            eventText = `<span class="text-blue-400 font-bold">¡GOLAZO! Disparo de ${scorer}.</span>`;
         } else if (rand > 1 - oppProb) {
             oG++;
-            eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Error de comunicación en la zaga local que cuesta caro.</span>`;
+            eventText = `<span class="text-red-400 font-bold">¡Gol del rival! Error defensivo.</span>`;
         }
 
         logDiv.innerHTML += `<div><strong>Min ${time}':</strong> ${eventText}</div>`;
         logDiv.scrollTop = logDiv.scrollHeight; 
-        
         document.getElementById('sim-home-score').textContent = mG;
         document.getElementById('sim-away-score').textContent = oG;
-
     }, 600); 
 }
 
 function finishMatch(mG, oG) {
     document.getElementById('match-post').classList.remove('hidden');
-    
     let coins = 0; let rep = 0; let resultText = "";
 
     if(mG > oG) {
         coins = 5000000; rep = 150; resultText = "¡Una victoria para enmarcar!";
-        // Subir moral al 11 titular
         getStartingXI().forEach(p => p.morale = Math.min(100, p.morale + 15));
     } else if (mG === oG) {
-        coins = 1500000; rep = 50; resultText = "Empate disputado. Nos faltó puntería.";
+        coins = 1500000; rep = 50; resultText = "Empate disputado.";
         getStartingXI().forEach(p => p.morale = Math.min(100, p.morale + 5));
     } else {
-        coins = 500000; rep = -10; resultText = "Derrota dolorosa. La directiva exige resultados.";
-        // Bajar moral fuertemente al perder
+        coins = 500000; rep = -10; resultText = "Derrota dolorosa.";
         getStartingXI().forEach(p => p.morale = Math.max(0, p.morale - 25));
     }
 
     state.economy.coins += coins;
     state.stats.rep = Math.max(0, state.stats.rep + rep);
     
-    addEmail('Segundo Entrenador', `Informe Post-Partido: ${mG}-${oG}`, `${resultText} Hemos ingresado €${(coins/1000000).toFixed(1)}M por taquilla. He notado un cambio en la moral de los jugadores tras este resultado, revíselo en la pestaña de Plantilla.`);
+    addEmail('Cuerpo Técnico', `Análisis: ${mG}-${oG}`, `${resultText} Ingresos: +€${(coins/1000000).toFixed(1)}M. Revisa la moral en la plantilla.`);
     saveState();
     
     document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;

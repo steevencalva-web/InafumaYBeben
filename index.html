@@ -113,7 +113,7 @@
             <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
                 <button id="nav-inbox" class="nav-btn active" onclick="switchTab('inbox')">📥 Buzón</button>
                 <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')">👥 Plantilla y Moral</button>
-                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">📋 Pizarra y Sustituciones</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">📋 Pizarra (Drag & Drop)</button>
                 <button id="nav-market" class="nav-btn" onclick="switchTab('market')">🌍 Ojeo y Mercado</button>
             </nav>
             <div class="p-4 border-t border-slate-700 bg-slate-900/50">
@@ -121,7 +121,7 @@
                 <div class="font-gaming text-blue-400 text-lg mb-3">🏆 <span id="ui-rep">1000</span></div>
                 
                 <div class="text-xs text-slate-400 mb-1">Presupuesto Traspasos</div>
-                <div class="font-mono text-green-400 text-sm mb-3">💰 <span id="ui-coins">10,000,000</span> €</div>
+                <div class="font-mono text-green-400 text-sm mb-3">💰 <span id="ui-coins">50,000,000</span> €</div>
                 
                 <div class="text-xs text-slate-400 mb-1">Monedas Premium</div>
                 <div class="font-mono text-yellow-400 text-sm flex justify-between items-center">
@@ -182,7 +182,7 @@
 
                 <div id="tab-tactics" class="fm-tab">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">Instrucciones al Equipo</h2>
+                        <h2 class="text-xl font-bold">Instrucciones y Pizarra</h2>
                         <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-sm">
                             <span class="text-slate-400 mr-2">Formación:</span>
                             <select id="tactics-formation" class="bg-slate-900 border border-slate-600 text-white p-1 rounded outline-none" onchange="changeFormation()">
@@ -194,10 +194,10 @@
                     </div>
                     
                     <div class="flex gap-6 h-[65vh]">
-                        <div class="flex-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg relative p-4 flex items-center justify-center">
-                            <div class="absolute top-2 left-2 text-xs text-slate-400">Selecciona un jugador del campo y luego uno del banquillo para intercambiarlos.</div>
+                        <div class="flex-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg relative p-4 flex flex-col items-center justify-center">
+                            <div class="absolute top-2 left-2 text-xs text-slate-400 bg-slate-900 p-2 rounded border border-slate-700 shadow z-10">💡 Mantén pulsado un jugador para <strong>arrastrarlo</strong> al campo o al banquillo.</div>
                             
-                            <div class="pitch bg-green-800 border-2 border-white/30 rounded relative w-full max-w-[600px] h-[500px]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.1) 50px, rgba(0,0,0,0.1) 100px);">
+                            <div class="pitch bg-green-800 border-2 border-white/30 rounded relative w-full max-w-[600px] h-[500px] shadow-inner" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.1) 50px, rgba(0,0,0,0.1) 100px);">
                                 <div class="absolute inset-0 border-white/30 border-2 m-4 opacity-50"></div>
                                 <div class="absolute top-1/2 left-0 w-full h-0 border-t-2 border-white/30"></div>
                                 <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/30 rounded-full"></div>
@@ -206,7 +206,8 @@
                         </div>
 
                         <div class="w-80 flex flex-col gap-4">
-                            <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden">
+                            <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden" 
+                                 ondragover="allowDrop(event)" ondrop="dropOnBench(event)">
                                 <div class="bg-slate-700 p-3 border-b border-slate-600 font-bold text-sm">Banquillo y Reservas</div>
                                 <div id="bench-list" class="flex-1 overflow-y-auto p-2 space-y-2">
                                     </div>
