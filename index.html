@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inafuma y Beben - Football Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #3b82f6;
+            --neon-green: #10b981;
+            --neon-gold: #f59e0b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-gaming { font-family: 'Orbitron', sans-serif; }
+        
+        /* Efectos Neón Gaming */
+        .glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); border: 1px solid rgba(59, 130, 246, 0.8); }
+        .glow-green { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); border: 1px solid rgba(16, 185, 129, 0.8); }
+        .glow-gold { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); border: 1px solid rgba(245, 158, 11, 0.8); }
+        
+        .btn-neon {
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .btn-neon:hover { transform: translateY(-2px); box-shadow: 0 0 20px currentColor; }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+
+        /* Ocultar secciones por defecto */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.5s ease-out; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Escudo dinamico */
+        .shield {
+            width: 40px; height: 45px;
+            clip-path: polygon(50% 0%, 100% 0, 100% 70%, 50% 100%, 0 70%, 0 0);
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: white; font-family: 'Orbitron'; cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <div id="cookie-popup" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center backdrop-blur-sm hidden">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-md w-full glow-blue text-center">
+            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Uso de Cookies</h2>
+            <p class="text-slate-300 mb-6 text-sm">Utilizamos cookies locales para guardar tu progreso, alineaciones y economía del club. Son obligatorias para jugar.</p>
+            <button onclick="acceptCookies()" class="w-full py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-500 transition">Aceptar y Entrar</button>
+        </div>
+    </div>
+
+    <div id="terms-popup" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center backdrop-blur-sm hidden">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-2xl w-full glow-blue h-[80vh] flex flex-col">
+            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Términos y Condiciones Legales</h2>
+            <div class="flex-1 overflow-y-auto pr-4 text-slate-300 text-sm space-y-4 mb-6">
+                <p><strong class="text-white">1. Aceptación:</strong> Al registrarte en Inafuma y Beben, aceptas someterte a estas reglas de juego y convivencia.</p>
+                <p><strong class="text-white">2. Economía y Monedas:</strong> Las monedas del juego y las monedas premium no tienen valor en el mundo real. Las compras de monedas premium con dinero real son finales y no reembolsables.</p>
+                <p><strong class="text-white">3. Cuenta:</strong> Eres responsable de mantener la confidencialidad de tu contraseña. El robo de cuentas por compartir credenciales no será compensado.</p>
+                <p><strong class="text-white">4. Fair Play:</strong> El uso de bots externos, scripts o explotación de bugs para alterar la simulación de partidos resultará en el baneo permanente del club y la pérdida del ELO/Reputación.</p>
+                <p><strong class="text-white">5. Privacidad:</strong> Tus datos de correo electrónico se almacenan encriptados y no se venderán a terceros bajo ninguna circunstancia según la RGPD.</p>
+            </div>
+            <button onclick="closeTerms()" class="w-full py-3 border border-blue-500 text-blue-400 rounded font-bold hover:bg-blue-900/30 transition">Cerrar Documento</button>
+        </div>
+    </div>
+
+    <div id="store-popup" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center backdrop-blur-sm hidden">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-4xl w-full glow-gold">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-gaming text-yellow-400">Tienda Premium</h2>
+                <button onclick="closeStore()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <p class="text-slate-300 mb-6">Adquiere Monedas Premium para fichar a las superestrellas del mercado mundial.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600 hover:border-yellow-400 transition cursor-pointer" onclick="buyPremium(100, 5)">
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">100 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-blue-600 rounded py-2 mt-4">5,00 €</div>
+                </div>
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600 hover:border-yellow-400 transition cursor-pointer" onclick="buyPremium(250, 10)">
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">250 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-blue-600 rounded py-2 mt-4">10,00 €</div>
+                </div>
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600 hover:border-yellow-400 transition cursor-pointer glow-gold relative" onclick="buyPremium(600, 20)">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">POPULAR</div>
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">600 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-blue-600 rounded py-2 mt-4">20,00 €</div>
+                </div>
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600 hover:border-yellow-400 transition cursor-pointer" onclick="buyPremium(1600, 50)">
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">1.600 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-blue-600 rounded py-2 mt-4">50,00 €</div>
+                </div>
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600 hover:border-yellow-400 transition cursor-pointer" onclick="buyPremium(3500, 100)">
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">3.500 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-blue-600 rounded py-2 mt-4">100,00 €</div>
+                </div>
+                <div class="bg-slate-700 p-4 rounded-lg text-center border border-yellow-500 transition cursor-pointer" style="background: linear-gradient(45deg, #1e293b, #451a03);" onclick="buyPremium(8000, 200)">
+                    <div class="text-yellow-400 text-3xl mb-2 font-gaming">8.000 <span class="text-sm">🪙</span></div>
+                    <div class="text-white font-bold bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded py-2 mt-4">200,00 €</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="match-popup" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center backdrop-blur-md hidden">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-lg w-full text-center border border-slate-600">
+            <h2 class="text-3xl font-gaming text-white mb-2">DÍA DE PARTIDO</h2>
+            <div class="flex justify-between items-center my-8">
+                <div class="w-1/3 text-right">
+                    <h3 id="match-my-team" class="text-xl font-bold text-blue-400">Mi Equipo</h3>
+                    <p class="text-sm text-slate-400">Media: <span id="match-my-ovr">0</span></p>
+                </div>
+                <div class="w-1/3 text-4xl font-gaming text-white" id="match-score">VS</div>
+                <div class="w-1/3 text-left">
+                    <h3 id="match-opp-team" class="text-xl font-bold text-red-400">Rival FC</h3>
+                    <p class="text-sm text-slate-400">Media: <span id="match-opp-ovr">0</span></p>
+                </div>
+            </div>
+            <div id="match-log" class="bg-slate-900 h-32 overflow-y-auto p-4 text-left text-sm font-mono text-slate-300 mb-6 rounded border border-slate-700">
+                Iniciando simulación...
+            </div>
+            <div id="match-result-actions" class="hidden">
+                <h3 id="match-result-title" class="text-2xl font-bold mb-4">¡VICTORIA!</h3>
+                <p id="match-rewards" class="text-green-400 mb-6">+50,000 💰 | +25 Reputación 🏆</p>
+                <button onclick="closeMatch()" class="px-8 py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-500 transition">Volver al Club</button>
+            </div>
+        </div>
+    </div>
+
+    <header id="main-header" class="bg-slate-900 border-b border-slate-800 p-4 hidden">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-xl font-gaming text-white tracking-wider">
+                INAFUMA <span class="text-blue-500">&</span> BEBEN
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4 text-sm bg-slate-800 py-2 px-4 rounded-full border border-slate-700">
+                    <div class="flex items-center gap-2" title="Reputación (ELO)">
+                        <span class="text-xl">🏆</span> <span id="ui-rep" class="font-bold text-white font-gaming">0</span>
+                    </div>
+                    <div class="w-px h-6 bg-slate-600"></div>
+                    <div class="flex items-center gap-2" title="Monedas del Club">
+                        <span class="text-xl">💰</span> <span id="ui-basic" class="font-bold text-green-400 font-gaming">10M</span>
+                    </div>
+                    <div class="w-px h-6 bg-slate-600"></div>
+                    <div class="flex items-center gap-2" title="Monedas Premium">
+                        <span class="text-xl">🪙</span> <span id="ui-premium" class="font-bold text-yellow-400 font-gaming">0</span>
+                        <button onclick="openStore()" class="ml-1 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold pb-0.5 shadow-[0_0_8px_rgba(245,158,11,0.5)] transition">+</button>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <div id="ui-shield" class="shield bg-blue-600 hover:scale-105 transition shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                    <div class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-xl border border-slate-700 hidden group-hover:block z-50">
+                        <div class="px-4 py-3 border-b border-slate-700">
+                            <p class="text-sm text-white font-bold" id="dropdown-team-name">Club</p>
+                            <p class="text-xs text-slate-400" id="dropdown-user-name">@user</p>
+                        </div>
+                        <a href="#" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white">Ajustes</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-red-400 hover:bg-slate-700 hover:text-red-300">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="view-landing" class="view-section flex-1 flex items-center justify-center active bg-[url('https://images.unsplash.com/photo-1518605368461-1e12d53787b4?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center">
+        <div class="absolute inset-0 bg-slate-900/80"></div> <div class="relative z-10 bg-slate-800/90 p-8 rounded-2xl max-w-md w-full border border-slate-700 glow-blue backdrop-blur-sm m-4">
+            <h1 class="text-4xl font-gaming text-center text-white mb-2">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
+            <p class="text-center text-slate-400 mb-8 text-sm">El Manager de Fútbol Definitivo</p>
+            
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="reg-user" placeholder="Nombre de Usuario" required class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                <input type="email" id="reg-email" placeholder="Correo Electrónico" required class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                <input type="password" id="reg-pass" placeholder="Contraseña" required class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                
+                <div class="flex items-start gap-2 mt-4">
+                    <input type="checkbox" id="reg-terms" required class="mt-1">
+                    <label for="reg-terms" class="text-xs text-slate-400">He leído y acepto los <a href="#" onclick="openTerms()" class="text-blue-400 hover:underline">Términos y Condiciones</a>.</label>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-3 rounded-lg mt-6 shadow-[0_0_15px_rgba(59,130,246,0.4)] transition">Crear Cuenta / Entrar</button>
+            </form>
+        </div>
+    </main>
+
+    <main id="view-setup" class="view-section flex-1 container mx-auto p-4 flex items-center justify-center">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-lg w-full border border-slate-700 glow-green">
+            <h2 class="text-3xl font-gaming text-center text-white mb-6">Funda tu Club</h2>
+            <form id="setup-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Nombre del Equipo</label>
+                    <input type="text" id="setup-team" placeholder="Ej: Real Beben FC" required class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:border-green-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Nombre del Entrenador</label>
+                    <input type="text" id="setup-manager" placeholder="Tu nombre" required class="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:border-green-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Color Principal del Escudo</label>
+                    <div class="flex gap-4 justify-center">
+                        <input type="radio" name="color" value="#ef4444" class="w-8 h-8 accent-red-500 cursor-pointer" style="background-color: #ef4444; appearance: none; border-radius: 50%;" checked>
+                        <input type="radio" name="color" value="#3b82f6" class="w-8 h-8 accent-blue-500 cursor-pointer" style="background-color: #3b82f6; appearance: none; border-radius: 50%;">
+                        <input type="radio" name="color" value="#10b981" class="w-8 h-8 accent-green-500 cursor-pointer" style="background-color: #10b981; appearance: none; border-radius: 50%;">
+                        <input type="radio" name="color" value="#f59e0b" class="w-8 h-8 accent-yellow-500 cursor-pointer" style="background-color: #f59e0b; appearance: none; border-radius: 50%;">
+                        <input type="radio" name="color" value="#a855f7" class="w-8 h-8 accent-purple-500 cursor-pointer" style="background-color: #a855f7; appearance: none; border-radius: 50%;">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-gaming py-3 rounded-lg mt-6 shadow-[0_0_15px_rgba(16,185,129,0.4)] transition">Firmar Contrato</button>
+            </form>
+        </div>
+    </main>
+
+    <main id="view-dashboard" class="view-section flex-1 container mx-auto p-4 pt-8">
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <aside class="lg:w-1/4 space-y-6">
+                <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-blue-900/50 to-transparent"></div>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="Manager" class="w-24 h-24 mx-auto rounded-full border-4 border-slate-700 bg-slate-900 relative z-10 mb-4">
+                    <h3 id="dash-manager" class="text-xl font-bold text-white font-gaming">Mister</h3>
+                    <p id="dash-team" class="text-blue-400 font-semibold mb-2">Equipo FC</p>
+                    <div class="bg-slate-900 rounded p-2 text-sm text-slate-300 border border-slate-700">
+                        Media Plantilla: <span id="dash-ovr" class="text-white font-bold font-gaming text-lg">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg flex-1">
+                    <h3 class="text-lg font-gaming text-white mb-4 border-b border-slate-700 pb-2">Mi Plantilla (<span id="roster-count">0</span>/11)</h3>
+                    <div id="roster-list" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                        </div>
+                </div>
+            </aside>
+
+            <section class="lg:w-3/4 flex flex-col gap-6">
+                <div class="bg-slate-800 rounded-xl p-8 border border-slate-700 shadow-lg glow-blue text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[200px]">
+                    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518605368461-1e12d53787b4?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
+                    <h2 class="text-3xl font-gaming text-white relative z-10 mb-2 shadow-black drop-shadow-md">PRÓXIMO PARTIDO</h2>
+                    <p class="text-slate-300 relative z-10 mb-6">Simula un partido de liga. Requiere al menos 1 jugador para jugar decentemente.</p>
+                    <button onclick="startMatch()" class="relative z-10 px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white font-gaming text-xl rounded-lg shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:scale-105 transition-all border border-blue-400">JUGAR PARTIDO ⚽</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-green-500 transition-colors group cursor-pointer" onclick="showMarket()">
+                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🛒</div>
+                        <h3 class="text-xl font-gaming text-white mb-2 group-hover:text-green-400 transition-colors">Compra / Venta</h3>
+                        <p class="text-slate-400 text-sm">Accede al mercado global. Ficha superestrellas o vende descartes.</p>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-purple-500 transition-colors group cursor-pointer" onclick="showTactics()">
+                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📋</div>
+                        <h3 class="text-xl font-gaming text-white mb-2 group-hover:text-purple-400 transition-colors">Alineación</h3>
+                        <p class="text-slate-400 text-sm">Gestiona tus jugadores, formaciones y tácticas (Próximamente).</p>
+                    </div>
+                </div>
+
+                <div id="market-section" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hidden">
+                    <div class="flex border-b border-slate-700">
+                        <button class="flex-1 py-3 text-center font-bold bg-slate-700 text-white">Mercado Global</button>
+                        <button class="flex-1 py-3 text-center font-bold text-slate-400 hover:text-white" onclick="alert('Función de venta en próximo parche.')">Mis Jugadores (Vender)</button>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                            <button class="px-4 py-1 rounded bg-blue-600 text-white text-sm font-bold">TODOS</button>
+                            <button class="px-4 py-1 rounded bg-slate-700 text-slate-300 text-sm hover:bg-slate-600">DEL</button>
+                            <button class="px-4 py-1 rounded bg-slate-700 text-slate-300 text-sm hover:bg-slate-600">MED</button>
+                            <button class="px-4 py-1 rounded bg-slate-700 text-slate-300 text-sm hover:bg-slate-600">DEF</button>
+                            <button class="px-4 py-1 rounded bg-slate-700 text-slate-300 text-sm hover:bg-slate-600">POR</button>
+                        </div>
+                        
+                        <div id="market-list" class="grid grid-cols-1 xl:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
+                            </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-auto">
+        <div class="container mx-auto text-center">
+            <p class="text-slate-500 text-sm">© 2026 Inafuma y Beben. Arquitectura MVP 1 por IA.</p>
+            <p class="mt-2"><a href="#" onclick="openTerms()" class="text-blue-500 hover:underline text-xs">Términos y Condiciones Legales</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // --- BASE DE DATOS Y ESTADO GLOBAL (Simulación Firestore/Zustand) ---
+        const DB_KEY = 'inafuma_db_v1';
+        
+        // Catálogo de jugadores del mercado (Generado algorítmicamente para el MVP)
+        const marketDatabase = [
+            { id: 1, name: "S. Aris", pos: "DEL", rating: 115, repReq: 2000, priceBasic: 80000000, pricePremium: 5000 },
+            { id: 2, name: "M. Beben", pos: "MED", rating: 110, repReq: 1500, priceBasic: 50000000, pricePremium: 3000 },
+            { id: 3, name: "J. Doe", pos: "DEL", rating: 85, repReq: 500, priceBasic: 15000000, pricePremium: 800 },
+            { id: 4, name: "P. Maldini", pos: "DEF", rating: 92, repReq: 800, priceBasic: 25000000, pricePremium: 1200 },
+            { id: 5, name: "L. Yashin", pos: "POR", rating: 95, repReq: 1000, priceBasic: 30000000, pricePremium: 1500 },
+            { id: 6, name: "A. Novato", pos: "MED", rating: 65, repReq: 0, priceBasic: 2000000, pricePremium: 100 },
+            { id: 7, name: "C. Tronco", pos: "DEF", rating: 55, repReq: 0, priceBasic: 500000, pricePremium: 50 },
+            { id: 8, name: "R. Veloz", pos: "DEL", rating: 75, repReq: 200, priceBasic: 5000000, pricePremium: 300 },
+            { id: 9, name: "G. Muro", pos: "POR", rating: 68, repReq: 50, priceBasic: 2500000, pricePremium: 150 },
+            { id: 10, name: "E. Inafuma", pos: "DEL", rating: 120, repReq: 3000, priceBasic: 120000000, pricePremium: 8000 },
+        ];
+
+        let state = {
+            user: null,
+            team: null,
+            roster: [],
+            economy: { basic: 0, premium: 0 },
+            stats: { reputation: 1000, matches: 0, wins: 0 }
+        };
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkCookies();
+            loadState();
+            routeView();
+        });
+
+        // --- SISTEMA DE PERSISTENCIA ---
+        function saveState() {
+            localStorage.setItem(DB_KEY, JSON.stringify(state));
+            updateUI();
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(DB_KEY);
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+        }
+
+        // --- NAVEGACIÓN Y RUTAS ---
+        function routeView() {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            if (!state.user) {
+                document.getElementById('view-landing').classList.add('active');
+                document.getElementById('main-header').classList.add('hidden');
+            } else if (!state.team) {
+                document.getElementById('view-setup').classList.add('active');
+                document.getElementById('main-header').classList.add('hidden');
+            } else {
+                document.getElementById('view-dashboard').classList.add('active');
+                document.getElementById('main-header').classList.remove('hidden');
+                updateUI();
+            }
+        }
+
+        // --- POPUPS & LEGAL ---
+        function checkCookies() {
+            if (!localStorage.getItem('inafuma_cookies')) {
+                document.getElementById('cookie-popup').classList.remove('hidden');
+            }
+        }
+        function acceptCookies() {
+            localStorage.setItem('inafuma_cookies', 'true');
+            document.getElementById('cookie-popup').classList.add('hidden');
+        }
+        function openTerms() { document.getElementById('terms-popup').classList.remove('hidden'); }
+        function closeTerms() { document.getElementById('terms-popup').classList.add('hidden'); }
+        function openStore() { document.getElementById('store-popup').classList.remove('hidden'); }
+        function closeStore() { document.getElementById('store-popup').classList.add('hidden'); }
+        function closeMatch() { 
+            document.getElementById('match-popup').classList.add('hidden'); 
+            document.getElementById('match-result-actions').classList.add('hidden');
+            document.getElementById('match-log').innerHTML = 'Iniciando simulación...';
+        }
+
+        // --- AUTENTICACIÓN ---
+        document.getElementById('auth-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('reg-user').value;
+            // Simulamos creación
+            state.user = { username: user, createdAt: Date.now() };
+            // Inicializar economía de cuenta nueva
+            state.economy.basic = 10000000; // 10 Millones base
+            state.economy.premium = 0;
+            state.stats.reputation = 1000; // ELO Base Métrica v3
+            
+            saveState();
+            routeView();
+        });
+
+        function logout() {
+            state.user = null;
+            state.team = null;
+            state.roster = [];
+            saveState();
+            routeView();
+        }
+
+        // --- CREACIÓN DE EQUIPO ---
+        document.getElementById('setup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const color = document.querySelector('input[name="color"]:checked').value;
+            state.team = {
+                name: document.getElementById('setup-team').value,
+                manager: document.getElementById('setup-manager').value,
+                color: color
+            };
+            saveState();
+            routeView();
+        });
+
+        // --- ACTUALIZACIÓN DE INTERFAZ REACTIVA ---
+        function updateUI() {
+            if (!state.user || !state.team) return;
+
+            // Header
+            document.getElementById('ui-rep').textContent = state.stats.reputation;
+            document.getElementById('ui-basic').textContent = formatMoney(state.economy.basic);
+            document.getElementById('ui-premium').textContent = state.economy.premium.toLocaleString();
+            
+            const shield = document.getElementById('ui-shield');
+            shield.style.backgroundColor = state.team.color;
+            shield.textContent = state.team.name.charAt(0).toUpperCase();
+            
+            document.getElementById('dropdown-team-name').textContent = state.team.name;
+            document.getElementById('dropdown-user-name').textContent = "@" + state.user.username;
+
+            // Dashboard
+            document.getElementById('dash-manager').textContent = state.team.manager;
+            document.getElementById('dash-team').textContent = state.team.name;
+            
+            // Render Roster & Calc OVR
+            renderRoster();
+            
+            // Render Market
+            renderMarket();
+        }
+
+        function formatMoney(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function getTeamOVR() {
+            if (state.roster.length === 0) return 30; // Equipo amateur si está vacío
+            const sum = state.roster.reduce((acc, p) => acc + p.rating, 0);
+            return Math.round(sum / state.roster.length);
+        }
+
+        function getPosColor(pos) {
+            switch(pos) {
+                case 'DEL': return 'bg-blue-600';
+                case 'MED': return 'bg-green-600';
+                case 'DEF': return 'bg-yellow-600';
+                case 'POR': return 'bg-orange-600';
+                default: return 'bg-slate-600';
+            }
+        }
+
+        function renderRoster() {
+            const list = document.getElementById('roster-list');
+            list.innerHTML = '';
+            document.getElementById('roster-count').textContent = state.roster.length;
+            document.getElementById('dash-ovr').textContent = getTeamOVR();
+
+            if (state.roster.length === 0) {
+                list.innerHTML = '<p class="text-slate-500 text-sm text-center py-4">Sin jugadores. Ve al mercado.</p>';
+                return;
+            }
+
+            // Ordenar por rating desc
+            const sorted = [...state.roster].sort((a,b) => b.rating - a.rating);
+
+            sorted.forEach(p => {
+                list.innerHTML += `
+                <div class="flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <span class="${getPosColor(p.pos)} text-white text-[10px] font-bold px-1.5 py-0.5 rounded">${p.pos}</span>
+                        <span class="text-white text-sm font-bold">${p.name}</span>
+                    </div>
+                    <span class="text-yellow-400 font-gaming font-bold bg-slate-800 px-2 py-0.5 rounded border border-slate-600">${p.rating}</span>
+                </div>`;
+            });
+        }
+
+        // --- SISTEMA DE MERCADO ---
+        function showMarket() {
+            const el = document.getElementById('market-section');
+            el.classList.toggle('hidden');
+        }
+
+        function showTactics() {
+            alert("Sistema de formaciones bloqueado en MVP 1. Próxima actualización.");
+        }
+
+        function renderMarket() {
+            const container = document.getElementById('market-list');
+            container.innerHTML = '';
+
+            marketDatabase.forEach(p => {
+                // Verificar si ya lo tengo
+                const isOwned = state.roster.find(rp => rp.id === p.id);
+                if (isOwned) return; // No mostrar si ya lo compré
+
+                const canAffordBasic = state.economy.basic >= p.priceBasic;
+                const canAffordPrem = state.economy.premium >= p.pricePremium;
+                const hasRep = state.stats.reputation >= p.repReq;
+
+                container.innerHTML += `
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 flex flex-col justify-between hover:border-blue-500 transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="${getPosColor(p.pos)} text-white text-xs font-bold px-2 py-0.5 rounded">${p.pos}</span>
+                                <span class="text-white font-bold text-lg">${p.name}</span>
+                            </div>
+                            <div class="text-xs text-slate-400">Req. Reputación: <span class="${hasRep ? 'text-green-400' : 'text-red-400'}">${p.repReq} 🏆</span></div>
+                        </div>
+                        <div class="text-2xl font-gaming text-yellow-400 bg-slate-800 px-3 py-1 rounded border border-yellow-500/30 glow-gold">${p.rating}</div>
+                    </div>
+                    <div class="flex gap-2 mt-auto">
+                        <button onclick="buyPlayer(${p.id}, 'basic')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-sm font-bold flex flex-col items-center transition ${!canAffordBasic || !hasRep ? 'opacity-50 cursor-not-allowed' : 'text-green-400'}">
+                            <span>Comprar</span>
+                            <span class="text-xs">💰 ${formatMoney(p.priceBasic)}</span>
+                        </button>
+                        <button onclick="buyPlayer(${p.id}, 'premium')" class="flex-1 py-2 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 border border-yellow-400 rounded text-black font-bold flex flex-col items-center transition shadow-lg ${!canAffordPrem || !hasRep ? 'opacity-50 cursor-not-allowed' : ''}">
+                            <span>Fichar</span>
+                            <span class="text-xs">🪙 ${p.pricePremium}</span>
+                        </button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function buyPlayer(id, currency) {
+            const player = marketDatabase.find(p => p.id === id);
+            if (!player) return;
+
+            if (state.stats.reputation < player.repReq) {
+                alert(`Necesitas ${player.repReq} de reputación para fichar a este jugador.`);
+                return;
+            }
+
+            if (currency === 'basic') {
+                if (state.economy.basic < player.priceBasic) return alert("Monedas del club insuficientes.");
+                state.economy.basic -= player.priceBasic;
+            } else {
+                if (state.economy.premium < player.pricePremium) {
+                    openStore();
+                    return;
+                }
+                state.economy.premium -= player.pricePremium;
+            }
+
+            state.roster.push(player);
+            saveState();
+        }
+
+        // --- SISTEMA DE COMPRAS PREMIUM ---
+        function buyPremium(amount, cost) {
+            const confirm = window.confirm(`¿Simular pago de ${cost}€ por ${amount} Monedas Premium?`);
+            if (confirm) {
+                state.economy.premium += amount;
+                saveState();
+                alert(`¡Pago simulado con éxito! Has recibido ${amount} 🪙`);
+                closeStore();
+            }
+        }
+
+        // --- MOTOR DE SIMULACIÓN DE PARTIDOS (Métrica V3 Core) ---
+        function startMatch() {
+            if (state.roster.length === 0) {
+                alert("¡Ficha al menos un jugador en el mercado antes de jugar!");
+                return;
+            }
+
+            document.getElementById('match-popup').classList.remove('hidden');
+            
+            const myOvr = getTeamOVR();
+            // Generar bot con ELO similar +- 15 puntos
+            const oppOvr = Math.max(30, myOvr + (Math.floor(Math.random() * 31) - 15));
+            
+            document.getElementById('match-my-ovr').textContent = myOvr;
+            document.getElementById('match-opp-ovr').textContent = oppOvr;
+            document.getElementById('match-my-team').textContent = state.team.name;
+            document.getElementById('match-score').textContent = "0 - 0";
+            
+            const logBox = document.getElementById('match-log');
+            logBox.innerHTML = '';
+            
+            let myScore = 0; let oppScore = 0;
+            let minute = 0;
+
+            // Diferencial para probabilidades
+            const diff = myOvr - oppOvr;
+            // Base 2% de marcar cada ciclo. Diff modifica.
+            const myProb = 0.05 + (diff * 0.002);
+            const oppProb = 0.05 - (diff * 0.002);
+
+            // Bucle de simulación visual (cada 200ms es un evento)
+            const matchInterval = setInterval(() => {
+                minute += 10;
+                if (minute > 90) {
+                    clearInterval(matchInterval);
+                    finishMatch(myScore, oppScore);
+                    return;
+                }
+
+                let eventStr = `Min ${minute}': Juego en el centro del campo...`;
+                
+                const rand = Math.random();
+                if (rand < myProb) {
+                    myScore++;
+                    eventStr = `<span class="text-blue-400 font-bold">Min ${minute}': ¡GOL DE ${state.team.name.toUpperCase()}! ⚽</span>`;
+                } else if (rand > 1 - oppProb) {
+                    oppScore++;
+                    eventStr = `<span class="text-red-400 font-bold">Min ${minute}': ¡Gol del equipo rival! ⚽</span>`;
+                } else if (Math.random() < 0.1) {
+                    eventStr = `<span class="text-yellow-500">Min ${minute}': Falta dura. Tarjeta amarilla. 🟨</span>`;
+                }
+
+                logBox.innerHTML += `<div>${eventStr}</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                document.getElementById('match-score').textContent = `${myScore} - ${oppScore}`;
+
+            }, 400); // Velocidad de simulación
+        }
+
+        function finishMatch(myGoals, oppGoals) {
+            document.getElementById('match-result-actions').classList.remove('hidden');
+            const title = document.getElementById('match-result-title');
+            const rewards = document.getElementById('match-rewards');
+            
+            state.stats.matches++;
+
+            let coinReward = 0;
+            let repReward = 0;
+
+            if (myGoals > oppGoals) {
+                title.textContent = "¡VICTORIA!";
+                title.className = "text-3xl font-gaming text-green-500 mb-4";
+                coinReward = 50000;
+                repReward = 30;
+                state.stats.wins++;
+            } else if (myGoals === oppGoals) {
+                title.textContent = "EMPATE";
+                title.className = "text-3xl font-gaming text-yellow-500 mb-4";
+                coinReward = 15000;
+                repReward = 5;
+            } else {
+                title.textContent = "DERROTA";
+                title.className = "text-3xl font-gaming text-red-500 mb-4";
+                coinReward = 2000; // Consuelo
+                repReward = -10;
+            }
+
+            state.economy.basic += coinReward;
+            state.stats.reputation = Math.max(0, state.stats.reputation + repReward);
+            
+            rewards.innerHTML = `+${coinReward.toLocaleString()} 💰 | ${repReward > 0 ? '+' : ''}${repReward} Reputación 🏆`;
+            saveState();
+        }
+
+    </script>
+</body>
+</html>
