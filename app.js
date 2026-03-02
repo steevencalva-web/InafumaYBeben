@@ -1,5 +1,8 @@
 // --- BASE DE DATOS DE JUGADORES (Con Fotos Simuladas) ---
-// Usamos avatars realistas. En un proyecto real cambiarías img por "assets/messi.jpg"
+function getAvatar(name) {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`;
+}
+
 const PLAYERS_DB = [
     // Galácticos
     { id: 101, name: "L. Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://i.pravatar.cc/150?u=messi" },
@@ -21,7 +24,7 @@ const PLAYERS_DB = [
     { id: 304, name: "D. Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://i.pravatar.cc/150?u=carvajal" },
     { id: 403, name: "U. Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://i.pravatar.cc/150?u=simon" },
 
-    // Baratos / Iniciales (Para empezar)
+    // Baratos / Iniciales
     { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://i.pravatar.cc/150?u=joselu" },
     { id: 107, name: "B. Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://i.pravatar.cc/150?u=panda" },
     { id: 108, name: "H. Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://i.pravatar.cc/150?u=duro" },
@@ -47,14 +50,13 @@ function calcPlayerOVR(p) {
 }
 PLAYERS_DB.forEach(p => { p.ovr = calcPlayerOVR(p); p.morale = 100; });
 
-// --- SISTEMA DE BASE DE DATOS LOCAL DE USUARIOS (Simula SQLite) ---
+// --- SISTEMA DE BASE DE DATOS LOCAL DE USUARIOS ---
 let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
-let state = null; // Estado del usuario logueado actualmente
+let state = null; 
 
 window.onload = () => {
     if(!localStorage.getItem('inafuma_cookies')) document.getElementById('modal-cookies').classList.remove('hidden');
     
-    // Auto-login si hay sesión activa
     const activeUserId = localStorage.getItem('inafuma_active_user');
     if(activeUserId) {
         state = UsersDB.find(u => u.auth.user === activeUserId);
@@ -65,7 +67,6 @@ window.onload = () => {
 };
 
 function saveState() { 
-    // Actualizar DB global
     const index = UsersDB.findIndex(u => u.auth.user === state.auth.user);
     if(index !== -1) UsersDB[index] = state;
     localStorage.setItem('inafuma_users_db', JSON.stringify(UsersDB));
@@ -378,6 +379,11 @@ function filterMarket(pos) {
     let available = PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id));
     if(pos !== 'ALL') available = available.filter(p => p.pos === pos);
 
+    if(available.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">Has vaciado esta zona del mercado.</td></tr>';
+        return;
+    }
+
     available.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         const canRep = state.stats.rep >= p.rep;
@@ -390,14 +396,15 @@ function filterMarket(pos) {
             <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
             <td class="font-gaming text-yellow-400 font-bold text-xl">${p.ovr}</td>
             <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">${p.rep} 🏆</td>
-            <td><button class="btn-buy basic w-full" onclick="buyPlayer(${p.id}, 'basic')">€${formatM}</button></td>
-            <td><button class="btn-buy premium w-full" onclick="buyPlayer(${p.id}, 'prem')">🪙 ${p.pricePrem}</button></td>
+            <td><button class="btn-buy basic w-full" onclick="buyPlayer(${p.id}, 'basic')">FICHAR<br>€${formatM}</button></td>
+            <td><button class="btn-buy premium w-full" onclick="buyPlayer(${p.id}, 'prem')">FICHAR<br>🪙 ${p.pricePrem}</button></td>
         </tr>`;
     });
 }
 
 function buyPlayer(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
+    if(!p) return;
     if(state.stats.rep < p.rep) return alert(`No tienes reputación mundial suficiente (${p.rep} 🏆).`);
     
     if(curr === 'basic') {
@@ -409,6 +416,10 @@ function buyPlayer(id, curr) {
     }
 
     state.roster.push(p);
+    
+    const emptySlot = state.lineup.findIndex(slot => slot === null);
+    if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
+
     addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso. La afición está eufórica.`);
     saveState(); filterMarket(currentMarketFilter);
 }
@@ -418,13 +429,14 @@ function buyIAP() {
     if(val && !isNaN(val)) { state.economy.premium += parseInt(val); saveState(); }
 }
 
-// --- MOTOR DE PARTIDO (SIMULACIÓN 3D) ---
+// --- MOTOR DE PARTIDO (SIMULACIÓN FULL SCREEN) ---
 function startMatch() {
     const xi = getStartingXI();
     if(xi.length < 11) return alert(`Faltan jugadores en el campo. Usa el botón "Mejor 11" en Tácticas.`);
 
     document.getElementById('app-layout').classList.add('hidden');
-    document.getElementById('view-match').classList.remove('hidden');
+    // CORRECCIÓN DEL ID AQUÍ
+    document.getElementById('match-modal').classList.remove('hidden');
     document.getElementById('match-post').classList.add('hidden');
     
     document.getElementById('sim-home-name').textContent = state.team.name;
@@ -511,7 +523,8 @@ function finishMatch(mG, oG) {
 }
 
 function endMatchAndReturn() {
-    document.getElementById('view-match').classList.add('hidden');
+    // CORRECCIÓN DEL ID AQUÍ TAMBIÉN
+    document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     switchTab('dash'); 
 }
