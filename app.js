@@ -656,4 +656,4 @@ window.endMatchAndReturn = function() {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     switchTab('league'); 
-}º
+}
