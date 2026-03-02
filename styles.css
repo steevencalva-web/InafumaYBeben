@@ -41,7 +41,8 @@ body {
 
 /* Botón Continuar */
 .btn-action { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; font-weight: bold; border-radius: 6px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer;}
-.btn-action:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+.btn-action:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+.btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-sell { background: linear-gradient(135deg, #b91c1c, #ef4444); color: white; font-weight: bold; border-radius: 6px; padding: 8px 12px; transition: all 0.2s; border: none; cursor: pointer; text-transform: uppercase; font-size: 12px; }
 .btn-sell:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
@@ -89,7 +90,7 @@ body {
 .pitch-player { position: absolute; transform: translate(-50%, -50%); width: 70px; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease; z-index: 10; }
 .pitch-shirt { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.6); cursor: grab; background-size: cover; background-position: center;}
 .pitch-shirt:active { cursor: grabbing; transform: scale(1.1); }
-.pitch-name { background: rgba(0,0,0,0.9); padding: 3px 8px; border-radius: 4px; font-size: 11px; margin-top: 5px; white-space: nowrap; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);}
+.pitch-name { background: rgba(0,0,0,0.9); padding: 3px 8px; border-radius: 4px; font-size: 11px; margin-top: 5px; white-space: nowrap; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); pointer-events: none;}
 .bench-player { cursor: grab; transition: all 0.2s; }
 .bench-player:hover { background-color: rgba(59, 130, 246, 0.2); border-color: var(--fm-accent); }
 .opacity-50 { opacity: 0.5; }

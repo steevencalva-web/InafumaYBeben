@@ -22,7 +22,7 @@
         <div class="absolute inset-0 bg-slate-900/85"></div>
         <div class="relative z-10 m-auto glass-panel p-10 rounded-2xl max-w-md w-full glow-blue">
             <h1 class="text-5xl font-gaming text-center text-white mb-2 tracking-wider">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
-            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.7.0</p>
+            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.8.0</p>
             
             <div class="flex mb-6 border-b border-slate-600">
                 <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold cursor-pointer">Iniciar Sesión</button>
@@ -73,7 +73,7 @@
     <div id="app-layout" class="hidden flex h-screen w-full bg-slate-900" style="background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px;">
         
         <aside class="w-64 glass-panel border-r border-slate-700 flex flex-col z-20 shadow-2xl relative">
-            <div class="p-6 border-b border-slate-700/50 text-center bg-slate-800/50">
+            <div class="p-6 border-b border-slate-700/50 text-center bg-slate-800/30">
                 <h1 class="text-xl font-gaming text-white tracking-widest leading-relaxed">INAFUMA<br><span class="text-blue-500">& BEBEN</span></h1>
             </div>
             
@@ -110,7 +110,7 @@
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <button onclick="startMatch()" class="btn-action px-6 py-2 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                    <button id="top-continue-btn" onclick="startMatch()" class="btn-action px-6 py-2.5 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                         CONTINUAR LIGA ⏭
                     </button>
 
@@ -173,12 +173,12 @@
                             <table class="fm-table league-table">
                                 <thead>
                                     <tr>
-                                        <th title="Posición">Pos</th>
+                                        <th title="Posición en la Tabla">Pos</th>
                                         <th title="Nombre del Equipo">Equipo</th>
                                         <th title="Partidos Jugados">PJ</th>
-                                        <th title="Victorias">V</th>
-                                        <th title="Empates">E</th>
-                                        <th title="Derrotas">D</th>
+                                        <th title="Victorias Obtenidas">V</th>
+                                        <th title="Empates Obtenidos">E</th>
+                                        <th title="Derrotas Obtenidas">D</th>
                                         <th title="Goles a Favor">GF</th>
                                         <th title="Goles en Contra">GC</th>
                                         <th title="Diferencia de Goles">DG</th>
@@ -273,7 +273,7 @@
                                     <tr>
                                         <th>Perfil</th>
                                         <th>Pos</th>
-                                        <th>Nombre</th>
+                                        <th>Nombre Completo</th>
                                         <th>OVR</th>
                                         <th>Moral</th>
                                         <th>PAC</th>
@@ -400,12 +400,22 @@
             </div>
         </header>
 
-        <div class="flex-1 flex items-center justify-center p-6 md:p-10 overflow-hidden">
-            <div class="w-full max-w-4xl h-full glass-panel border border-slate-600 rounded-2xl p-6 md:p-8 shadow-2xl flex flex-col">
+        <div class="flex-1 flex items-center justify-center p-6 md:p-10 overflow-hidden relative">
+            <div class="w-full max-w-4xl h-full glass-panel border border-slate-600 rounded-2xl p-6 md:p-8 shadow-2xl flex flex-col relative z-10">
                 <h3 class="font-gaming text-slate-200 border-b border-slate-600 pb-4 mb-4 text-xl tracking-widest shrink-0">RETRANSMISIÓN EN DIRECTO</h3>
                 
                 <div id="match-narrative" class="flex-1 overflow-y-auto space-y-4 font-mono text-base text-slate-300 pr-4"></div>
                 
+                <div id="match-halftime" class="mt-6 border-t border-slate-600 pt-6 hidden shrink-0 text-center">
+                    <h4 class="text-yellow-400 font-bold text-2xl mb-4">¡DESCANSO! (45')</h4>
+                    <div class="flex gap-4 justify-center mb-6">
+                        <button id="btn-animar" onclick="matchTalk('animar')" class="btn-action px-6 py-3 bg-blue-600 flex-1">Animar al Equipo</button>
+                        <button id="btn-exigir" onclick="matchTalk('exigir')" class="btn-action px-6 py-3 flex-1" style="background:linear-gradient(135deg, #b91c1c, #ef4444)">Exigir Más</button>
+                        <button onclick="goToTacticsFromMatch()" class="btn-action px-6 py-3 bg-slate-600 flex-1">Hacer Cambios (Tácticas)</button>
+                    </div>
+                    <button onclick="resumeMatch()" class="w-full btn-action py-4 text-xl tracking-widest glow-green" style="background:linear-gradient(135deg, #10b981, #059669)">COMENZAR 2ª PARTE</button>
+                </div>
+
                 <div id="match-post" class="mt-6 border-t border-slate-600 pt-6 hidden shrink-0">
                     <div class="flex justify-around mb-6">
                         <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">

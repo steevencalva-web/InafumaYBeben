@@ -18,6 +18,8 @@ const PLAYERS_DB = [
     { id: 203, name: "Pedri", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://i.pravatar.cc/150?u=pedri" },
     { id: 304, name: "D. Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://i.pravatar.cc/150?u=carvajal" },
     { id: 403, name: "U. Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://i.pravatar.cc/150?u=simon" },
+    
+    // --- ESTOS JUGADORES SE DAN AL INICIAR PARA NO TENER LA PLANTILLA VACÍA ---
     { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://i.pravatar.cc/150?u=joselu" },
     { id: 107, name: "B. Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://i.pravatar.cc/150?u=panda" },
     { id: 108, name: "H. Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://i.pravatar.cc/150?u=duro" },
@@ -60,21 +62,24 @@ function initLeague() {
 }
 
 /* =========================================================================
-   BASE DE DATOS: USUARIOS (Limpiando NaNs)
+   BASE DE DATOS: USUARIOS (Limpieza Automática de errores NaN)
    ========================================================================= */
 let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
 let state = null; 
 
-// Función para purgar NaNs de cuentas antiguas
+// LIMPIADOR DE ERRORES NaN PARA CUENTAS ANTIGUAS
 function cleanState(s) {
     if(!s.stats) s.stats = {};
-    s.stats.wins = typeof s.stats.wins === 'number' && !isNaN(s.stats.wins) ? s.stats.wins : 0;
-    s.stats.draws = typeof s.stats.draws === 'number' && !isNaN(s.stats.draws) ? s.stats.draws : 0;
-    s.stats.losses = typeof s.stats.losses === 'number' && !isNaN(s.stats.losses) ? s.stats.losses : 0;
-    s.stats.matches = typeof s.stats.matches === 'number' && !isNaN(s.stats.matches) ? s.stats.matches : 0;
-    s.stats.rep = typeof s.stats.rep === 'number' && !isNaN(s.stats.rep) ? s.stats.rep : 0;
-    if(!s.league || s.league.length === 0) { s.league = initLeague(); s.playedTeams = []; s.stats.matchday = 1; }
+    s.stats.wins = Number(s.stats.wins) || 0;
+    s.stats.draws = Number(s.stats.draws) || 0;
+    s.stats.losses = Number(s.stats.losses) || 0;
+    s.stats.matches = Number(s.stats.matches) || 0;
+    s.stats.rep = Number(s.stats.rep) || 0;
+    s.stats.matchday = Number(s.stats.matchday) || 1;
+    if(!s.league || s.league.length === 0) { s.league = initLeague(); s.playedTeams = []; }
     if(!s.flags) s.flags = { canTrain: true, canTalk: true };
+    if(!s.playedTeams) s.playedTeams = [];
+    if(!s.roster) s.roster = [];
     return s;
 }
 
@@ -147,7 +152,13 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
     state.team = { name: document.getElementById('set-team').value, manager: document.getElementById('set-manager').value, color: document.querySelector('input[name="color"]:checked').value };
     state.league = initLeague();
-    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada consta de 38 jornadas. Tiene 50M EUR de presupuesto. Fiche, gestione su 11 y llévenos a la gloria.`);
+    
+    // REGALO DEL 11 INICIAL PARA NO EMPEZAR VACÍO
+    const initialIDs = [405, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
+    state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id))));
+    state.lineup = [...initialIDs];
+
+    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada consta de 38 jornadas. Tiene 50M EUR de presupuesto. Le hemos asignado un 11 inicial básico para que pueda empezar a jugar inmediatamente.`);
     saveState(); routeView();
 });
 
@@ -350,13 +361,19 @@ window.executeTalk = function(tone) {
 }
 
 /* =========================================================================
-   PLANTILLA Y TÁCTICAS (SIN RECORTAR NOMBRES)
+   PLANTILLA (ORDENADA POR POSICIÓN CORRECTAMENTE)
    ========================================================================= */
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
     tbody.innerHTML = '';
     document.getElementById('squad-count').textContent = state.roster.length;
-    const sorted = [...state.roster].sort((a,b) => b.ovr - a.ovr);
+    
+    // ORDEN: Porteros primero, luego defensas, etc., y luego por OVR.
+    const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
+    const sorted = [...state.roster].sort((a,b) => {
+        if(posOrder[a.pos] !== posOrder[b.pos]) return posOrder[a.pos] - posOrder[b.pos];
+        return b.ovr - a.ovr;
+    });
     
     sorted.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
@@ -381,15 +398,25 @@ function renderSquad() {
     document.getElementById('squad-ovr').textContent = getTeamOvr();
 }
 
+// --- TÁCTICAS Y DRAG & DROP PERFECCIONADO ---
 let dragSrc = { id: null, slot: null };
 window.dragStart = function(e, pId, slotIndex) { dragSrc = { id: pId, slot: slotIndex }; setTimeout(() => e.target.classList.add('opacity-50'), 0); };
 window.dragEnd = function(e) { e.target.classList.remove('opacity-50'); };
 window.allowDrop = function(e) { e.preventDefault(); };
 window.dropOnPitch = function(e, targetSlotIndex) {
     e.preventDefault(); if(!dragSrc.id) return;
-    const targetPlayerId = state.lineup[targetSlotIndex];
-    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = targetPlayerId; state.lineup[targetSlotIndex] = dragSrc.id; } 
-    else { state.lineup[targetSlotIndex] = dragSrc.id; }
+    
+    const targetPlayerId = state.lineup[targetSlotIndex]; // ID del jugador que ya estaba en el campo
+    
+    if (dragSrc.slot !== null) { 
+        // Viene del campo (Intercambio campo-campo)
+        state.lineup[dragSrc.slot] = targetPlayerId; 
+        state.lineup[targetSlotIndex] = dragSrc.id; 
+    } else { 
+        // Viene del banquillo (Cambio titular-suplente)
+        state.lineup[targetSlotIndex] = dragSrc.id; 
+        // El jugador 'targetPlayerId' desaparece del lineup, por lo que el algoritmo lo devuelve al banquillo automáticamente.
+    }
     saveState(); renderTactics();
 };
 window.dropOnBench = function(e) { e.preventDefault(); if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); } };
@@ -404,16 +431,26 @@ window.autoFillLineup = function() {
     };
     const targetLayout = posMap[state.formation];
     let newLineup = new Array(11).fill(null);
-    const sortedRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr);
+    let availableRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr); // Clonar y ordenar por Media
 
-    let pools = { 'POR': sortedRoster.filter(p => p.pos === 'POR'), 'DEF': sortedRoster.filter(p => p.pos === 'DEF'), 'MED': sortedRoster.filter(p => p.pos === 'MED'), 'DEL': sortedRoster.filter(p => p.pos === 'DEL') };
-    let missing = [];
+    // Fase 1: Rellenar posiciones exactas
     for (let i = 0; i < 11; i++) {
         let neededPos = targetLayout[i];
-        if (pools[neededPos].length > 0) newLineup[i] = pools[neededPos].shift().id;
-        else missing.push(neededPos);
+        let bestPlayerIndex = availableRoster.findIndex(p => p.pos === neededPos);
+        if (bestPlayerIndex !== -1) {
+            newLineup[i] = availableRoster[bestPlayerIndex].id;
+            availableRoster.splice(bestPlayerIndex, 1); // Quitar de disponibles
+        }
     }
-    if (missing.length > 0) alert(`Faltan jugadores para: ${missing.join(', ')}`);
+
+    // Fase 2: Si faltan jugadores de una posición, meter a los que sobren de mejor media
+    for (let i = 0; i < 11; i++) {
+        if (newLineup[i] === null && availableRoster.length > 0) {
+            newLineup[i] = availableRoster[0].id;
+            availableRoster.splice(0, 1);
+        }
+    }
+
     state.lineup = newLineup; saveState(); renderTactics();
 };
 
@@ -436,6 +473,7 @@ function renderTactics() {
         const player = state.roster.find(p => p.id === playerId);
         let innerHTML = '';
         if(player) {
+            // MOSTRAR NOMBRE COMPLETO
             innerHTML = `
                 <div class="pitch-shirt" style="background-image:url(${player.img})" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)"></div>
                 <div class="pitch-name">${player.name} <span class="text-yellow-400 ml-1">${player.ovr}</span></div>
@@ -460,16 +498,14 @@ function renderTactics() {
     });
 }
 
-/* =========================================================================
-   MERCADO (COMPRA, VENTA Y LUPA)
-   ========================================================================= */
+// --- MERCADO ---
 let marketMode = 'buy';
 window.setMarketMode = function(mode) {
     marketMode = mode;
     document.getElementById('mode-buy').className = mode === 'buy' ? "text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" : "text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm";
     document.getElementById('mode-sell').className = mode === 'sell' ? "text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" : "text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
-    filterMarket();
+    filterMarket(currentMarketFilter);
 };
 
 let currentMarketFilter = 'ALL';
@@ -490,7 +526,7 @@ window.filterMarket = function(pos) {
     if(searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
 
     if(items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores que coincidan con la búsqueda.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores disponibles aquí.</td></tr>`;
         return;
     }
 
@@ -540,8 +576,9 @@ window.buyPlayer = function(id, curr) {
     state.roster.push(JSON.parse(JSON.stringify(p)));
     const emptySlot = state.lineup.findIndex(slot => slot === null);
     if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
+
     addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso.`);
-    saveState(); filterMarket();
+    saveState(); filterMarket(currentMarketFilter);
 }
 
 window.sellPlayer = function(id, sellValue) {
@@ -549,7 +586,7 @@ window.sellPlayer = function(id, sellValue) {
     state.economy.coins += sellValue;
     state.roster = state.roster.filter(p => p.id !== id);
     for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
-    saveState(); filterMarket();
+    saveState(); filterMarket(currentMarketFilter);
 }
 
 window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); }
@@ -559,20 +596,11 @@ window.confirmIAP = function() {
 }
 
 /* =========================================================================
-   SÍNTESIS DE VOZ (COMENTARISTA IA)
+   MOTOR DE PARTIDO CON PAUSA AL DESCANSO (VESTUARIO) Y CAMBIOS
    ========================================================================= */
-function speak(text) {
-    if ('speechSynthesis' in window) {
-        let msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'es-ES';
-        msg.rate = 1.1;
-        window.speechSynthesis.speak(msg);
-    }
-}
+let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0 };
+let currentOpponent = null;
 
-/* =========================================================================
-   MOTOR DE PARTIDO (LARGO Y NARRADO)
-   ========================================================================= */
 window.startMatch = function() {
     const xi = getStartingXI();
     if(xi.length < 11) return alert(`Faltan jugadores. Usa "MEJOR 11" en Tácticas.`);
@@ -586,6 +614,7 @@ window.startMatch = function() {
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('match-modal').classList.remove('hidden');
     document.getElementById('match-post').classList.add('hidden');
+    document.getElementById('match-halftime').classList.add('hidden');
     
     document.getElementById('sim-home-name').textContent = state.team.name;
     document.getElementById('sim-home-shield').style.backgroundColor = state.team.color;
@@ -596,68 +625,135 @@ window.startMatch = function() {
     document.getElementById('sim-away-name').textContent = currentOpponent.name;
     document.getElementById('sim-away-ovr').textContent = currentOpponent.ovr;
     
+    matchState = {
+        mG: 0, oG: 0, min: 0,
+        myProb: 0.08 + ((myOvr - currentOpponent.ovr) * 0.003),
+        oppProb: 0.08 - ((myOvr - currentOpponent.ovr) * 0.003),
+        interval: null, talkMod: 0
+    };
+
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     document.getElementById('match-progress').style.width = "0%";
     document.getElementById('match-narrative').innerHTML = "<div class='text-lg mb-2 text-white'>Los equipos saltan al césped. ¡Arranca el partido!</div>";
 
-    const diff = myOvr - currentOpponent.ovr;
-    const myProb = 0.08 + (diff * 0.003); 
-    const oppProb = 0.08 - (diff * 0.003);
+    runMatchLoop(45); // Corre hasta el minuto 45
+}
 
-    let mG = 0, oG = 0, min = 0;
-    const commentary = [
-        "Posesión larga buscando el hueco en la frontal del área.", 
-        "¡Disparo potente que se va rozando el palo izquierdo!", 
-        "Falta táctica en el centro del campo para frenar la contra.", 
-        "Corte espectacular del defensa, salvando una jugada clara.", 
-        "Juego muy físico en la medular, nadie regala un metro.", 
-        "Centro al área que atrapa el portero con mucha seguridad."
-    ];
+function runMatchLoop(targetMinute) {
+    const logDiv = document.getElementById('match-narrative');
+    const commentary = ["Posesión larga buscando huecos.", "Disparo potente desviado.", "Falta táctica en el centro.", "Corte espectacular de la defensa.", "Juego muy físico en la medular.", "Centro al área que atrapa el portero."];
 
-    // Narra el inicio
-    speak(`Comienza el partido entre ${state.team.name} y ${currentOpponent.name}.`);
+    matchState.interval = setInterval(() => {
+        matchState.min += 3;
+        document.getElementById('match-time').textContent = `${matchState.min}:00`;
+        document.getElementById('match-progress').style.width = `${(matchState.min/90)*100}%`;
 
-    // Intervalo de simulación larga (Tarda unos 20-30 segundos reales)
-    const matchInterval = setInterval(() => {
-        min += 3;
-        document.getElementById('match-time').textContent = `${min}:00`;
-        document.getElementById('match-progress').style.width = `${(min/90)*100}%`;
+        // CHECK DESCANSO (45')
+        if(matchState.min === 45 && targetMinute === 45) {
+            clearInterval(matchState.interval);
+            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 text-lg">45': ¡FINAL DE LA PRIMERA PARTE!</strong> Los jugadores se van al vestuario.</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            document.getElementById('match-halftime').classList.remove('hidden');
+            document.getElementById('btn-animar').disabled = false;
+            document.getElementById('btn-exigir').disabled = false;
+            return;
+        }
 
-        if(min > 90) {
-            clearInterval(matchInterval);
-            finishMatch(mG, oG); return;
+        // CHECK FINAL DE PARTIDO (90')
+        if(matchState.min >= 90) {
+            clearInterval(matchState.interval);
+            finishMatch(matchState.mG, matchState.oG); return;
         }
 
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
         let rand = Math.random();
+        
+        let activeMyProb = matchState.myProb + matchState.talkMod; // Modificador de charla
 
-        // Control de goles ajustado a la duración del bucle (3 min por tick)
-        if(rand < (myProb * 0.4)) {
-            mG++;
+        if(rand < (activeMyProb * 0.4)) {
+            matchState.mG++;
+            const xi = getStartingXI();
             const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
             const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el equipo";
             eventText = `<span class="text-blue-400 font-bold text-lg">¡GOLAZO! Disparo imparable de ${scorer}.</span>`;
-            speak(`¡Golazo de ${scorer}! ¡Qué locura de disparo!`);
-        } else if (rand > 1 - (oppProb * 0.4)) {
-            oG++;
+        } else if (rand > 1 - (matchState.oppProb * 0.4)) {
+            matchState.oG++;
             eventText = `<span class="text-red-400 font-bold text-lg">¡Gol de ${currentOpponent.name}! Error defensivo.</span>`;
-            speak(`¡Gol del equipo rival! Error garrafal en la defensa.`);
         }
 
-        const logDiv = document.getElementById('match-narrative');
-        logDiv.innerHTML += `<div><strong class="text-white">${min}':</strong> ${eventText}</div>`;
+        logDiv.innerHTML += `<div><strong class="text-white">${matchState.min}':</strong> ${eventText}</div>`;
         logDiv.scrollTop = logDiv.scrollHeight; 
-        document.getElementById('sim-home-score').textContent = mG;
-        document.getElementById('sim-away-score').textContent = oG;
-    }, 700); // 700ms por cada 3 minutos = 21 segundos de partido
+        document.getElementById('sim-home-score').textContent = matchState.mG;
+        document.getElementById('sim-away-score').textContent = matchState.oG;
+    }, 400); 
+}
+
+// LOGICA VESTUARIO MEDIO TIEMPO
+window.matchTalk = function(type) {
+    document.getElementById('btn-animar').disabled = true;
+    document.getElementById('btn-exigir').disabled = true;
+    const logDiv = document.getElementById('match-narrative');
+
+    if(type === 'animar') {
+        matchState.talkMod = 0.01; 
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2"><em>[VESTUARIO] Has animado al equipo. Parecen motivados para la 2ª parte.</em></div>`;
+    } else {
+        if(Math.random() < 0.6) {
+            matchState.talkMod = 0.02; 
+            logDiv.innerHTML += `<div class="text-green-400 mt-2"><em>[VESTUARIO] ¡Bronca monumental! Los jugadores salen a por todas.</em></div>`;
+        } else {
+            matchState.talkMod = -0.01; 
+            logDiv.innerHTML += `<div class="text-red-400 mt-2"><em>[VESTUARIO] Te has pasado con la bronca. El equipo está nervioso.</em></div>`;
+        }
+    }
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+window.goToTacticsFromMatch = function() {
+    document.getElementById('match-modal').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+    switchTab('tactics');
+    
+    // Cambiar el botón principal para poder volver
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'VOLVER AL PARTIDO ⏱';
+    topBtn.onclick = returnToMatch;
+    topBtn.className = "btn-action px-6 py-2.5 text-sm flex items-center gap-2 glow-green bg-green-600";
+}
+
+window.returnToMatch = function() {
+    document.getElementById('app-layout').classList.add('hidden');
+    document.getElementById('match-modal').classList.remove('hidden');
+    
+    // Restaurar el botón original
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'CONTINUAR LIGA ⏭';
+    topBtn.onclick = startMatch;
+    topBtn.className = "btn-action px-6 py-2.5 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]";
+}
+
+window.resumeMatch = function() {
+    document.getElementById('match-halftime').classList.add('hidden');
+    
+    // Recalcular OVR por si hubo sustituciones en Tácticas
+    const newOvr = getTeamOvr(); 
+    document.getElementById('sim-home-ovr').textContent = newOvr;
+    const diff = newOvr - currentOpponent.ovr;
+    matchState.myProb = 0.08 + (diff * 0.003); 
+
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4"><strong class="text-white text-lg">45': ¡COMIENZA LA SEGUNDA PARTE!</strong></div>`;
+    logDiv.scrollTop = logDiv.scrollHeight; 
+    
+    runMatchLoop(90); // Corre hasta el 90
 }
 
 function finishMatch(mG, oG) {
     document.getElementById('match-post').classList.remove('hidden');
     document.getElementById('match-narrative').innerHTML += `<div class="mt-4 text-yellow-400 font-bold text-2xl">¡FINAL DEL PARTIDO!</div>`;
     document.getElementById('match-narrative').scrollTop = document.getElementById('match-narrative').scrollHeight;
-    speak(`El árbitro pita el final. Resultado definitivo, ${mG} a ${oG}.`);
 
     let ptsEarned = 0; let coins = 0; let rep = 0;
 
@@ -665,7 +761,6 @@ function finishMatch(mG, oG) {
     else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; } 
     else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
 
-    // Aseguramiento anti-cuelgues
     try {
         let userLeague = state.league.find(t => t.isUser);
         if(userLeague) updateTeamStats(userLeague, mG, oG);
