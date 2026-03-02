@@ -1,5 +1,4 @@
 // --- BASE DE DATOS REAL (ESTILO FM24 / EA FC) ---
-// Atributos: PAC (Ritmo), SHO (Tiro), PAS (Pase), DEF (Defensa), PHY (Físico).
 const PLAYERS_DB = [
     // --- DELANTEROS (DEL) ---
     { id: 101, name: "L. Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000 },
@@ -31,7 +30,7 @@ const PLAYERS_DB = [
     { id: 305, name: "A. Davies", pos: "DEF", pac: 95, sho: 68, pas: 80, def: 80, phy: 78, rep: 1500, priceBasic: 35000000, pricePrem: 2800 },
     { id: 306, name: "D. Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500 },
     { id: 307, name: "P. Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 300, priceBasic: 10000000, pricePrem: 800 },
-    { id: 308, name: "H. Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150 }, // Promesa inicial
+    { id: 308, name: "H. Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150 },
 
     // --- PORTEROS (POR) ---
     { id: 401, name: "T. Courtois", pos: "POR", pac: 40, sho: 20, pas: 65, def: 95, phy: 88, rep: 4000, priceBasic: 85000000, pricePrem: 6500 },
@@ -42,7 +41,6 @@ const PLAYERS_DB = [
     { id: 406, name: "Mamardashvili", pos: "POR", pac: 42, sho: 20, pas: 70, def: 84, phy: 80, rep: 0, priceBasic: 4000000, pricePrem: 300 }
 ];
 
-// Cálculo de la Media General (OVR) ponderado por posición como en los juegos reales
 function calcPlayerOVR(p) {
     if(p.pos === 'DEL') return Math.round((p.pac*0.20) + (p.sho*0.45) + (p.phy*0.15) + (p.pas*0.20));
     if(p.pos === 'MED') return Math.round((p.pac*0.10) + (p.pas*0.45) + (p.def*0.25) + (p.phy*0.20));
@@ -51,7 +49,6 @@ function calcPlayerOVR(p) {
     return 50;
 }
 
-// Inicializar y calcular OVRs en la DB antes de jugar
 PLAYERS_DB.forEach(p => p.ovr = calcPlayerOVR(p));
 
 // --- ESTADO GLOBAL ---
@@ -113,7 +110,6 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
         manager: document.getElementById('set-manager').value, 
         color: color 
     };
-    // 10 Millones iniciales para intentar fichar tus primeros jugadores base
     state.economy = { coins: 10000000, premium: 0 };
     state.stats = { rep: 0, matches: 0 };
     
@@ -161,7 +157,7 @@ function readEmail(id) {
     if(mail) { mail.read = true; saveState(); renderInbox(); }
 }
 
-// --- SISTEMA DE PESTAÑAS (TABS) ---
+// --- NAVEGACIÓN Y TABS ---
 function switchTab(tabId) {
     document.querySelectorAll('.fm-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -179,7 +175,7 @@ function switchTab(tabId) {
     if(tabId === 'tactics') calculateTactics();
 }
 
-// --- ACTUALIZAR UI GLOBAL ---
+// --- ACTUALIZAR UI ---
 function updateUI() {
     if(!state.team) return;
     
@@ -202,17 +198,22 @@ function updateUI() {
     if(document.getElementById('tab-market').classList.contains('active')) filterMarket(currentMarketFilter);
 }
 
+// --- CÁLCULO DE MEDIA DEL EQUIPO ---
+function getTeamOvr() {
+    if(state.roster.length === 0) return 0;
+    const sum = state.roster.reduce((a, b) => a + b.ovr, 0);
+    return Math.round(sum / state.roster.length);
+}
+
 // --- PLANTILLA ---
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
     tbody.innerHTML = '';
     document.getElementById('squad-count').textContent = state.roster.length;
     
-    let sumOvr = 0;
     const sorted = [...state.roster].sort((a,b) => b.ovr - a.ovr);
     
     sorted.forEach(p => {
-        sumOvr += p.ovr;
         let pClass = `pos-${p.pos.toLowerCase()}`;
         tbody.innerHTML += `
         <tr>
@@ -228,8 +229,7 @@ function renderSquad() {
         </tr>`;
     });
 
-    const avg = state.roster.length > 0 ? Math.round(sumOvr / state.roster.length) : 0;
-    document.getElementById('squad-ovr').textContent = avg;
+    document.getElementById('squad-ovr').textContent = getTeamOvr();
 }
 
 // --- TÁCTICAS ---
@@ -265,7 +265,6 @@ function calculateTactics() {
     if(state.formation === '4-3-3') { atk*=1.2; def*=0.9; }
     if(state.formation === '5-3-2') { def*=1.3; atk*=0.8; }
     
-    // Normalizador modificado para stats más grandes (Messi, CR7...)
     const norm = (val) => Math.min(100, Math.round((val / (state.roster.length * 150 || 1)) * 100));
     
     document.getElementById('tac-atk').textContent = Math.round(atk);
@@ -284,20 +283,18 @@ let currentMarketFilter = 'ALL';
 function filterMarket(pos) {
     currentMarketFilter = pos;
     
-    document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('active');
-        if (b.id === `filter-${pos}`) b.classList.add('active');
-    });
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById(`filter-${pos}`) || document.querySelector('.filter-btn');
+    if(btn) btn.classList.add('active');
 
     const tbody = document.getElementById('market-tbody');
     tbody.innerHTML = '';
 
-    // Mostrar solo los que NO tenemos
     let available = PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id));
     if(pos !== 'ALL') available = available.filter(p => p.pos === pos);
 
     if(available.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">Has vaciado esta zona del mercado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores disponibles en esta posición.</td></tr>';
         return;
     }
 
@@ -322,7 +319,7 @@ function buyPlayer(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
     if(!p) return;
 
-    if(state.stats.rep < p.rep) return alert(`La directiva bloquea el fichaje: El club no tiene la reputación mundial necesaria (${p.rep} 🏆). Gana partidos para ser más conocido.`);
+    if(state.stats.rep < p.rep) return alert(`La directiva bloquea el fichaje: El club no tiene la reputación mundial necesaria (${p.rep} 🏆).`);
     
     if(curr === 'basic') {
         if(state.economy.coins < p.priceBasic) return alert("Presupuesto de traspasos insuficiente.");
@@ -333,42 +330,47 @@ function buyPlayer(id, curr) {
     }
 
     state.roster.push(p);
-    addEmail('Director Deportivo', `Fichaje Galáctico: ${p.name}`, `Míster, hemos cerrado el traspaso de ${p.name} (OVR: ${p.ovr}). La afición está eufórica con su llegada al ${state.team.name}.`);
+    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Míster, hemos cerrado el traspaso de ${p.name} (OVR: ${p.ovr}). La afición está eufórica con su llegada al ${state.team.name}.`);
     saveState();
 }
 
 function buyIAP() {
-    const val = prompt("Herramienta de Desarrollo (MVP):\n\nIntroduce cuántas monedas premium quieres simular comprar (Max 50000):", "10000");
+    const val = prompt("Herramienta de Desarrollo (MVP):\n\nIntroduce cuántas monedas premium quieres añadir:", "10000");
     if(val && !isNaN(val)) {
         state.economy.premium += parseInt(val);
         saveState();
     }
 }
 
-// --- MOTOR DE SIMULACIÓN DE PARTIDO ---
+// --- MOTOR DE SIMULACIÓN DE PARTIDO (CORREGIDO) ---
 function playMatch() {
     if(state.roster.length < 3) {
         alert("Segundo Entrenador: Míster, necesitamos fichar al menos a 3 jugadores del mercado para que nos dejen competir.");
         return;
     }
 
+    // Asegurarse de que las pantallas del modal estén correctas
     document.getElementById('match-modal').classList.remove('hidden');
-    document.getElementById('match-post').classList.add('hidden');
+    document.getElementById('match-post').classList.add('hidden'); // Oculta los resultados finales
     
+    // Cargar nombres y medias
     document.getElementById('sim-home-name').textContent = state.team.name;
-    const myOvr = document.getElementById('squad-ovr').textContent;
+    const myOvr = getTeamOvr(); 
     document.getElementById('sim-home-ovr').textContent = myOvr;
     
-    const botOvr = Math.max(40, parseInt(myOvr) + (Math.floor(Math.random() * 21) - 10));
+    const botOvr = Math.max(40, myOvr + (Math.floor(Math.random() * 21) - 10));
     document.getElementById('sim-away-ovr').textContent = botOvr;
     
+    // Resetear textos y marcadores
     document.getElementById('match-header').textContent = "SIMULANDO...";
-    document.getElementById('match-score').innerHTML = `<span id="sim-home-score">0</span> - <span id="sim-away-score">0</span>`;
+    document.getElementById('sim-home-score').textContent = "0";
+    document.getElementById('sim-away-score').textContent = "0";
     
     const logDiv = document.getElementById('match-narrative');
     logDiv.innerHTML = "Previa: Gran ambiente en el estadio. Arranca el encuentro.";
 
-    const diff = parseInt(myOvr) - botOvr;
+    // Probabilidades
+    const diff = myOvr - botOvr;
     const myProb = 0.08 + (diff * 0.003); 
     const oppProb = 0.08 - (diff * 0.003);
 
@@ -380,11 +382,12 @@ function playMatch() {
         "Corte espectacular del defensa central.", "Juego trabado, muchas interrupciones."
     ];
 
+    // Arrancar el reloj
     const matchInterval = setInterval(() => {
         time += 10;
         if(time > 90) {
             clearInterval(matchInterval);
-            finishMatch(mG, oG);
+            finishMatch(mG, oG); // Llama al final del partido
             return;
         }
 
@@ -400,7 +403,7 @@ function playMatch() {
         }
 
         logDiv.innerHTML += `<div><strong>Min ${time}':</strong> ${eventText}</div>`;
-        logDiv.scrollTop = logDiv.scrollHeight;
+        logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll hacia abajo
         
         document.getElementById('sim-home-score').textContent = mG;
         document.getElementById('sim-away-score').textContent = oG;
@@ -410,12 +413,12 @@ function playMatch() {
 
 function finishMatch(mG, oG) {
     document.getElementById('match-header').textContent = "FINAL DEL PARTIDO";
-    document.getElementById('match-post').classList.remove('hidden');
+    document.getElementById('match-post').classList.remove('hidden'); // Muestra los resultados
     
     let coins = 0; let rep = 0; let resultText = "";
 
     if(mG > oG) {
-        coins = 5000000; rep = 150; resultText = "¡Una victoria para enmarcar!"; // 5M por ganar para fichar a las estrellas
+        coins = 5000000; rep = 150; resultText = "¡Una victoria para enmarcar!";
     } else if (mG === oG) {
         coins = 1500000; rep = 50; resultText = "Empate disputado. Nos faltó puntería.";
     } else {
