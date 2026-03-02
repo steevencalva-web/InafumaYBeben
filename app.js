@@ -1,5 +1,4 @@
 // --- BASE DE DATOS AVANZADA (Estilo FM24) ---
-// Atributos: PAC (Ritmo), SHO (Tiro), PAS (Pase), DEF (Defensa), PHY (Físico).
 const PLAYERS_DB = [
     { id: 1, name: "E. Inafuma", pos: "DEL", pac: 98, sho: 99, pas: 85, def: 30, phy: 88, rep: 5000, priceBasic: 120000000, pricePrem: 10000 },
     { id: 2, name: "M. Beben", pos: "MED", pac: 85, sho: 88, pas: 98, def: 75, phy: 82, rep: 4000, priceBasic: 85000000, pricePrem: 8000 },
@@ -14,7 +13,6 @@ const PLAYERS_DB = [
     { id: 11, name: "D. Manco", pos: "POR", pac: 40, sho: 10, pas: 40, def: 65, phy: 70, rep: 0, priceBasic: 500000, pricePrem: 50 },
 ];
 
-// Calcula la media (OVR) visual basada en posición
 function calcPlayerOVR(p) {
     if(p.pos === 'DEL') return Math.round((p.pac*0.2) + (p.sho*0.5) + (p.phy*0.1) + (p.pas*0.2));
     if(p.pos === 'MED') return Math.round((p.pac*0.1) + (p.pas*0.5) + (p.def*0.2) + (p.phy*0.2));
@@ -23,7 +21,6 @@ function calcPlayerOVR(p) {
     return 50;
 }
 
-// Inicializar y calcular OVRs en la DB
 PLAYERS_DB.forEach(p => p.ovr = calcPlayerOVR(p));
 
 // --- ESTADO GLOBAL ---
@@ -44,7 +41,6 @@ window.onload = () => {
     }
     loadState();
     routeView();
-    // Iniciar reloj superior
     document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
@@ -67,7 +63,7 @@ function routeView() {
     } else {
         document.getElementById('app-layout').classList.remove('hidden');
         updateUI();
-        switchTab('inbox'); // Empieza siempre en el buzón (Como en FM)
+        switchTab('inbox'); // Pestaña por defecto
     }
 }
 
@@ -89,7 +85,6 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     state.economy = { coins: 10000000, premium: 0 };
     state.stats = { rep: 0, matches: 0 };
     
-    // Correo de bienvenida en el buzón
     addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la junta directiva confía en usted para llevar al ${state.team.name} a la gloria. Tiene 10M€ de presupuesto inicial. Use el mercado con inteligencia.`);
     
     saveState(); routeView();
@@ -101,7 +96,7 @@ function logout() {
     }
 }
 
-// --- BUZÓN DE NOTICIAS (INBOX) ---
+// --- BUZÓN DE NOTICIAS ---
 function addEmail(sender, subject, body) {
     const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
@@ -134,22 +129,31 @@ function readEmail(id) {
     if(mail) { mail.read = true; saveState(); renderInbox(); }
 }
 
-// --- NAVEGACIÓN Y TABS ---
+// --- SISTEMA DE PESTAÑAS (TABS) REPARADO ---
 function switchTab(tabId) {
+    // 1. Quitar activo de todos los contenidos
     document.querySelectorAll('.fm-tab').forEach(t => t.classList.remove('active'));
+    // 2. Quitar activo de los botones del sidebar
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-    event.currentTarget.classList.add('active');
+    // 3. Activar el contenedor deseado (el CSS display:block se encargará de mostrarlo)
+    const targetTab = document.getElementById('tab-' + tabId);
+    if(targetTab) targetTab.classList.add('active');
     
+    // 4. Activar el botón correspondiente
+    const navBtn = document.getElementById('nav-' + tabId);
+    if(navBtn) navBtn.classList.add('active');
+    
+    // Cambiar Título del Header
     const titles = { 'inbox': 'Buzón de Entrada', 'squad': 'Plantilla del Primer Equipo', 'tactics': 'Pizarra Táctica', 'market': 'Centro de Ojeo (Mercado)' };
     document.getElementById('page-title').textContent = titles[tabId];
 
+    // Renderizados específicos si es necesario
     if(tabId === 'market') filterMarket('ALL');
     if(tabId === 'tactics') calculateTactics();
 }
 
-// --- UI GLOBALS ---
+// --- ACTUALIZAR UI GLOBAL ---
 function updateUI() {
     if(!state.team) return;
     
@@ -168,10 +172,12 @@ function updateUI() {
 
     renderInbox();
     renderSquad();
+    
+    // Solo actualizar el mercado si estamos en esa pestaña para no gastar recursos
     if(document.getElementById('tab-market').classList.contains('active')) filterMarket(currentMarketFilter);
 }
 
-// --- SQUAD (Plantilla Table) ---
+// --- PLANTILLA ---
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
     tbody.innerHTML = '';
@@ -213,7 +219,6 @@ function calculateTactics() {
     const pitch = document.getElementById('pitch-players');
     pitch.innerHTML = '';
 
-    // Dibujar layout en la pizarra basado en CSS absolute positioning
     const layouts = {
         '4-4-2': [ {x:50,y:90,c:'POR'}, {x:20,y:70,c:'DEF'},{x:40,y:75,c:'DEF'},{x:60,y:75,c:'DEF'},{x:80,y:70,c:'DEF'}, {x:20,y:40,c:'MED'},{x:40,y:45,c:'MED'},{x:60,y:45,c:'MED'},{x:80,y:40,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ],
         '4-3-3': [ {x:50,y:90,c:'POR'}, {x:20,y:75,c:'DEF'},{x:40,y:80,c:'DEF'},{x:60,y:80,c:'DEF'},{x:80,y:75,c:'DEF'}, {x:30,y:50,c:'MED'},{x:50,y:45,c:'MED'},{x:70,y:50,c:'MED'}, {x:20,y:20,c:'DEL'},{x:50,y:15,c:'DEL'},{x:80,y:20,c:'DEL'} ],
@@ -225,7 +230,6 @@ function calculateTactics() {
         pitch.innerHTML += `<div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%; border-color:${color}">${pos.c}</div>`;
     });
 
-    // Calcular estadísticas base (Sumatorios simplificados para el MVP)
     let atk = 0, mid = 0, def = 0;
     state.roster.forEach(p => {
         if(p.pos === 'DEL') atk += p.sho + p.pac;
@@ -233,11 +237,9 @@ function calculateTactics() {
         if(p.pos === 'DEF' || p.pos === 'POR') def += p.def + p.phy;
     });
 
-    // Modificadores por formación
     if(state.formation === '4-3-3') { atk*=1.2; def*=0.9; }
     if(state.formation === '5-3-2') { def*=1.3; atk*=0.8; }
     
-    // Normalizar para barra (Max 1000 para el MVP visual)
     const norm = (val) => Math.min(100, Math.round((val / (state.roster.length * 100 || 1)) * 100));
     
     document.getElementById('tac-atk').textContent = Math.round(atk);
@@ -250,22 +252,29 @@ function calculateTactics() {
     document.getElementById('bar-def').style.width = norm(def) + '%';
 }
 
-// --- MERCADO ---
+// --- MERCADO DE FICHAJES ---
 let currentMarketFilter = 'ALL';
+
 function filterMarket(pos) {
     currentMarketFilter = pos;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    event.currentTarget?.classList.add('active');
+    
+    // Actualizar botones visualmente (Robusto, sin depender del event.target)
+    document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('active');
+        if (b.id === `filter-${pos}`) {
+            b.classList.add('active');
+        }
+    });
 
     const tbody = document.getElementById('market-tbody');
     tbody.innerHTML = '';
 
-    // Filtrar los que ya tengo
+    // Solo muestra los que NO tienes en la plantilla
     let available = PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id));
     if(pos !== 'ALL') available = available.filter(p => p.pos === pos);
 
     if(available.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores que coincidan con la búsqueda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-6">Mercado vacío o ya has fichado a todos.</td></tr>';
         return;
     }
 
@@ -280,75 +289,81 @@ function filterMarket(pos) {
             <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
             <td class="font-gaming text-yellow-400 font-bold">${p.ovr}</td>
             <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">${p.rep} 🏆</td>
-            <td><button class="btn-buy basic w-full" onclick="buy(${p.id}, 'basic')">€${formatM}</button></td>
-            <td><button class="btn-buy premium w-full" onclick="buy(${p.id}, 'prem')">🪙 ${p.pricePrem}</button></td>
+            <td><button class="btn-buy basic w-full" onclick="buyPlayer(${p.id}, 'basic')">€${formatM}</button></td>
+            <td><button class="btn-buy premium w-full" onclick="buyPlayer(${p.id}, 'prem')">🪙 ${p.pricePrem}</button></td>
         </tr>`;
     });
 }
 
-function buy(id, curr) {
+function buyPlayer(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if(state.stats.rep < p.rep) return alert("El jugador rechaza negociar: El club no tiene la reputación necesaria.");
+    if(!p) return;
+
+    if(state.stats.rep < p.rep) return alert(`El jugador rechaza negociar: El club no tiene la reputación necesaria (${p.rep} 🏆).`);
     
     if(curr === 'basic') {
         if(state.economy.coins < p.priceBasic) return alert("Presupuesto de traspasos insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return alert("Monedas premium insuficientes. Haz clic en el '+' superior.");
+        if(state.economy.premium < p.pricePrem) return alert("Monedas Premium insuficientes. Compra más en la barra superior (+).");
         state.economy.premium -= p.pricePrem;
     }
 
     state.roster.push(p);
-    addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Nos complace anunciar que las negociaciones han sido un éxito. ${p.name} (OVR: ${p.ovr}) ya se ha incorporado a la plantilla del ${state.team.name}.`);
+    addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Nos complace anunciar que las negociaciones han sido un éxito. ${p.name} (OVR: ${p.ovr}) ya se ha incorporado a la plantilla del ${state.team.name} por petición expresa de Míster ${state.team.manager}.`);
     saveState();
 }
 
 function buyIAP() {
-    const val = prompt("Tienda de Desarrollo (MVP):\n\nIntroduce cuántas monedas premium quieres generar gratis (Max 10000):", "1000");
+    const val = prompt("Menú de Desarrollo (MVP):\n\nIntroduce cuántas monedas premium quieres generar gratis:", "1000");
     if(val && !isNaN(val)) {
         state.economy.premium += parseInt(val);
         saveState();
     }
 }
 
-// --- MOTOR DE PARTIDO ---
+// --- MOTOR DE SIMULACIÓN DE PARTIDO ---
 function playMatch() {
-    if(state.roster.length < 5) return alert("Segundo Entrenador: Míster, necesitamos al menos 5 jugadores en la plantilla para poder competir dignamente.");
+    if(state.roster.length < 5) {
+        alert("Segundo Entrenador: Míster, necesitamos al menos 5 jugadores en la plantilla para poder competir dignamente.");
+        return;
+    }
 
-    document.getElementById('modal-match').classList.remove('hidden');
-    document.getElementById('match-btn-close').classList.add('hidden');
+    document.getElementById('match-modal').classList.remove('hidden');
+    document.getElementById('match-post').classList.add('hidden');
     
-    // Configuración inicial UI
-    document.getElementById('match-myteam').textContent = state.team.name;
+    document.getElementById('sim-home-name').textContent = state.team.name;
     const myOvr = document.getElementById('squad-ovr').textContent;
-    document.getElementById('match-myovr').textContent = `OVR: ${myOvr}`;
+    document.getElementById('sim-home-ovr').textContent = myOvr;
     
+    // Generar rival
     const botOvr = Math.max(30, parseInt(myOvr) + (Math.floor(Math.random() * 21) - 10));
-    document.getElementById('match-oppovr').textContent = `OVR: ${botOvr}`;
+    document.getElementById('sim-away-ovr').textContent = botOvr;
     
-    document.getElementById('match-title').textContent = "SIMULANDO...";
-    document.getElementById('match-score').textContent = "0 - 0";
-    const logDiv = document.getElementById('match-log');
-    logDiv.innerHTML = "";
+    document.getElementById('match-header').textContent = "SIMULANDO...";
+    document.getElementById('match-score').innerHTML = `<span id="sim-home-score">0</span> - <span id="sim-away-score">0</span>`;
+    
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML = "Previa: Los equipos saltan al terreno de juego.";
 
-    // Lógica matemática del motor FM simplificada
+    // Probabilidades (Matemáticas puras)
     const diff = parseInt(myOvr) - botOvr;
     const myProb = 0.08 + (diff * 0.003); 
     const oppProb = 0.08 - (diff * 0.003);
 
-    let myGoals = 0, oppGoals = 0, min = 0;
+    let mG = 0, oG = 0, time = 0;
     
     const commentary = [
-        "Juego trabado en el centro del campo.", "Disparo lejano que se va desviado.", 
-        "Corte providencial de la defensa.", "Falta táctica para evitar la contra.", 
-        "Fuera de juego por milímetros.", "El portero atrapa con seguridad."
+        "Juego trabado en el centro del campo.", "Disparo lejano que atrapa el portero.", 
+        "Corte providencial del defensa central.", "Pase filtrado que no encuentra rematador.", 
+        "Fuera de juego por milímetros.", "Saque de esquina sin peligro."
     ];
 
     const matchInterval = setInterval(() => {
-        min += 12;
-        if(min > 90) {
+        time += 15;
+        if(time > 90) {
             clearInterval(matchInterval);
-            finishMatch(myGoals, oppGoals);
+            finishMatch(mG, oG);
             return;
         }
 
@@ -356,48 +371,48 @@ function playMatch() {
         let rand = Math.random();
 
         if(rand < myProb) {
-            myGoals++;
-            eventText = `<span class="text-blue-400 font-bold">¡GOLAZO! Jugada espectacular del ${state.team.name}.</span>`;
+            mG++;
+            eventText = `<span class="text-blue-400 font-bold">¡GOLAZO! Jugada de pizarra ejecutada a la perfección por el ${state.team.name}.</span>`;
         } else if (rand > 1 - oppProb) {
-            oppGoals++;
-            eventText = `<span class="text-red-400 font-bold">Gol del rival. Error en las marcas defensivas.</span>`;
+            oG++;
+            eventText = `<span class="text-red-400 font-bold">¡Gol del rival! Error de comunicación en la zaga.</span>`;
         }
 
-        logDiv.innerHTML += `<div><strong>Min ${min}':</strong> ${eventText}</div>`;
+        logDiv.innerHTML += `<div><strong>Min ${time}':</strong> ${eventText}</div>`;
         logDiv.scrollTop = logDiv.scrollHeight;
-        document.getElementById('match-score').textContent = `${myGoals} - ${oppGoals}`;
+        
+        document.getElementById('sim-home-score').textContent = mG;
+        document.getElementById('sim-away-score').textContent = oG;
 
-    }, 500); // 0.5s por cada 12 minutos
+    }, 500); 
 }
 
 function finishMatch(mG, oG) {
-    document.getElementById('match-title').textContent = "FINAL DEL PARTIDO";
-    document.getElementById('match-btn-close').classList.remove('hidden');
+    document.getElementById('match-header').textContent = "FINAL DEL PARTIDO";
+    document.getElementById('match-post').classList.remove('hidden');
     
-    state.stats.matches++;
     let coins = 0; let rep = 0; let resultText = "";
 
     if(mG > oG) {
-        coins = 200000; rep = 50; resultText = "¡Victoria importante!";
+        coins = 200000; rep = 50; resultText = "¡Victoria incontestable!";
     } else if (mG === oG) {
-        coins = 75000; rep = 15; resultText = "Empate disputado.";
+        coins = 75000; rep = 15; resultText = "Empate muy disputado.";
     } else {
-        coins = 15000; rep = -5; resultText = "Derrota dolorosa. Hay que revisar la táctica.";
+        coins = 15000; rep = -5; resultText = "Derrota. Toca revisar los entrenamientos.";
     }
 
     state.economy.coins += coins;
     state.stats.rep = Math.max(0, state.stats.rep + rep);
     
-    // Mandar email al buzón con el resumen
-    addEmail('Segundo Entrenador', `Análisis Post-Partido: ${mG}-${oG}`, `${resultText} El equipo jugó con la formación ${state.formation}. Hemos recibido +€${(coins/1000).toFixed(0)}K por ingresos de taquilla y derechos televisivos.`);
-    
+    addEmail('Segundo Entrenador', `Post-Partido: ${mG}-${oG}`, `${resultText} Hemos ingresado +€${(coins/1000).toFixed(0)}K por entradas y publicidad. A seguir trabajando.`);
     saveState();
     
-    const rDiv = document.getElementById('match-rewards');
-    rDiv.innerHTML = `<span class="text-green-400">+€${(coins/1000).toFixed(0)}K</span> | <span class="${rep>0?'text-blue-400':'text-red-400'}">${rep>0?'+':''}${rep} Reputación</span>`;
+    document.getElementById('match-coins').textContent = `+€${(coins/1000).toFixed(0)}K`;
+    document.getElementById('match-rep').textContent = rep > 0 ? `+${rep}` : rep;
+    document.getElementById('match-rep').className = rep > 0 ? "text-blue-400 font-bold font-mono text-lg" : "text-red-400 font-bold font-mono text-lg";
 }
 
 function closeMatch() {
-    document.getElementById('modal-match').classList.add('hidden');
-    switchTab('inbox'); // Redirige al buzón para leer el informe post-partido (Como en FM)
+    document.getElementById('match-modal').classList.add('hidden');
+    switchTab('inbox'); // Al terminar el partido, vuelves al buzón a ver las noticias
 }

@@ -55,17 +55,17 @@
     <div id="app-layout" class="hidden flex h-screen w-full">
         <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col z-20 shadow-xl relative">
             <div class="p-6 border-b border-slate-700 flex items-center gap-4">
-                <div id="ui-shield" class="w-12 h-14 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-lg shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-105 transition" onclick="logout()">X</div>
+                <div id="ui-shield" class="w-12 h-14 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-lg shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-105 transition" onclick="logout()" title="Cerrar Sesión">X</div>
                 <div>
                     <h2 id="ui-teamname" class="font-bold text-white text-lg leading-tight truncate w-36">Beben FC</h2>
                     <p id="ui-manager" class="text-xs text-slate-400 truncate w-36">Manager</p>
                 </div>
             </div>
             <nav class="flex-1 py-4 flex flex-col gap-1 px-2">
-                <button class="nav-btn active" onclick="switchTab('inbox')">📥 Buzón</button>
-                <button class="nav-btn" onclick="switchTab('squad')">👥 Plantilla</button>
-                <button class="nav-btn" onclick="switchTab('tactics')">📋 Tácticas</button>
-                <button class="nav-btn" onclick="switchTab('market')">🌍 Mercado</button>
+                <button id="nav-inbox" class="nav-btn active" onclick="switchTab('inbox')">📥 Buzón</button>
+                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')">👥 Plantilla</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">📋 Tácticas</button>
+                <button id="nav-market" class="nav-btn" onclick="switchTab('market')">🌍 Mercado</button>
             </nav>
             <div class="p-4 border-t border-slate-700 bg-slate-900/50">
                 <div class="text-xs text-slate-400 mb-1">Reputación Mundial</div>
@@ -104,7 +104,7 @@
                     </div>
                 </div>
 
-                <div id="tab-squad" class="fm-tab hidden">
+                <div id="tab-squad" class="fm-tab">
                     <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden">
                         <div class="bg-slate-700 p-3 border-b border-slate-600 flex justify-between items-center">
                             <span class="font-bold">Plantilla del Primer Equipo</span>
@@ -132,7 +132,7 @@
                     </div>
                 </div>
 
-                <div id="tab-tactics" class="fm-tab hidden">
+                <div id="tab-tactics" class="fm-tab">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-6">
                             <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
@@ -168,21 +168,21 @@
                                 </div>
                             </div>
                             <div class="mt-4 p-3 bg-slate-900 rounded text-xs text-slate-400 border border-slate-700">
-                                La formación elegida y los atributos de tus jugadores determinan estos valores, clave para el simulador de partidos.
+                                La formación elegida y los atributos de tus jugadores determinan estos valores, clave para ganar en el simulador.
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="tab-market" class="fm-tab hidden">
+                <div id="tab-market" class="fm-tab">
                     <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg overflow-hidden flex flex-col h-[75vh]">
                         <div class="bg-slate-700 p-3 border-b border-slate-600 flex justify-between items-center gap-4">
                             <div class="flex gap-2">
-                                <button class="filter-btn active" onclick="filterMarket('ALL')">Todos</button>
-                                <button class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
-                                <button class="filter-btn" onclick="filterMarket('MED')">MED</button>
-                                <button class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
-                                <button class="filter-btn" onclick="filterMarket('POR')">POR</button>
+                                <button id="filter-ALL" class="filter-btn active" onclick="filterMarket('ALL')">Todos</button>
+                                <button id="filter-DEL" class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
+                                <button id="filter-MED" class="filter-btn" onclick="filterMarket('MED')">MED</button>
+                                <button id="filter-DEF" class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
+                                <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
                             </div>
                             <div class="text-sm text-yellow-400 font-bold">Ojeadores del Club</div>
                         </div>
@@ -244,7 +244,7 @@
                         <div id="match-rep" class="text-yellow-400 font-bold font-mono text-lg">+0</div>
                     </div>
                 </div>
-                <button onclick="closeMatch()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-3 rounded font-bold shadow-lg transition">CONTINUAR AL BUZÓN</button>
+                <button onclick="closeMatch()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-gaming py-3 rounded font-bold shadow-lg transition">VOLVER AL VESTUARIO</button>
             </div>
         </div>
     </div>
