@@ -62,7 +62,7 @@ let state = {
     economy: { coins: 0, premium: 0 },
     stats: { rep: 0, matches: 0 },
     roster: [],
-    lineup: [], // Array de IDs de los 11 titulares (Longitud estricta de 11)
+    lineup: [], // Array de IDs de los 11 titulares
     inbox: [],
     formation: '4-4-2'
 };
@@ -237,7 +237,7 @@ let dragSrc = { id: null, slot: null };
 window.dragStart = function(e, pId, slotIndex) {
     dragSrc = { id: pId, slot: slotIndex };
     e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => e.target.classList.add('opacity-50'), 0); // Efecto visual
+    setTimeout(() => e.target.classList.add('opacity-50'), 0); 
 };
 window.dragEnd = function(e) {
     e.target.classList.remove('opacity-50');
@@ -252,11 +252,9 @@ window.dropOnPitch = function(e, targetSlotIndex) {
     const targetPlayerId = state.lineup[targetSlotIndex];
 
     if (dragSrc.slot !== null) {
-        // Mover de Campo a Campo (Intercambio)
         state.lineup[dragSrc.slot] = targetPlayerId;
         state.lineup[targetSlotIndex] = dragSrc.id;
     } else {
-        // Mover de Banquillo a Campo
         state.lineup[targetSlotIndex] = dragSrc.id;
     }
     saveState();
@@ -264,7 +262,6 @@ window.dropOnPitch = function(e, targetSlotIndex) {
 window.dropOnBench = function(e) {
     e.preventDefault();
     if (dragSrc.slot !== null) {
-        // Mover de Campo a Banquillo (Lo quita del 11)
         state.lineup[dragSrc.slot] = null;
         saveState();
     }
@@ -290,7 +287,6 @@ function renderTactics() {
 
     while(state.lineup.length < 11) state.lineup.push(null);
 
-    // RENDERIZAR CAMPO (Drop Zones)
     layouts[state.formation].forEach((pos, index) => {
         let color = pos.c==='POR'?'#e11d48':pos.c==='DEF'?'#d97706':pos.c==='MED'?'#16a34a':'#2563eb';
         const playerId = state.lineup[index];
@@ -314,7 +310,6 @@ function renderTactics() {
         </div>`;
     });
 
-    // RENDERIZAR BANQUILLO (Draggable)
     const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
     if(benchPlayers.length === 0) {
         benchContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">No tienes reservas.</p>';
@@ -389,10 +384,12 @@ function buyPlayer(id, curr) {
     }
 
     state.roster.push(p);
+    
     // Auto-añadir al campo si hay hueco libre
     const emptySlot = state.lineup.findIndex(slot => slot === null);
     if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
 
+    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso de ${p.name} (OVR: ${p.ovr}). El jugador ya está disponible en la pestaña Plantilla.`);
     saveState();
 }
 
@@ -401,7 +398,7 @@ function buyIAP() {
     if(val && !isNaN(val)) { state.economy.premium += parseInt(val); saveState(); }
 }
 
-// --- MOTOR DE PARTIDO ---
+// --- MOTOR DE PARTIDO (CORREGIDO ERROR CONGELACIÓN) ---
 function startMatch() {
     const xi = getStartingXI();
     if(xi.length < 11) return alert(`Entrenador, no podemos salir a jugar con ${xi.length} jugadores. Arrastra a 11 jugadores al campo en la pestaña "Tácticas".`);
@@ -420,7 +417,7 @@ function startMatch() {
     const botOvr = Math.max(40, myOvr + (Math.floor(Math.random() * 21) - 10));
     document.getElementById('sim-away-ovr').textContent = botOvr;
     
-    document.getElementById('match-header').textContent = "SIMULANDO...";
+    // Reseteo directo para evitar el error anterior
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     
@@ -463,6 +460,12 @@ function startMatch() {
 
 function finishMatch(mG, oG) {
     document.getElementById('match-post').classList.remove('hidden');
+    
+    // Log de final de partido
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4 text-yellow-400 font-bold text-lg">¡FINAL DEL PARTIDO!</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+
     let coins = 0; let rep = 0; let resultText = "";
 
     if(mG > oG) {
