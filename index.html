@@ -3,18 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inafuma y Beben - FM24 Style</title>
+    <title>Inafuma y Beben - Football Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-slate-900 text-slate-100 flex flex-col h-screen overflow-hidden">
 
+    <div id="modal-cookies" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 p-8 rounded-xl max-w-md w-full glow-blue text-center">
+            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Aviso de Privacidad</h2>
+            <p class="text-slate-300 mb-6 text-sm">El motor requiere LocalStorage para guardar tu partida, tácticas y base de datos.</p>
+            <button class="w-full py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-500" onclick="acceptCookies()">Aceptar y Cargar</button>
+        </div>
+    </div>
+
     <main id="view-landing" class="view-section bg-[url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center">
         <div class="absolute inset-0 bg-slate-900/85"></div>
         <div class="relative z-10 m-auto glass-panel p-10 rounded-2xl max-w-md w-full glow-blue">
             <h1 class="text-5xl font-gaming text-center text-white mb-2 tracking-wider">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
-            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.3.0</p>
+            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.4.0</p>
             
             <div class="flex mb-6 border-b border-slate-600">
                 <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold">Iniciar Sesión</button>
@@ -73,23 +81,26 @@
                 </div>
             </div>
             
-            <nav class="flex-1 py-6 flex flex-col gap-2 px-4">
-                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')"><span class="text-xl">🏠</span> Inicio</button>
-                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')"><span class="text-xl">👥</span> Plantilla</button>
-                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')"><span class="text-xl">📋</span> Tácticas</button>
-                <button id="nav-market" class="nav-btn" onclick="switchTab('market')"><span class="text-xl">🌍</span> Mercado</button>
+            <nav class="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
+                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')"><span class="w-6 text-center">[H]</span> Inicio</button>
+                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')"><span class="w-6 text-center">[S]</span> Plantilla</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')"><span class="w-6 text-center">[T]</span> Tácticas</button>
+                <button id="nav-train" class="nav-btn" onclick="switchTab('train')"><span class="w-6 text-center">[E]</span> Entrenamientos</button>
+                <button id="nav-talk" class="nav-btn" onclick="switchTab('talk')"><span class="w-6 text-center">[C]</span> Charla Equipo</button>
+                <button id="nav-league" class="nav-btn" onclick="switchTab('league')"><span class="w-6 text-center">[L]</span> Clasificación</button>
+                <button id="nav-market" class="nav-btn" onclick="switchTab('market')"><span class="w-6 text-center">[M]</span> Mercado</button>
             </nav>
 
             <div class="p-6 border-t border-slate-700/50 bg-slate-900/80">
-                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Reputación Mundial</div>
-                <div class="font-gaming text-blue-400 text-2xl mb-4">🏆 <span id="ui-rep">1000</span></div>
+                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Reputación (REP)</div>
+                <div class="font-gaming text-blue-400 text-2xl mb-4">✦ <span id="ui-rep">1000</span></div>
                 
-                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Presupuesto Traspasos</div>
-                <div class="font-mono text-green-400 text-lg mb-4 font-bold">💰 <span id="ui-coins">50,000,000</span> €</div>
+                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Presupuesto (BASE)</div>
+                <div class="font-mono text-green-400 text-lg mb-4 font-bold">€ <span id="ui-coins">50,000,000</span></div>
                 
-                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Monedas Premium</div>
+                <div class="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wider">Moneda Pago (PREM)</div>
                 <div class="font-mono text-yellow-400 text-lg font-bold flex justify-between items-center">
-                    <span>🪙 <span id="ui-prem">0</span></span>
+                    <span>◈ <span id="ui-prem">0</span></span>
                     <button class="bg-yellow-500 hover:bg-yellow-400 text-black w-8 h-8 rounded-full font-bold text-lg flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.5)] transition hover:scale-110" onclick="buyIAP()">+</button>
                 </div>
             </div>
@@ -99,25 +110,33 @@
             <header class="h-20 glass-panel border-b border-slate-700/50 flex items-center justify-between px-8 shadow-md">
                 <h1 id="page-title" class="text-2xl font-gaming text-white uppercase tracking-widest drop-shadow-md">Panel de Control</h1>
                 <button onclick="startMatch()" class="btn-action px-10 py-3 text-lg flex items-center gap-2" style="animation: pulseGlow 2s infinite;">
-                    CONTINUAR ⏭
+                    CONTINUAR LIGA >>
                 </button>
             </header>
 
             <div class="flex-1 overflow-y-auto p-8">
                 
                 <div id="tab-dash" class="fm-tab active max-w-5xl mx-auto space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center glow-blue">
-                            <h3 class="text-slate-400 font-bold uppercase text-xs mb-2">Media del Equipo (OVR)</h3>
-                            <div class="text-6xl font-gaming text-white" id="dash-ovr-big">0</div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center glow-blue col-span-2 md:col-span-1">
+                            <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2">OVR Global</h3>
+                            <div class="text-4xl font-gaming text-white" id="dash-ovr-big">0</div>
                         </div>
-                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center">
-                            <h3 class="text-slate-400 font-bold uppercase text-xs mb-2">Partidos Jugados</h3>
-                            <div class="text-5xl font-gaming text-blue-400" id="dash-matches">0</div>
+                        <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
+                            <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2">Jugados</h3>
+                            <div class="text-4xl font-gaming text-blue-400" id="dash-matches">0</div>
                         </div>
-                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center">
-                            <h3 class="text-slate-400 font-bold uppercase text-xs mb-2">Victorias</h3>
-                            <div class="text-5xl font-gaming text-green-400" id="dash-wins">0</div>
+                        <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
+                            <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2">Victorias</h3>
+                            <div class="text-4xl font-gaming text-green-400" id="dash-wins">0</div>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
+                            <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2">Empates</h3>
+                            <div class="text-4xl font-gaming text-yellow-400" id="dash-draws">0</div>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border border-slate-600 text-center">
+                            <h3 class="text-slate-400 font-bold uppercase text-[10px] mb-2">Derrotas</h3>
+                            <div class="text-4xl font-gaming text-red-400" id="dash-losses">0</div>
                         </div>
                     </div>
                     <div class="glass-panel rounded-xl border border-slate-600 overflow-hidden flex flex-col h-[50vh]">
@@ -126,6 +145,79 @@
                             <span class="text-slate-400 font-mono" id="date-display">1 Jul 2026</span>
                         </div>
                         <div class="flex-1 overflow-y-auto p-6 space-y-4" id="inbox-list"></div>
+                    </div>
+                </div>
+
+                <div id="tab-league" class="fm-tab max-w-5xl mx-auto">
+                    <div class="glass-panel border border-slate-600 rounded-xl overflow-hidden shadow-2xl">
+                        <div class="bg-slate-800/80 p-4 border-b border-slate-600 font-bold text-lg">Clasificación - División Global</div>
+                        <div class="overflow-x-auto h-[65vh]">
+                            <table class="fm-table league-table">
+                                <thead>
+                                    <tr>
+                                        <th>Pos</th>
+                                        <th>Equipo</th>
+                                        <th>PJ</th>
+                                        <th>V</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                        <th>GF</th>
+                                        <th>GC</th>
+                                        <th>DG</th>
+                                        <th class="text-white">PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="league-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-train" class="fm-tab max-w-5xl mx-auto space-y-6">
+                    <div class="glass-panel p-6 border border-slate-600 rounded-xl">
+                        <h2 class="text-2xl font-gaming mb-2">Centro de Entrenamiento</h2>
+                        <p class="text-slate-400 text-sm">Mejora los atributos de tus jugadores. <span id="train-status" class="font-bold text-yellow-400"></span></p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-blue">
+                            <h3 class="font-bold text-xl mb-4">Entr. Ofensivo</h3>
+                            <p class="text-slate-400 text-sm mb-6">Mejora el TIRO y PASE de todos los Delanteros y Medios (+1).</p>
+                            <button onclick="executeTraining('atk')" class="btn-action w-full py-3">Entrenar Ataque</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-gold">
+                            <h3 class="font-bold text-xl mb-4">Entr. Defensivo</h3>
+                            <p class="text-slate-400 text-sm mb-6">Mejora la DEFENSA y FÍSICO de Defensas, Medios y Porteros (+1).</p>
+                            <button onclick="executeTraining('def')" class="btn-action w-full py-3">Entrenar Defensa</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-red">
+                            <h3 class="font-bold text-xl mb-4">Sesión Física</h3>
+                            <p class="text-slate-400 text-sm mb-6">Mejora RITMO y FÍSICO (+2) a toda la plantilla, pero reduce Moral (-10).</p>
+                            <button onclick="executeTraining('phy')" class="btn-action w-full py-3">Entrenamiento Físico</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-talk" class="fm-tab max-w-5xl mx-auto space-y-6">
+                    <div class="glass-panel p-6 border border-slate-600 rounded-xl">
+                        <h2 class="text-2xl font-gaming mb-2">Charla de Vestuario</h2>
+                        <p class="text-slate-400 text-sm">Gestiona la moral antes del partido. <span id="talk-status" class="font-bold text-yellow-400"></span></p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-green">
+                            <h3 class="font-bold text-xl mb-4">Tranquilizar</h3>
+                            <p class="text-slate-400 text-sm mb-6">Quita presión. +10 Moral a toda la plantilla. Gratis.</p>
+                            <button onclick="executeTalk('relax')" class="btn-action w-full py-3">Hablar con calma</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-gold">
+                            <h3 class="font-bold text-xl mb-4">Motivar (Incentivo)</h3>
+                            <p class="text-slate-400 text-sm mb-6">Promete primas. +20 Moral a todos. Coste: 500k €.</p>
+                            <button onclick="executeTalk('motivate')" class="btn-action w-full py-3">Ofrecer Prima</button>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border border-slate-600 text-center flex flex-col justify-between glow-red">
+                            <h3 class="font-bold text-xl mb-4">Exigir (Bronca)</h3>
+                            <p class="text-slate-400 text-sm mb-6">Mano dura. +25 Moral Titulares, -15 Moral Suplentes.</p>
+                            <button onclick="executeTalk('demand')" class="btn-action w-full py-3">Echar la bronca</button>
+                        </div>
                     </div>
                 </div>
 
@@ -160,14 +252,14 @@
                 <div id="tab-tactics" class="fm-tab max-w-6xl mx-auto">
                     <div class="flex justify-between items-center mb-6">
                         <div class="text-slate-400 text-sm bg-slate-800/80 p-3 rounded-lg border border-slate-700 shadow">
-                            💡 <strong class="text-white">Interactivo:</strong> Arrastra jugadores del banquillo a las posiciones del campo.
+                            [ INFO ] Arrastra jugadores del banquillo al campo para crear tu 11 titular.
                         </div>
                         <div class="flex gap-4">
-                            <button onclick="autoFillLineup()" class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white px-6 py-2 rounded-lg font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)] transition flex items-center gap-2 transform hover:scale-105">
-                                ⚡ MEJOR 11
+                            <button onclick="autoFillLineup()" class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white px-6 py-2 rounded-lg font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)] transition flex items-center gap-2 transform hover:scale-105 uppercase tracking-wider">
+                                MEJOR 11
                             </button>
                             <div class="glass-panel border border-slate-600 px-4 py-2 rounded-lg flex items-center gap-3">
-                                <span class="text-slate-400 font-bold text-sm">Formación:</span>
+                                <span class="text-slate-400 font-bold text-sm uppercase tracking-wider">Formación:</span>
                                 <select id="tactics-formation" class="bg-slate-900 border border-slate-600 text-white p-1.5 rounded outline-none font-bold" onchange="changeFormation()">
                                     <option value="4-4-2">4-4-2 Estándar</option>
                                     <option value="4-3-3">4-3-3 Ofensiva</option>
@@ -186,7 +278,6 @@
                                 <div id="pitch-players" class="absolute inset-0"></div>
                             </div>
                         </div>
-
                         <div class="w-96 flex flex-col gap-4">
                             <div class="glass-panel border border-slate-600 rounded-xl shadow-2xl flex-1 flex flex-col overflow-hidden" 
                                  ondragover="allowDrop(event)" ondrop="dropOnBench(event)">
@@ -219,7 +310,7 @@
                                         <th>OVR</th>
                                         <th>Rep. Min.</th>
                                         <th>Fichar (€)</th>
-                                        <th>Cláusula (🪙)</th>
+                                        <th>Cláusula (PREM)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="market-tbody"></tbody>
@@ -282,21 +373,13 @@
         </div>
     </div>
 
-    <div id="modal-cookies" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm hidden">
-        <div class="glass-panel p-8 rounded-xl max-w-md w-full glow-blue text-center">
-            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Aviso de Privacidad</h2>
-            <p class="text-slate-300 mb-6 text-sm">El motor de Inafuma y Beben requiere LocalStorage para guardar tu partida, tácticas y base de datos.</p>
-            <button class="w-full btn-action py-3 rounded font-bold" onclick="acceptCookies()">Aceptar y Cargar Datos</button>
-        </div>
-    </div>
-
     <div id="modal-store" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center backdrop-blur-sm hidden">
         <div class="glass-panel p-8 rounded-xl max-w-lg w-full glow-gold text-center relative">
-            <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl" onclick="document.getElementById('modal-store').classList.add('hidden')">&times;</button>
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl" onclick="document.getElementById('modal-store').classList.add('hidden')">CERRAR</button>
             <h2 class="text-2xl font-gaming text-yellow-400 mb-6">Tienda de Desarrollo</h2>
-            <p class="text-slate-300 mb-6 text-sm">Inserta la cantidad de monedas Premium que quieres generar (Función temporal para MVP).</p>
+            <p class="text-slate-300 mb-6 text-sm">Inserta la cantidad de monedas Premium que quieres generar (Función MVP).</p>
             <input type="number" id="dev-coins-input" class="input-fm mb-6 text-center text-2xl font-mono text-yellow-400" value="10000">
-            <button class="w-full btn-action py-3 rounded font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.5)]" onclick="confirmIAP()">GENERAR MONEDAS</button>
+            <button class="w-full btn-action py-3 rounded font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 text-black" onclick="confirmIAP()">GENERAR MONEDAS</button>
         </div>
     </div>
 
