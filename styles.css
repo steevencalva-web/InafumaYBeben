@@ -38,7 +38,7 @@ body {
 .nav-btn { width: 100%; text-align: left; padding: 14px 20px; color: #cbd5e1; border-radius: 8px; transition: all 0.3s; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 12px; cursor: pointer; background: transparent; border-top: none; border-right: none; border-bottom: none;}
 .nav-btn:hover { background-color: rgba(59, 130, 246, 0.15); color: white; transform: translateX(4px);}
 .nav-btn.active { background-color: var(--fm-accent); color: white; border-left-color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-.nav-icon { width: 20px; text-align: center; opacity: 0.8; font-size: 16px; }
+.nav-icon { width: 20px; text-align: center; opacity: 0.8; font-size: 16px; font-style: normal; }
 
 /* Botones */
 .btn-action { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; font-weight: bold; border-radius: 6px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; border: none; cursor: pointer;}
@@ -48,8 +48,13 @@ body {
 .btn-sell { background: linear-gradient(135deg, #b91c1c, #ef4444); color: white; font-weight: bold; border-radius: 6px; padding: 8px 12px; border: none; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: all 0.2s;}
 .btn-sell:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); transform: scale(1.05); }
 
+/* Creador de Escudos (Formas) */
+.shape-shield { clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0); }
+.shape-circle { border-radius: 50%; }
+.shape-hexagon { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
+.club-badge { display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); border: 2px solid rgba(255,255,255,0.2); }
+
 /* Tablas y Avatares */
-.clip-shield { clip-path: polygon(50% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%, 0 0); }
 .player-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fm-accent); background: #000; transition: transform 0.2s;}
 .player-avatar:hover { transform: scale(1.2); z-index: 10; }
 
@@ -64,8 +69,8 @@ body {
 .league-table td { padding: 8px 15px; font-variant-numeric: tabular-nums;}
 .league-table tr.user-row td { background: rgba(59, 130, 246, 0.25); border-top: 1px solid var(--fm-accent); border-bottom: 1px solid var(--fm-accent);}
 
-/* Posiciones con colores corregidos */
-.pos-badge { padding: 4px 0; border-radius: 4px; font-weight: 800; font-size: 10px; display: inline-block; width: 40px; text-align: center; color: white !important;}
+/* Posiciones */
+.pos-badge { padding: 4px 0; border-radius: 4px; font-weight: 800; font-size: 10px; display: inline-block; width: 40px; text-align: center; color: white !important; text-transform: uppercase;}
 .pos-del { background-color: var(--neon-blue); }
 .pos-med { background-color: var(--neon-green); }
 .pos-def { background-color: var(--neon-gold); color: black !important; }
@@ -73,10 +78,9 @@ body {
 
 /* Pizarra Táctica */
 .pitch-player { position: absolute; transform: translate(-50%, -50%); width: 75px; display: flex; flex-direction: column; align-items: center; z-index: 10; transition: all 0.3s ease; }
-.pitch-shirt { width: 46px; height: 46px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.6); cursor: grab; background-size: cover; background-color: #1e293b; position: relative;}
-.pitch-shirt:active { cursor: grabbing; transform: scale(1.1); }
+.pitch-shirt { width: 44px; height: 44px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.6); cursor: grab; background-size: cover; background-color: #1e293b; position: relative; }
 .pitch-name { background: rgba(0,0,0,0.9); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 5px; white-space: nowrap; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); pointer-events: none;}
-.pitch-ovr-tag { position: absolute; top: -6px; right: -6px; background: var(--neon-gold); color: black; font-size: 10px; padding: 1px 4px; border-radius: 4px; font-weight: 900; border: 1px solid black;}
+.pitch-ovr-tag { position: absolute; top: -8px; right: -8px; background: var(--neon-gold); color: black; font-size: 10px; padding: 1px 4px; border-radius: 4px; font-weight: 900; border: 1px solid black;}
 
 .bench-player { cursor: grab; transition: all 0.2s; }
 .bench-player:hover { background-color: rgba(59, 130, 246, 0.2); }
@@ -98,7 +102,7 @@ body {
 .btn-buy.premium { background: linear-gradient(135deg, #d97706, #fbbf24); color: black; }
 .btn-buy.premium:hover { filter: brightness(1.15); transform: scale(1.05); box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
 
-/* Barras de progreso */
+/* Barras Progress */
 .morale-bar-bg { width: 100%; height: 6px; background-color: #334155; border-radius: 3px; overflow: hidden; margin-top: 4px;}
 .morale-bar-fill { height: 100%; transition: width 0.5s ease; }
 .match-progress-bg { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-top: 15px;}
@@ -125,4 +129,6 @@ body {
 .modal-full { position: fixed; inset: 0; background: var(--fm-bg); z-index: 200; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
 .stadium-bg { background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
 
-input[type="radio"].color-picker { border: 2px solid transparent; outline: none; cursor: pointer; }
+/* Formularios de Escudo */
+.color-select { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 30px; height: 30px; background-color: transparent; border: none; cursor: pointer; padding: 0;}
+.color-select::-webkit-color-swatch { border-radius: 4px; border: 2px solid var(--fm-border); }

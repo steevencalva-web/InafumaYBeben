@@ -1,39 +1,37 @@
 /* =========================================================================
-   BASE DE DATOS: JUGADORES
+   BASE DE DATOS: JUGADORES Y AVATARES
    ========================================================================= */
 function getAvatar(name) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`; }
 
 const PLAYERS_DB = [
-    { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://i.pravatar.cc/150?u=messi" },
-    { id: 102, name: "C. Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkZdsY7pTk8W1bVJYdl__FK0pFjSWsygb5Pg&s" },
-    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://i.pravatar.cc/150?u=mbappe" },
-    { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.pravatar.cc/150?u=kdb" },
-    { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://i.pravatar.cc/150?u=vandijk" },
-    { id: 401, name: "Thibaut Courtois", pos: "POR", pac: 40, sho: 20, pas: 65, def: 95, phy: 88, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: "https://i.pravatar.cc/150?u=courtois" },
-    { id: 104, name: "Vini Jr.", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: "https://i.pravatar.cc/150?u=vini" },
-    { id: 202, name: "Jude Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: "https://i.pravatar.cc/150?u=jude" },
-    { id: 302, name: "Antonio Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: "https://i.pravatar.cc/150?u=rudiger" },
-    { id: 402, name: "Iker Gahete", pos: "POR", pac: 45, sho: 25, pas: 80, def: 92, phy: 85, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: "https://i.pravatar.cc/150?u=alisson" },
-    { id: 105, name: "A. Griezmann", pos: "DEL", pac: 80, sho: 85, pas: 88, def: 50, phy: 70, rep: 2000, priceBasic: 55000000, pricePrem: 4500, img: "https://i.pravatar.cc/150?u=grizzi" },
-    { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://i.pravatar.cc/150?u=pedri" },
-    { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://i.pravatar.cc/150?u=carvajal" },
-    { id: 403, name: "Unai Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://i.pravatar.cc/150?u=simon" },
-    
-    // Iniciales
-    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://i.pravatar.cc/150?u=joselu" },
-    { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://i.pravatar.cc/150?u=panda" },
-    { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://i.pravatar.cc/150?u=duro" },
-    { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://i.pravatar.cc/150?u=darder" },
-    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://i.pravatar.cc/150?u=isco" },
-    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: "https://i.pravatar.cc/150?u=pepelu" },
-    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: "https://i.pravatar.cc/150?u=trejo" },
-    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 0, priceBasic: 8000000, pricePrem: 600, img: "https://i.pravatar.cc/150?u=cubarsi" },
-    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: "https://i.pravatar.cc/150?u=dgarcia" },
-    { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 0, priceBasic: 2500000, pricePrem: 200, img: "https://i.pravatar.cc/150?u=maffeo" },
-    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: "https://i.pravatar.cc/150?u=navas" },
-    { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pravatar.cc/150?u=maguire" },
-    { id: 404, name: "David Soria", pos: "POR", pac: 35, sho: 10, pas: 60, def: 80, phy: 78, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://i.pravatar.cc/150?u=soria" },
-    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 42, sho: 15, pas: 68, def: 78, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pravatar.cc/150?u=gazza" }
+    { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: getAvatar("Messi") },
+    { id: 102, name: "Cristiano Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: getAvatar("C R 7") },
+    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: getAvatar("Mbappe") },
+    { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: getAvatar("De Bruyne") },
+    { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: getAvatar("V Dijk") },
+    { id: 401, name: "Thibaut Courtois", pos: "POR", pac: 40, sho: 20, pas: 65, def: 95, phy: 88, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: getAvatar("Courtois") },
+    { id: 104, name: "Vini Jr.", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: getAvatar("Vini Jr") },
+    { id: 202, name: "Jude Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: getAvatar("Bellingham") },
+    { id: 302, name: "Antonio Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("Rudiger") },
+    { id: 402, name: "Alisson Becker", pos: "POR", pac: 45, sho: 25, pas: 80, def: 92, phy: 85, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: getAvatar("Alisson") },
+    { id: 105, name: "A. Griezmann", pos: "DEL", pac: 80, sho: 85, pas: 88, def: 50, phy: 70, rep: 2000, priceBasic: 55000000, pricePrem: 4500, img: getAvatar("Griezmann") },
+    { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("Pedri") },
+    { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: getAvatar("Carvajal") },
+    { id: 403, name: "Unai Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: getAvatar("Simon") },
+    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Joselu") },
+    { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("Iglesias") },
+    { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("Duro") },
+    { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("Darder") },
+    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Isco") },
+    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: getAvatar("Pepelu") },
+    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("Trejo") },
+    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 0, priceBasic: 8000000, pricePrem: 600, img: getAvatar("Cubarsi") },
+    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: getAvatar("Garcia") },
+    { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 0, priceBasic: 2500000, pricePrem: 200, img: getAvatar("Maffeo") },
+    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("Navas") },
+    { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("Maguire") },
+    { id: 404, name: "David Soria", pos: "POR", pac: 35, sho: 10, pas: 60, def: 80, phy: 78, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("Soria") },
+    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 42, sho: 15, pas: 68, def: 78, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("Gazzaniga") }
 ];
 
 function calcPlayerOVR(p) {
@@ -45,27 +43,59 @@ function calcPlayerOVR(p) {
 }
 PLAYERS_DB.forEach(p => { p.ovr = calcPlayerOVR(p); p.morale = 100; });
 
+/* =========================================================================
+   EQUIPOS IA (CON FORMAS Y COLORES PARA EL ESCUDO)
+   ========================================================================= */
 const AI_TEAMS = [
-    { name: "Madrid Kings", ovr: 88 }, { name: "Catalunya AC", ovr: 87 }, { name: "Atletico Titan", ovr: 85 },
-    { name: "Basque Lions", ovr: 82 }, { name: "Sevilla Sur", ovr: 80 }, { name: "Valencia Bats", ovr: 78 },
-    { name: "Galicia CF", ovr: 76 }, { name: "Betis Norte", ovr: 75 }, { name: "Villarreal Sun", ovr: 74 },
-    { name: "Real Sebastian", ovr: 73 }, { name: "Celta Sky", ovr: 71 }, { name: "Mallorca Red", ovr: 70 },
-    { name: "Osasuna Bulls", ovr: 68 }, { name: "Alaves Blue", ovr: 67 }, { name: "Rayo Thunder", ovr: 66 },
-    { name: "Getafe Light", ovr: 65 }, { name: "Las Palmas FC", ovr: 64 }, { name: "Granada City", ovr: 63 },
-    { name: "Cadiz Yellows", ovr: 62 }
+    { name: "Madrid Kings", ovr: 88, c1: "#ffffff", c2: "#94a3b8", shape: "shape-shield" },
+    { name: "Catalunya AC", ovr: 87, c1: "#b91c1c", c2: "#1d4ed8", shape: "shape-shield" },
+    { name: "Atletico Titan", ovr: 85, c1: "#b91c1c", c2: "#ffffff", shape: "shape-circle" },
+    { name: "Basque Lions", ovr: 82, c1: "#dc2626", c2: "#ffffff", shape: "shape-hexagon" },
+    { name: "Sevilla Sur", ovr: 80, c1: "#ffffff", c2: "#dc2626", shape: "shape-shield" },
+    { name: "Valencia Bats", ovr: 78, c1: "#ffffff", c2: "#000000", shape: "shape-circle" },
+    { name: "Galicia CF", ovr: 76, c1: "#60a5fa", c2: "#ffffff", shape: "shape-shield" },
+    { name: "Betis Norte", ovr: 75, c1: "#16a34a", c2: "#ffffff", shape: "shape-circle" },
+    { name: "Villarreal Sun", ovr: 74, c1: "#eab308", c2: "#ca8a04", shape: "shape-shield" },
+    { name: "Real Sebastian", ovr: 73, c1: "#1d4ed8", c2: "#ffffff", shape: "shape-circle" },
+    { name: "Celta Sky", ovr: 71, c1: "#93c5fd", c2: "#ffffff", shape: "shape-shield" },
+    { name: "Mallorca Red", ovr: 70, c1: "#ef4444", c2: "#000000", shape: "shape-hexagon" },
+    { name: "Osasuna Bulls", ovr: 68, c1: "#991b1b", c2: "#1e293b", shape: "shape-shield" },
+    { name: "Alaves Blue", ovr: 67, c1: "#1e3a8a", c2: "#ffffff", shape: "shape-circle" },
+    { name: "Rayo Thunder", ovr: 66, c1: "#ffffff", c2: "#dc2626", shape: "shape-shield" },
+    { name: "Getafe Light", ovr: 65, c1: "#2563eb", c2: "#1e40af", shape: "shape-circle" },
+    { name: "Las Palmas FC", ovr: 64, c1: "#fde047", c2: "#1e293b", shape: "shape-shield" },
+    { name: "Granada City", ovr: 63, c1: "#b91c1c", c2: "#ffffff", shape: "shape-hexagon" },
+    { name: "Cadiz Yellows", ovr: 62, c1: "#facc15", c2: "#1e3a8a", shape: "shape-shield" }
 ];
 
 function initLeague() {
     let league = [{ name: state.team.name, isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
-    AI_TEAMS.forEach(ai => league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }));
+    AI_TEAMS.forEach(ai => league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
     return league;
 }
 
 /* =========================================================================
-   SISTEMA LOCAL Y LIMPIEZA DE NANs
+   SISTEMA LOCAL, ALERTAS PERSONALIZADAS Y LIMPIEZA DE DATOS (NaN)
    ========================================================================= */
 let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
 let state = null; 
+
+window.showAlert = function(msg) {
+    document.getElementById('alert-message').textContent = msg;
+    document.getElementById('custom-alert').classList.remove('hidden');
+}
+window.closeAlert = function() { document.getElementById('custom-alert').classList.add('hidden'); }
+
+let confirmCallback = null;
+window.showConfirm = function(msg, callback) {
+    document.getElementById('confirm-message').textContent = msg;
+    confirmCallback = callback;
+    document.getElementById('custom-confirm').classList.remove('hidden');
+}
+window.closeConfirm = function(result) {
+    document.getElementById('custom-confirm').classList.add('hidden');
+    if(result && confirmCallback) confirmCallback();
+}
 
 function cleanState(s) {
     if(!s.stats) s.stats = {};
@@ -80,12 +110,14 @@ function cleanState(s) {
     
     if(!s.league || s.league.length === 0) { 
         s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
-        AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }));
+        AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
     }
     if(!s.flags) s.flags = { canTrain: true, canTalk: true };
-    if(!s.playedTeams) s.playedTeams = [];
+    if(!s.playedTeams) s.playedTeams = []; 
     if(!s.roster) s.roster = [];
     if(!s.lineup || s.lineup.length !== 11) s.lineup = new Array(11).fill(null);
+    
+    if(s.team && !s.team.shape) { s.team.shape = "shape-shield"; s.team.c1 = s.team.color || "#2563eb"; s.team.c2 = "#1e293b"; }
     return s;
 }
 
@@ -101,6 +133,7 @@ window.onload = () => {
 };
 
 function saveState() { 
+    if(!state) return;
     const index = UsersDB.findIndex(u => u.auth.user === state.auth.user);
     if(index !== -1) UsersDB[index] = state;
     localStorage.setItem('inafuma_users_db', JSON.stringify(UsersDB));
@@ -127,7 +160,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('reg-user').value;
     const pass = document.getElementById('reg-pass').value;
-    if(UsersDB.find(u => u.auth.user === user)) return alert("El usuario ya existe.");
+    if(UsersDB.find(u => u.auth.user === user)) return showAlert("El usuario ya existe.");
     
     state = cleanState({
         auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 },
@@ -149,20 +182,41 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
         state = cleanState(foundUser);
         localStorage.setItem('inafuma_active_user', user);
         routeView();
-    } else alert("Credenciales incorrectas.");
+    } else showAlert("Credenciales incorrectas.");
 });
+
+// Creador Visual de Escudos (Funda tu club)
+window.updatePreviewBadge = function() {
+    const shape = document.getElementById('set-shape').value;
+    const c1 = document.getElementById('set-c1').value;
+    const c2 = document.getElementById('set-c2').value;
+    const badge = document.getElementById('preview-badge');
+    const teamName = document.getElementById('set-team').value || "BEB";
+    
+    badge.className = `w-16 h-20 club-badge text-xs ${shape}`;
+    badge.style.background = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
+    badge.textContent = teamName.substring(0,3).toUpperCase();
+}
+
+document.getElementById('set-team').addEventListener('input', updatePreviewBadge);
 
 document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    state.team = { name: document.getElementById('set-team').value, manager: document.getElementById('set-manager').value, color: document.querySelector('input[name="color"]:checked').value };
+    state.team = { 
+        name: document.getElementById('set-team').value, 
+        manager: document.getElementById('set-manager').value, 
+        shape: document.getElementById('set-shape').value,
+        c1: document.getElementById('set-c1').value,
+        c2: document.getElementById('set-c2').value
+    };
     state.league = initLeague();
     
-    // Regalo de plantilla base
+    // Regalo Inicial: Tu 11 Titular
     const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
     state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id))));
     state.lineup = [...initialIDs];
 
-    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada consta de 38 jornadas. Tiene 50M EUR de presupuesto. Le hemos asignado un 11 inicial básico para empezar.`);
+    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada de LaLiga Tussi consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
     saveState(); routeView();
 });
 
@@ -198,7 +252,10 @@ function addEmail(sender, subject, body) {
 function renderInbox() {
     const list = document.getElementById('inbox-list');
     list.innerHTML = '';
-    if(state.inbox.length === 0) return;
+    if(state.inbox.length === 0) {
+        list.innerHTML = '<div class="text-slate-500 text-sm text-center italic mt-4">Sin noticias en el club.</div>';
+        return;
+    }
     state.inbox.forEach(mail => {
         const border = mail.read ? 'border-slate-600 opacity-60' : 'border-blue-500 glow-blue';
         list.innerHTML += `
@@ -235,8 +292,12 @@ function getTeamOvr() {
     return Math.round(sum / xi.length);
 }
 
+function getBadgeHTML(name, shape, c1, c2, extraClass="w-8 h-10 text-[10px]") {
+    return `<div class="club-badge ${shape} ${extraClass}" style="background: linear-gradient(135deg, ${c1} 50%, ${c2} 50%);">${name.substring(0,3).toUpperCase()}</div>`;
+}
+
 function updateUI() {
-    if(!state.team) return;
+    if(!state || !state.team) return;
     const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
     
     document.getElementById('ui-rep').textContent = state.stats.rep;
@@ -246,8 +307,10 @@ function updateUI() {
     
     document.getElementById('top-teamname').textContent = state.team.name;
     document.getElementById('top-manager').textContent = state.team.manager;
-    document.getElementById('top-shield').style.backgroundColor = state.team.color;
     
+    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-10 h-12 text-sm shadow-md border-white/20");
+    document.getElementById('top-shield').outerHTML = `<div id="top-shield" class="border border-white/20">${badgeHTML}</div>`;
+
     document.getElementById('dash-ovr-big').textContent = getTeamOvr();
     document.getElementById('dash-matches').textContent = state.stats.matches;
     document.getElementById('dash-wins').textContent = state.stats.wins;
@@ -259,7 +322,7 @@ function updateUI() {
 }
 
 /* =========================================================================
-   LIGA Y CLASIFICACIÓN
+   LIGA Y CLASIFICACIÓN (38 JORNADAS)
    ========================================================================= */
 function renderLeague() {
     const tbody = document.getElementById('league-tbody');
@@ -271,9 +334,13 @@ function renderLeague() {
 
     sorted.forEach((t, i) => {
         const isUserClass = t.isUser ? 'user-row font-bold' : '';
+        const badgeObj = t.isUser ? state.team : t.badge;
+        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto");
+        
         tbody.innerHTML += `
         <tr class="${isUserClass}">
             <td>${i+1}</td>
+            <td class="text-center">${miniBadge}</td>
             <td class="text-white">${t.name}</td>
             <td>${t.pld}</td>
             <td>${t.w}</td>
@@ -318,11 +385,11 @@ function updateTeamStats(team, gf, ga) {
 /* =========================================================================
    ENTRENAMIENTO Y CHARLA
    ========================================================================= */
-function renderTrainStatus() { document.getElementById('train-status').textContent = state.flags.canTrain ? "ESTADO: PROGRAMACIÓN DISPONIBLE" : "ESTADO: SESIÓN COMPLETADA. JUEGA UN PARTIDO PARA AVANZAR."; }
+function renderTrainStatus() { document.getElementById('train-status').textContent = state.flags.canTrain ? "ESTADO: DISPONIBLE" : "ESTADO: SESIÓN COMPLETADA. JUEGA UN PARTIDO PARA AVANZAR."; }
 
 window.executeWeeklyTraining = function() {
-    if(!state.flags.canTrain) return alert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
-    if(state.roster.length === 0) return alert("No tienes jugadores que entrenar.");
+    if(!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
+    if(state.roster.length === 0) return showAlert("No tienes jugadores que entrenar.");
 
     const days = ['mon','tue','wed','thu','fri'];
     days.forEach(d => {
@@ -338,46 +405,47 @@ window.executeWeeklyTraining = function() {
     });
 
     state.flags.canTrain = false; saveState(); renderTrainStatus();
-    alert("Semana de entrenamiento completada. Los atributos de los jugadores han mejorado de forma permanente.");
+    showAlert("Semana de entrenamiento completada con éxito. Los atributos han mejorado.");
 }
 
 function renderTalkStatus() { document.getElementById('talk-status').textContent = state.flags.canTalk ? "ESTADO: ESPERANDO TUS PALABRAS" : "ESTADO: LA PLANTILLA YA ESTÁ EN EL TÚNEL DE VESTUARIOS"; }
 
 window.executeTalk = function(tone) {
-    if(!state.flags.canTalk) return alert("Ya has dado la charla pre-partido.");
-    if(state.roster.length === 0) return alert("Vestuario vacío.");
+    if(!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
+    if(state.roster.length === 0) return showAlert("Vestuario vacío.");
 
     let xi = getStartingXI();
     let bench = state.roster.filter(p => !state.lineup.includes(p.id));
 
     if(tone === 'calm') {
         state.roster.forEach(p => p.morale = Math.min(100, p.morale+5));
-        alert("Efecto: Toda la plantilla sube +5 de Moral.");
+        showAlert("Toda la plantilla sube +5 de Moral.");
     } else if(tone === 'aggressive') {
         if(Math.random() < 0.7) {
             state.roster.forEach(p => p.morale = Math.min(100, p.morale+20));
-            alert("Efecto: ¡Funcionó! Toda la plantilla se motiva (+20 Moral).");
+            showAlert("¡La bronca ha funcionado! Toda la plantilla se motiva (+20 Moral).");
         } else {
             state.roster.forEach(p => p.morale = Math.max(0, p.morale-15));
-            alert("Efecto: Te has pasado. El equipo está presionado (-15 Moral).");
+            showAlert("Te has pasado. El equipo está presionado (-15 Moral).");
         }
     } else if(tone === 'passionate') {
         state.roster.forEach(p => { if(Math.random() < 0.5) p.morale = Math.min(100, p.morale+15); });
-        alert("Efecto: Parte de la plantilla sube +15 de Moral.");
+        showAlert("El discurso ha calado en parte de la plantilla (+15 Moral a algunos).");
     } else if(tone === 'assertive') {
         xi.forEach(p => p.morale = Math.min(100, p.morale+10));
         bench.forEach(p => p.morale = Math.max(0, p.morale-5));
-        alert("Efecto: Titulares ganan confianza (+10 Moral), suplentes bajan (-5 Moral).");
+        showAlert("Titulares ganan confianza (+10 Moral), suplentes bajan (-5 Moral).");
     }
 
     state.flags.canTalk = false; saveState(); renderTalkStatus();
 }
 
 /* =========================================================================
-   PLANTILLA (ORDENADA POR POSICIÓN CORRECTAMENTE)
+   PLANTILLA (ORDENADA)
    ========================================================================= */
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
     
     const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
@@ -423,13 +491,12 @@ window.dropOnPitch = function(e, targetSlotIndex) {
     e.preventDefault(); if(!dragSrc.id) return;
     
     const targetPlayerId = state.lineup[targetSlotIndex]; 
-    
     if (dragSrc.slot !== null) { 
         // Movimiento de campo a campo (Intercambio)
         state.lineup[dragSrc.slot] = targetPlayerId; 
         state.lineup[targetSlotIndex] = dragSrc.id; 
     } else { 
-        // Movimiento del banquillo al campo (Entra dragSrc, sale targetPlayerId al banquillo auto)
+        // Movimiento del banquillo al campo (Entra suplente, sale titular automáticamente)
         state.lineup[targetSlotIndex] = dragSrc.id; 
     }
     saveState(); renderTactics();
@@ -437,10 +504,7 @@ window.dropOnPitch = function(e, targetSlotIndex) {
 
 window.dropOnBench = function(e) { 
     e.preventDefault(); 
-    if (dragSrc.slot !== null) { 
-        state.lineup[dragSrc.slot] = null; 
-        saveState(); renderTactics(); 
-    } 
+    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); } 
 };
 
 window.changeFormation = function() { state.formation = document.getElementById('tactics-formation').value; saveState(); renderTactics(); }
@@ -458,7 +522,6 @@ window.autoFillLineup = function() {
     let newLineup = new Array(11).fill(null);
     let availableRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr); 
 
-    // Fase 1: Rellenar posiciones exactas
     for (let i = 0; i < 11; i++) {
         let neededPos = targetLayout[i];
         let bestPlayerIndex = availableRoster.findIndex(p => p.pos === neededPos);
@@ -467,15 +530,12 @@ window.autoFillLineup = function() {
             availableRoster.splice(bestPlayerIndex, 1); 
         }
     }
-
-    // Fase 2: Si faltan jugadores, meter a los mejores disponibles de otras posiciones
     for (let i = 0; i < 11; i++) {
         if (newLineup[i] === null && availableRoster.length > 0) {
             newLineup[i] = availableRoster[0].id;
             availableRoster.splice(0, 1);
         }
     }
-
     state.lineup = newLineup; saveState(); renderTactics();
 };
 
@@ -483,6 +543,7 @@ function renderTactics() {
     document.getElementById('tactics-formation').value = state.formation;
     const pitch = document.getElementById('pitch-players');
     const benchContainer = document.getElementById('bench-list');
+    if(!pitch || !benchContainer) return;
     pitch.innerHTML = ''; benchContainer.innerHTML = '';
 
     const layouts = {
@@ -516,7 +577,7 @@ function renderTactics() {
     benchPlayers.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         benchContainer.innerHTML += `
-        <div class="bench-player flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
+        <div class="bench-player flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700 mb-2" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
             <div class="flex items-center gap-3">
                 <img src="${p.img}" class="w-8 h-8 rounded-full object-cover border border-slate-600">
                 <div><div class="text-white text-xs font-bold">${p.name}</div><span class="pos-badge ${pClass} text-[9px] w-auto px-2">${p.pos}</span></div>
@@ -548,7 +609,6 @@ window.filterMarket = function(pos) {
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-
     const tbody = document.getElementById('market-tbody');
     tbody.innerHTML = '';
 
@@ -594,13 +654,13 @@ window.filterMarket = function(pos) {
 
 window.buyPlayer = function(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if(state.stats.rep < p.rep) return alert(`No tienes reputación mundial suficiente (Req: ${p.rep}).`);
+    if(state.stats.rep < p.rep) return showAlert(`No tienes reputación mundial suficiente (Req: ${p.rep}).`);
     
     if(curr === 'basic') {
-        if(state.economy.coins < p.priceBasic) return alert("Presupuesto insuficiente.");
+        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return alert("Moneda Premium insuficiente.");
+        if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
         state.economy.premium -= p.pricePrem;
     }
 
@@ -612,11 +672,12 @@ window.buyPlayer = function(id, curr) {
 }
 
 window.sellPlayer = function(id, sellValue) {
-    if(!confirm("¿Seguro que quieres vender a este jugador por el 60% de su valor?")) return;
-    state.economy.coins += sellValue;
-    state.roster = state.roster.filter(p => p.id !== id);
-    for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
-    saveState(); filterMarket();
+    showConfirm("¿Seguro que quieres vender a este jugador por el 60% de su valor?", () => {
+        state.economy.coins += sellValue;
+        state.roster = state.roster.filter(p => p.id !== id);
+        for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
+        saveState(); filterMarket();
+    });
 }
 
 window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); }
@@ -626,19 +687,27 @@ window.confirmIAP = function() {
 }
 
 /* =========================================================================
-   MOTOR DE PARTIDO CON DESCANSO Y VESTUARIO
+   MOTOR DE PARTIDO Y TEMPORADAS (38 JORNADAS)
    ========================================================================= */
 let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0 };
 let currentOpponent = null;
 
 window.startMatch = function() {
     const xi = getStartingXI();
-    if(xi.length < 11) return alert(`Faltan jugadores. Usa "MEJOR 11" en Tácticas.`);
+    if(xi.length < 11) return showAlert(`Faltan jugadores. Usa "MEJOR 11" en Tácticas.`);
 
-    if(!state.playedTeams) state.playedTeams = [];
-    const unplayedTeams = state.league.filter(t => !t.isUser && !state.playedTeams.includes(t.name));
+    // SISTEMA IDA Y VUELTA (2 PARTIDOS POR EQUIPO)
+    const unplayedTeams = state.league.filter(t => {
+        if (t.isUser) return false;
+        const timesPlayed = state.playedTeams.filter(x => x === t.name).length;
+        return timesPlayed < 2;
+    });
     
-    if(unplayedTeams.length === 0) return alert("¡Enhorabuena Míster! Has terminado la temporada.");
+    if(unplayedTeams.length === 0 || state.stats.matchday > 38) {
+        endSeason();
+        return;
+    }
+    
     currentOpponent = unplayedTeams[Math.floor(Math.random() * unplayedTeams.length)];
 
     document.getElementById('app-layout').classList.add('hidden');
@@ -647,7 +716,11 @@ window.startMatch = function() {
     document.getElementById('match-halftime').classList.add('hidden');
     
     document.getElementById('sim-home-name').textContent = state.team.name;
-    document.getElementById('sim-home-shield').style.backgroundColor = state.team.color;
+    const homeBadgeHtml = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-16 h-20 text-2xl border-2 border-white/20");
+    document.getElementById('sim-home-shield').outerHTML = `<div id="sim-home-shield">${homeBadgeHtml}</div>`;
+    
+    const oppBadgeHtml = getBadgeHTML(currentOpponent.name, currentOpponent.badge.shape, currentOpponent.badge.c1, currentOpponent.badge.c2, "w-16 h-20 text-2xl border-2 border-white/20 shadow-lg");
+    document.getElementById('sim-away-shield').outerHTML = `<div id="sim-away-shield">${oppBadgeHtml}</div>`;
     
     const myOvr = getTeamOvr(); 
     document.getElementById('sim-home-ovr').textContent = myOvr;
@@ -777,7 +850,7 @@ function finishMatch(mG, oG) {
 
     let ptsEarned = 0; let coins = 0; let rep = 0;
 
-    if(mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; state.stats.trophies += (Math.random() > 0.9 ? 1 : 0); } 
+    if(mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; } 
     else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; } 
     else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
 
@@ -810,5 +883,50 @@ function finishMatch(mG, oG) {
 window.endMatchAndReturn = function() {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
-    switchTab('league'); 
+    
+    if(state.stats.matchday > 38) {
+        endSeason();
+    } else {
+        switchTab('league'); 
+    }
+}
+
+/* =========================================================================
+   SISTEMA DE FIN DE TEMPORADA Y TROFEOS
+   ========================================================================= */
+function endSeason() {
+    document.getElementById('modal-season-end').classList.remove('hidden');
+    
+    const sorted = [...state.league].sort((a,b) => {
+        if(b.pts !== a.pts) return b.pts - a.pts;
+        return (b.gf - b.ga) - (a.gf - a.ga);
+    });
+    
+    const userPos = sorted.findIndex(t => t.isUser) + 1;
+    
+    if(userPos === 1) {
+        document.getElementById('season-trophy').classList.remove('hidden');
+        document.getElementById('season-no-trophy').classList.add('hidden');
+        state.stats.trophies++;
+        addEmail('Directiva', '¡CAMPEONES DE LIGA!', 'Felicidades Míster, hemos ganado LaLiga Tussi. Su trofeo ya está en el palmarés.');
+    } else {
+        document.getElementById('season-trophy').classList.add('hidden');
+        document.getElementById('season-no-trophy').classList.remove('hidden');
+        document.getElementById('season-pos').textContent = userPos + "º";
+        addEmail('Directiva', 'Fin de Temporada', `Hemos quedado en la posición ${userPos}. Esperamos mejores resultados la próxima temporada.`);
+    }
+    saveState();
+}
+
+window.startNewSeason = function() {
+    state.stats.matchday = 1;
+    state.playedTeams = [];
+    state.league.forEach(t => {
+        t.pld = 0; t.w = 0; t.d = 0; t.l = 0; t.gf = 0; t.ga = 0; t.pts = 0;
+    });
+    
+    saveState();
+    document.getElementById('modal-season-end').classList.add('hidden');
+    switchTab('dash');
+    showAlert("¡Nueva temporada iniciada! Todo tu dinero y plantilla se ha conservado.");
 }

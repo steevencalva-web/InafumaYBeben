@@ -10,22 +10,33 @@
 </head>
 <body class="bg-slate-900 text-slate-100 flex flex-col h-screen overflow-hidden">
 
-    <div id="modal-cookies" class="fixed inset-0 bg-black/90 z-[300] flex items-center justify-center backdrop-blur-sm">
-        <div class="glass-panel p-8 rounded-xl max-w-md w-full glow-blue text-center">
-            <h2 class="text-2xl font-gaming text-blue-400 mb-4">Aviso de Privacidad</h2>
-            <p class="text-slate-300 mb-6 text-sm">El motor de simulación requiere LocalStorage para guardar tu partida y progreso.</p>
-            <button class="w-full btn-action py-3 rounded font-bold" onclick="acceptCookies()">Aceptar y Cargar</button>
+    <div id="custom-alert" class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-blue-500 shadow-2xl">
+            <h3 class="text-xl font-gaming mb-4 text-white uppercase tracking-widest" id="alert-title">Aviso</h3>
+            <p class="text-slate-300 mb-6 text-sm" id="alert-message"></p>
+            <button class="btn-action w-full py-3 text-sm" onclick="closeAlert()">ACEPTAR</button>
+        </div>
+    </div>
+
+    <div id="custom-confirm" class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-yellow-500 shadow-2xl">
+            <h3 class="text-xl font-gaming mb-4 text-white uppercase tracking-widest">Confirmar Acción</h3>
+            <p class="text-slate-300 mb-6 text-sm" id="confirm-message"></p>
+            <div class="flex gap-4">
+                <button class="btn-action flex-1 py-3 text-sm bg-slate-600" onclick="closeConfirm(false)">CANCELAR</button>
+                <button class="btn-action flex-1 py-3 text-sm" style="background:linear-gradient(135deg, #15803d, #22c55e);" onclick="closeConfirm(true)">CONFIRMAR</button>
+            </div>
         </div>
     </div>
 
     <main id="view-landing" class="view-section stadium-bg">
         <div class="relative z-10 m-auto glass-panel p-10 rounded-2xl max-w-md w-full glow-blue">
             <h1 class="text-5xl font-gaming text-center text-white mb-2 tracking-wider">INAFUMA<br><span class="text-blue-500">BEBEN</span></h1>
-            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.9.0</p>
+            <p class="text-center text-slate-400 mb-8 text-sm font-mono">DATABASE ENGINE V.10.0</p>
             
             <div class="flex mb-6 border-b border-slate-600">
-                <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold cursor-pointer">Iniciar Sesión</button>
-                <button id="tab-register" onclick="toggleAuth('register')" class="flex-1 pb-2 text-slate-400 hover:text-white font-bold cursor-pointer">Registrarse</button>
+                <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold cursor-pointer">INICIAR SESIÓN</button>
+                <button id="tab-register" onclick="toggleAuth('register')" class="flex-1 pb-2 text-slate-400 hover:text-white font-bold cursor-pointer">REGISTRO</button>
             </div>
 
             <form id="login-form" class="space-y-4">
@@ -36,7 +47,6 @@
 
             <form id="register-form" class="space-y-4 hidden">
                 <input type="text" id="reg-user" class="input-fm" placeholder="Nuevo Usuario" required>
-                <input type="email" id="reg-email" class="input-fm" placeholder="Email" required>
                 <input type="password" id="reg-pass" class="input-fm" placeholder="Contraseña" required>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg mt-4 uppercase tracking-wider transition">Crear Cuenta</button>
             </form>
@@ -55,15 +65,25 @@
                     <label class="text-xs text-slate-400 uppercase tracking-widest ml-1">Nombre del Entrenador</label>
                     <input type="text" id="set-manager" class="input-fm mt-1" placeholder="Tu Nombre" required>
                 </div>
-                <div class="text-center pt-4">
-                    <label class="text-xs text-slate-400 uppercase tracking-widest mb-3 block">Color del Escudo</label>
-                    <div class="flex justify-center gap-6">
-                        <input type="radio" name="color" value="#e11d48" class="color-picker" checked> <div class="w-8 h-8 rounded-full bg-red-600 shadow-lg pointer-events-none"></div>
-                        <input type="radio" name="color" value="#2563eb" class="color-picker"> <div class="w-8 h-8 rounded-full bg-blue-600 shadow-lg pointer-events-none"></div>
-                        <input type="radio" name="color" value="#16a34a" class="color-picker"> <div class="w-8 h-8 rounded-full bg-green-600 shadow-lg pointer-events-none"></div>
-                        <input type="radio" name="color" value="#f59e0b" class="color-picker"> <div class="w-8 h-8 rounded-full bg-yellow-500 shadow-lg pointer-events-none"></div>
+                
+                <div class="pt-4 border-t border-slate-700">
+                    <label class="text-xs text-slate-400 uppercase tracking-widest mb-3 block text-center">Diseña tu Escudo</label>
+                    <div class="flex justify-center gap-4 mb-4">
+                        <select id="set-shape" class="input-fm text-xs w-1/3" onchange="updatePreviewBadge()">
+                            <option value="shape-shield">Clásico</option>
+                            <option value="shape-circle">Redondo</option>
+                            <option value="shape-hexagon">Hexágono</option>
+                        </select>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="set-c1" value="#2563eb" class="color-select" onchange="updatePreviewBadge()">
+                            <input type="color" id="set-c2" value="#1e3a8a" class="color-select" onchange="updatePreviewBadge()">
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div id="preview-badge" class="w-16 h-20 club-badge shape-shield text-xs" style="background: linear-gradient(135deg, #2563eb 50%, #1e3a8a 50%);">BEB</div>
                     </div>
                 </div>
+
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-lg font-bold font-gaming text-lg mt-8 shadow-lg transition tracking-widest">FIRMAR CONTRATO</button>
             </form>
         </div>
@@ -77,13 +97,13 @@
             </div>
             
             <nav class="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
-                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')"><span class="nav-icon">⌂</span> Inicio</button>
-                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')"><span class="nav-icon">≡</span> Plantilla</button>
-                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')"><span class="nav-icon">⛶</span> Tácticas</button>
-                <button id="nav-train" class="nav-btn" onclick="switchTab('train')"><span class="nav-icon">⚡</span> Entrenamientos</button>
-                <button id="nav-talk" class="nav-btn" onclick="switchTab('talk')"><span class="nav-icon">💬</span> Vestuario</button>
-                <button id="nav-league" class="nav-btn" onclick="switchTab('league')"><span class="nav-icon">🏆</span> Clasificación</button>
-                <button id="nav-market" class="nav-btn" onclick="switchTab('market')"><span class="nav-icon">⇄</span> Mercado</button>
+                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')"><i class="nav-icon">⌂</i> Inicio</button>
+                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')"><i class="nav-icon">≡</i> Plantilla</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')"><i class="nav-icon">⛶</i> Tácticas</button>
+                <button id="nav-train" class="nav-btn" onclick="switchTab('train')"><i class="nav-icon">⚡</i> Entrenamientos</button>
+                <button id="nav-talk" class="nav-btn" onclick="switchTab('talk')"><i class="nav-icon">💬</i> Vestuario</button>
+                <button id="nav-league" class="nav-btn" onclick="switchTab('league')"><i class="nav-icon">🏆</i> Clasificación</button>
+                <button id="nav-market" class="nav-btn" onclick="switchTab('market')"><i class="nav-icon">⇄</i> Mercado</button>
             </nav>
 
             <div class="p-6 border-t border-slate-700/50 bg-slate-900/80">
@@ -105,7 +125,7 @@
             <header class="h-20 glass-panel border-b border-slate-700/50 flex items-center justify-between px-8 shadow-md relative z-50">
                 <div>
                     <h1 id="page-title" class="text-2xl font-gaming text-white uppercase tracking-widest drop-shadow-md">Panel de Control</h1>
-                    <p class="text-slate-400 text-sm font-mono mt-1">Jornada <span id="ui-jornada">1</span>/38</p>
+                    <p class="text-slate-400 text-sm font-mono mt-1">LaLiga Tussi | Jornada <span id="ui-jornada">1</span>/38</p>
                 </div>
                 
                 <div class="flex items-center gap-6">
@@ -119,7 +139,7 @@
                                 <div id="top-manager" class="text-sm font-bold text-white uppercase tracking-wide">Manager</div>
                                 <div id="top-teamname" class="text-[10px] text-slate-400 uppercase">Club</div>
                             </div>
-                            <div id="top-shield" class="w-10 h-12 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-sm shadow-md border border-white/20"></div>
+                            <div id="top-shield" class="w-10 h-12 club-badge text-[10px]"></div>
                         </div>
                         
                         <div id="profile-dropdown" class="dropdown-menu hidden">
@@ -167,17 +187,18 @@
 
                 <div id="tab-league" class="fm-tab max-w-5xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl overflow-hidden shadow-2xl">
-                        <div class="bg-slate-800/80 p-4 border-b border-slate-600 font-bold text-sm tracking-widest uppercase">Clasificación Global</div>
+                        <div class="bg-slate-800/80 p-4 border-b border-slate-600 font-bold text-sm tracking-widest uppercase">LaLiga Tussi - Temporada Regular</div>
                         <div class="overflow-y-auto h-[65vh]">
                             <table class="fm-table league-table">
                                 <thead>
                                     <tr>
                                         <th title="Posición">Pos</th>
+                                        <th title="Escudo"></th>
                                         <th title="Nombre del Equipo">Equipo</th>
                                         <th title="Partidos Jugados">PJ</th>
-                                        <th title="Victorias Obtenidas">V</th>
-                                        <th title="Empates Obtenidos">E</th>
-                                        <th title="Derrotas Obtenidas">D</th>
+                                        <th title="Victorias">V</th>
+                                        <th title="Empates">E</th>
+                                        <th title="Derrotas">D</th>
                                         <th title="Goles a Favor">GF</th>
                                         <th title="Goles en Contra">GC</th>
                                         <th title="Diferencia de Goles">DG</th>
@@ -195,6 +216,7 @@
                         <h2 class="text-2xl font-gaming mb-2 text-white">Planificación Semanal</h2>
                         <p class="text-slate-400 text-sm">Programa el enfoque de entrenamiento por días para mejorar los atributos de forma permanente. <br><span id="train-status" class="font-bold text-yellow-400 mt-2 block"></span></p>
                     </div>
+                    
                     <div class="glass-panel p-6 rounded-xl border border-slate-600">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                             <div class="bg-slate-800 p-4 rounded border border-slate-600 text-center">
@@ -225,23 +247,35 @@
                 <div id="tab-talk" class="fm-tab max-w-5xl mx-auto space-y-6">
                     <div class="glass-panel p-6 border border-slate-600 rounded-xl">
                         <h2 class="text-2xl font-gaming mb-2 text-white">Vestuario (Pre-Partido)</h2>
-                        <p class="text-slate-400 text-sm">Tus palabras afectan al rendimiento del equipo antes de saltar al campo. <br><span id="talk-status" class="font-bold text-yellow-400 mt-2 block"></span></p>
+                        <p class="text-slate-400 text-sm">Tus palabras afectan al rendimiento del equipo antes de saltar al campo. Elige tu tono como mánager con cuidado. <br><span id="talk-status" class="font-bold text-yellow-400 mt-2 block"></span></p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-blue-500 transition">
-                            <div><h3 class="font-bold text-xl mb-2 text-blue-400 uppercase tracking-widest">Tono Calmado</h3><p class="text-slate-400 text-sm mb-6">"Disfrutad del partido."<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded">+ Efecto seguro y moderado en la moral.</span></p></div>
+                            <div>
+                                <h3 class="font-bold text-xl mb-2 text-blue-400 uppercase tracking-widest">Tono Calmado</h3>
+                                <p class="text-slate-400 text-sm mb-6">"Tranquilos chicos, salid a disfrutar y haced vuestro juego."<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded inline-block">+ Efecto seguro y moderado en la moral. Sin riesgos.</span></p>
+                            </div>
                             <button onclick="executeTalk('calm')" class="btn-action w-full py-3 bg-blue-600">Hablar con Calma</button>
                         </div>
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-red-500 transition">
-                            <div><h3 class="font-bold text-xl mb-2 text-red-400 uppercase tracking-widest">Tono Agresivo</h3><p class="text-slate-400 text-sm mb-6">"¡Es inaceptable, quiero sangre!"<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded">Riesgo Alto. Puede motivar o hundir.</span></p></div>
+                            <div>
+                                <h3 class="font-bold text-xl mb-2 text-red-400 uppercase tracking-widest">Tono Agresivo</h3>
+                                <p class="text-slate-400 text-sm mb-6">"¡Es inaceptable! ¡Quiero ver sangre en el campo hoy!"<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded inline-block">Riesgo Alto. Puede motivar mucho o hundir al equipo.</span></p>
+                            </div>
                             <button onclick="executeTalk('aggressive')" class="btn-action w-full py-3" style="background:linear-gradient(135deg, #b91c1c, #ef4444)">Bronca Agresiva</button>
                         </div>
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-yellow-500 transition">
-                            <div><h3 class="font-bold text-xl mb-2 text-yellow-400 uppercase tracking-widest">Tono Apasionado</h3><p class="text-slate-400 text-sm mb-6">"¡Hacedlo por la afición!"<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded">Riesgo Medio.</span></p></div>
+                            <div>
+                                <h3 class="font-bold text-xl mb-2 text-yellow-400 uppercase tracking-widest">Tono Apasionado</h3>
+                                <p class="text-slate-400 text-sm mb-6">"¡Hacedlo por la afición! ¡Demostrad quién manda aquí!"<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded inline-block">Riesgo Medio. Depende de la afinidad de la plantilla.</span></p>
+                            </div>
                             <button onclick="executeTalk('passionate')" class="btn-action w-full py-3" style="background:linear-gradient(135deg, #d97706, #f59e0b)">Discurso Apasionado</button>
                         </div>
                         <div class="glass-panel p-6 rounded-xl border border-slate-600 flex flex-col justify-between hover:border-green-500 transition">
-                            <div><h3 class="font-bold text-xl mb-2 text-green-400 uppercase tracking-widest">Tono Asertivo</h3><p class="text-slate-400 text-sm mb-6">"Confío en los titulares."<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded">Sube titulares, baja suplentes.</span></p></div>
+                            <div>
+                                <h3 class="font-bold text-xl mb-2 text-green-400 uppercase tracking-widest">Tono Asertivo</h3>
+                                <p class="text-slate-400 text-sm mb-6">"Confío en el 11 inicial. Los del banquillo, estad listos."<br><br><span class="text-white text-xs bg-slate-800 p-1.5 rounded inline-block">Sube moral a titulares, pero baja la de los suplentes.</span></p>
+                            </div>
                             <button onclick="executeTalk('assertive')" class="btn-action w-full py-3" style="background:linear-gradient(135deg, #15803d, #22c55e)">Charla Asertiva</button>
                         </div>
                     </div>
@@ -250,12 +284,25 @@
                 <div id="tab-squad" class="fm-tab max-w-6xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl overflow-hidden shadow-2xl flex flex-col h-[75vh]">
                         <div class="bg-slate-800/80 p-4 border-b border-slate-600 flex justify-between items-center text-sm tracking-widest uppercase shrink-0">
-                            <span class="font-bold text-lg">Plantilla Completa</span>
+                            <span class="font-bold text-lg">Plantilla del Primer Equipo</span>
                             <span class="bg-slate-900 px-4 py-2 rounded-lg border border-slate-700">OVR Titulares: <span id="squad-ovr" class="font-bold text-yellow-400 font-gaming text-lg">0</span></span>
                         </div>
                         <div class="overflow-y-auto flex-1 p-2">
                             <table class="fm-table">
-                                <thead><tr><th>Perfil</th><th>Pos</th><th>Nombre</th><th>OVR</th><th>Moral</th><th>PAC</th><th>SHO</th><th>PAS</th><th>DEF</th><th>PHY</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Perfil</th>
+                                        <th>Pos</th>
+                                        <th>Nombre Completo</th>
+                                        <th>OVR</th>
+                                        <th>Moral</th>
+                                        <th>PAC</th>
+                                        <th>SHO</th>
+                                        <th>PAS</th>
+                                        <th>DEF</th>
+                                        <th>PHY</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="squad-tbody"></tbody>
                             </table>
                         </div>
@@ -274,16 +321,17 @@
                             <div class="glass-panel border border-slate-600 px-4 py-2 rounded-lg flex items-center gap-3">
                                 <span class="text-slate-400 font-bold text-sm uppercase tracking-wider">Formación:</span>
                                 <select id="tactics-formation" class="bg-slate-900 border border-slate-600 text-white p-1.5 rounded outline-none font-bold cursor-pointer" onchange="changeFormation()">
-                                    <option value="4-4-2">4-4-2</option>
-                                    <option value="4-3-3">4-3-3</option>
-                                    <option value="5-3-2">5-3-2</option>
-                                    <option value="3-4-3">3-4-3</option>
-                                    <option value="4-2-3-1">4-2-3-1</option>
-                                    <option value="5-4-1">5-4-1</option>
+                                    <option value="4-4-2">4-4-2 Estándar</option>
+                                    <option value="4-3-3">4-3-3 Ofensiva</option>
+                                    <option value="5-3-2">5-3-2 Defensiva</option>
+                                    <option value="3-4-3">3-4-3 Ataque Total</option>
+                                    <option value="4-2-3-1">4-2-3-1 Control</option>
+                                    <option value="5-4-1">5-4-1 Autobús</option>
                                 </select>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="flex gap-8 h-[65vh]">
                         <div class="flex-1 glass-panel border border-slate-600 rounded-xl shadow-2xl relative p-6 flex flex-col items-center justify-center">
                             <div class="pitch bg-green-800/80 border-2 border-white/40 rounded relative w-full max-w-[650px] h-[100%] shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(0,0,0,0.1) 10%, rgba(0,0,0,0.1) 20%);">
@@ -304,16 +352,19 @@
 
                 <div id="tab-market" class="fm-tab max-w-6xl mx-auto">
                     <div class="glass-panel border border-slate-600 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[75vh]">
+                        
                         <div class="bg-slate-800/80 p-4 border-b border-slate-600 flex justify-between items-center gap-4">
                             <div class="flex gap-4 border-b border-slate-600 w-1/2 pb-2">
-                                <button id="mode-buy" class="text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" onclick="setMarketMode('buy')">Fichar</button>
-                                <button id="mode-sell" class="text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm" onclick="setMarketMode('sell')">Vender</button>
+                                <button id="mode-buy" class="text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" onclick="setMarketMode('buy')">Fichar Jugadores</button>
+                                <button id="mode-sell" class="text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm" onclick="setMarketMode('sell')">Vender Jugadores</button>
                             </div>
+                            
                             <div class="search-bar-container">
                                 <span class="search-icon">🔍</span>
                                 <input type="text" id="market-search" class="search-input" placeholder="Buscar jugador..." onkeyup="filterMarket()">
                             </div>
                         </div>
+
                         <div class="p-4 flex gap-3 bg-slate-900/50 border-b border-slate-700">
                             <button id="filter-ALL" class="filter-btn active" onclick="filterMarket('ALL')">TODOS</button>
                             <button id="filter-DEL" class="filter-btn" onclick="filterMarket('DEL')">DEL</button>
@@ -321,10 +372,18 @@
                             <button id="filter-DEF" class="filter-btn" onclick="filterMarket('DEF')">DEF</button>
                             <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
                         </div>
+
                         <div class="overflow-y-auto flex-1 p-2">
                             <table class="fm-table">
                                 <thead>
-                                    <tr><th>Perfil</th><th>Nombre</th><th>Pos</th><th>OVR</th><th id="market-th-rep">Rep Min.</th><th colspan="2" class="text-center">Acción</th></tr>
+                                    <tr>
+                                        <th>Perfil</th>
+                                        <th>Nombre</th>
+                                        <th>Pos</th>
+                                        <th>OVR</th>
+                                        <th id="market-th-rep">Rep. Min.</th>
+                                        <th colspan="2" class="text-center">Acción</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="market-tbody"></tbody>
                             </table>
@@ -339,9 +398,13 @@
     <div id="match-modal" class="view-section absolute inset-0 z-[100] stadium-bg hidden flex-col">
         <header class="h-24 bg-slate-900/95 border-b border-slate-700 flex items-center justify-between px-10 shadow-2xl backdrop-blur-md shrink-0">
             <div class="w-1/3 flex items-center gap-6">
-                <div id="sim-home-shield" class="w-16 h-20 bg-blue-600 clip-shield flex items-center justify-center font-gaming font-bold text-2xl border-2 border-white/20"></div>
-                <div><h2 id="sim-home-name" class="font-bold text-white text-2xl uppercase tracking-wider">Local</h2><p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-home-ovr" class="text-yellow-400 font-bold">0</span></p></div>
+                <div id="sim-home-shield" class="w-16 h-20 club-shield text-xl"></div>
+                <div>
+                    <h2 id="sim-home-name" class="font-bold text-white text-2xl uppercase tracking-wider">Local</h2>
+                    <p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-home-ovr" class="text-yellow-400 font-bold">0</span></p>
+                </div>
             </div>
+            
             <div class="w-1/3 text-center">
                 <div class="text-sm text-slate-400 font-mono tracking-widest mb-2 font-bold" id="match-time">00:00</div>
                 <div class="font-gaming text-6xl text-white tracking-widest glow-blue px-8 py-3 rounded-xl bg-black/60 border border-slate-600 inline-block shadow-2xl">
@@ -349,15 +412,20 @@
                 </div>
                 <div class="match-progress-bg"><div id="match-progress" class="match-progress-fill"></div></div>
             </div>
+
             <div class="w-1/3 flex items-center justify-end gap-6 text-right">
-                <div><h2 id="sim-away-name" class="font-bold text-red-400 text-2xl uppercase tracking-wider">Rival</h2><p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-away-ovr" class="text-yellow-400 font-bold">0</span></p></div>
-                <div class="w-16 h-20 bg-slate-800 clip-shield border-2 border-red-500 shadow-lg"></div>
+                <div>
+                    <h2 id="sim-away-name" class="font-bold text-red-400 text-2xl uppercase tracking-wider">Rival FC</h2>
+                    <p class="text-slate-400 font-mono mt-1">OVR: <span id="sim-away-ovr" class="text-yellow-400 font-bold">0</span></p>
+                </div>
+                <div id="sim-away-shield" class="w-16 h-20 club-badge text-xl border border-red-500/50"></div>
             </div>
         </header>
 
         <div class="flex-1 flex items-center justify-center p-6 md:p-10 overflow-hidden relative">
             <div class="w-full max-w-4xl h-full glass-panel border border-slate-600 rounded-2xl p-6 md:p-8 shadow-2xl flex flex-col relative z-10">
                 <h3 class="font-gaming text-slate-200 border-b border-slate-600 pb-4 mb-4 text-xl tracking-widest shrink-0 uppercase">Retransmisión</h3>
+                
                 <div id="match-narrative" class="flex-1 overflow-y-auto space-y-4 font-mono text-base text-slate-300 pr-4"></div>
                 
                 <div id="match-halftime" class="mt-6 border-t border-slate-600 pt-6 hidden shrink-0 text-center">
@@ -373,11 +441,11 @@
                 <div id="match-post" class="mt-6 border-t border-slate-600 pt-6 hidden shrink-0">
                     <div class="flex justify-around mb-6">
                         <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
-                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Ingresos</div>
+                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2 font-bold">Ingresos</div>
                             <div id="match-coins" class="text-green-400 font-bold font-mono text-2xl md:text-3xl">+0 €</div>
                         </div>
                         <div class="text-center bg-slate-800/80 p-4 md:p-6 rounded-xl w-2/5 border border-slate-600 shadow-inner">
-                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2">Puntos y REP</div>
+                            <div class="text-xs md:text-sm text-slate-400 uppercase tracking-widest mb-2 font-bold">Puntos y REP</div>
                             <div id="match-pts" class="text-white font-bold font-mono text-lg md:text-xl"></div>
                         </div>
                     </div>
@@ -390,12 +458,23 @@
     <div id="page-settings" class="subpage-container hidden">
         <div class="max-w-3xl mx-auto w-full">
             <div class="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
-                <h1 class="text-3xl font-gaming uppercase tracking-widest">Ajustes</h1>
-                <button onclick="closeSubpage()" class="text-slate-400 hover:text-white text-4xl">&times;</button>
+                <h1 class="text-3xl font-gaming uppercase tracking-widest text-white">Ajustes</h1>
+                <button onclick="closeSubpage()" class="text-slate-400 hover:text-white text-4xl cursor-pointer">&times;</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                <div class="glass-panel p-6"><h3 class="text-blue-400 uppercase text-xs font-bold mb-4">Audio y Video</h3><div class="space-y-4"><div><label class="text-[10px] text-slate-400 mb-2 block">Música</label><input type="range" class="w-full"></div><div><label class="text-[10px] text-slate-400 mb-2 block">Sonidos FX</label><input type="range" class="w-full"></div></div></div>
-                <div class="glass-panel p-6"><h3 class="text-blue-400 uppercase text-xs font-bold mb-4">Preferencias</h3><div class="space-y-4"><div><label class="text-[10px] text-slate-400 mb-2 block">Idioma</label><select class="input-fm text-xs p-1"><option>Castellano</option><option>English</option></select></div></div></div>
+                <div class="glass-panel p-6">
+                    <h3 class="text-blue-400 uppercase text-xs font-bold mb-4">Configuración de Audio</h3>
+                    <div class="space-y-4">
+                        <div><label class="text-[10px] text-slate-400 mb-2 block">Música</label><input type="range" class="w-full"></div>
+                        <div><label class="text-[10px] text-slate-400 mb-2 block">Sonidos FX</label><input type="range" class="w-full"></div>
+                    </div>
+                </div>
+                <div class="glass-panel p-6">
+                    <h3 class="text-blue-400 uppercase text-xs font-bold mb-4">Preferencias</h3>
+                    <div class="space-y-4">
+                        <div><label class="text-[10px] text-slate-400 mb-2 block">Idioma</label><select class="input-fm text-xs p-1 w-full"><option>Castellano</option><option>English</option></select></div>
+                    </div>
+                </div>
             </div>
             <div class="glass-panel p-10 space-y-6">
                 <h3 class="text-blue-400 uppercase text-xs font-bold mb-4">Información Legal</h3>
@@ -403,7 +482,7 @@
                     <p class="border-b border-slate-700 pb-2 cursor-pointer hover:text-white">Términos y Condiciones</p>
                     <p class="border-b border-slate-700 pb-2 cursor-pointer hover:text-white">Política de Cookies</p>
                     <p class="border-b border-slate-700 pb-2 cursor-pointer hover:text-white">Aviso Legal</p>
-                    <p>Build v9.0.2 Stable</p>
+                    <p>Build v10.0.1 Stable</p>
                 </div>
             </div>
         </div>
@@ -412,24 +491,49 @@
     <div id="page-stats" class="subpage-container hidden">
         <div class="max-w-4xl mx-auto w-full">
             <div class="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
-                <h1 class="text-3xl font-gaming uppercase tracking-widest">Estadísticas del Club</h1>
-                <button onclick="closeSubpage()" class="text-slate-400 hover:text-white text-4xl">&times;</button>
+                <h1 class="text-3xl font-gaming uppercase tracking-widest text-white">Estadísticas del Club</h1>
+                <button onclick="closeSubpage()" class="text-slate-400 hover:text-white text-4xl cursor-pointer">&times;</button>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 text-center">
-                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase">Goles</div><div id="stat-goals" class="text-4xl font-bold font-mono text-white">0</div></div>
-                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase">PJ Totales</div><div id="stat-matches" class="text-4xl font-bold font-mono text-blue-400">0</div></div>
-                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase">Títulos</div><div id="stat-trophies" class="text-4xl font-bold font-mono text-yellow-400">0</div></div>
-                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase">Victorias</div><div id="stat-wins" class="text-4xl font-bold font-mono text-green-400">0</div></div>
+                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase font-bold">Goles Historicos</div><div id="stat-goals" class="text-4xl font-bold font-mono text-white">0</div></div>
+                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase font-bold">PJ Totales</div><div id="stat-matches" class="text-4xl font-bold font-mono text-blue-400">0</div></div>
+                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase font-bold">Títulos Ganados</div><div id="stat-trophies" class="text-4xl font-bold font-mono text-yellow-400">0</div></div>
+                <div class="glass-panel p-6"><div class="text-[10px] text-slate-400 mb-2 uppercase font-bold">Victorias</div><div id="stat-wins" class="text-4xl font-bold font-mono text-green-400">0</div></div>
+            </div>
+            <div class="glass-panel p-8">
+                 <table class="w-full text-sm font-mono text-slate-300">
+                    <tr class="border-b border-slate-700"><td class="py-4">Empates Históricos</td><td id="stat-draws" class="text-right text-yellow-400">0</td></tr>
+                    <tr class="border-b border-slate-700"><td class="py-4">Derrotas Históricas</td><td id="stat-losses" class="text-right text-red-400">0</td></tr>
+                </table>
             </div>
         </div>
     </div>
 
-    <div id="modal-store" class="fixed inset-0 bg-black/90 z-[300] flex items-center justify-center backdrop-blur-sm hidden">
+    <div id="modal-season-end" class="fixed inset-0 bg-black/95 z-[9999] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="glass-panel p-10 rounded-xl max-w-lg w-full text-center border-t-4 border-yellow-400 shadow-2xl">
+            <h2 class="text-4xl font-gaming text-yellow-400 mb-2 uppercase tracking-widest">Fin de Temporada</h2>
+            <p class="text-slate-300 mb-6 font-mono text-sm">LaLiga Tussi ha concluido.</p>
+            
+            <div id="season-trophy" class="hidden mb-6">
+                <div class="text-6xl mb-2">🏆</div>
+                <h3 class="text-xl font-bold text-green-400 uppercase tracking-widest">¡CAMPEONES DE LIGA!</h3>
+                <p class="text-xs text-slate-400 mt-2">+1 Título añadido a tu palmarés</p>
+            </div>
+            <div id="season-no-trophy" class="mb-6">
+                <h3 class="text-xl font-bold text-white uppercase tracking-widest">Posición Final: <span id="season-pos" class="text-blue-400"></span></h3>
+                <p class="text-xs text-slate-400 mt-2">No has logrado el campeonato. Inténtalo de nuevo en la próxima edición.</p>
+            </div>
+
+            <button class="w-full btn-action py-4 text-lg mt-4" onclick="startNewSeason()">INICIAR NUEVA TEMPORADA</button>
+        </div>
+    </div>
+
+    <div id="modal-store" class="fixed inset-0 bg-black/90 z-[500] flex items-center justify-center backdrop-blur-sm hidden">
         <div class="glass-panel p-8 rounded-xl max-w-lg w-full glow-gold text-center relative">
             <button class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl cursor-pointer" onclick="document.getElementById('modal-store').classList.add('hidden')">&times;</button>
             <h2 class="text-2xl font-gaming text-yellow-400 mb-6">Banco Premium</h2>
             <input type="number" id="dev-coins-input" class="input-fm mb-6 text-center text-2xl font-mono text-yellow-400" value="10000">
-            <button class="w-full btn-action py-3 rounded font-bold text-black" style="background:linear-gradient(to right, #d97706, #fbbf24)" onclick="confirmIAP()">GENERAR</button>
+            <button class="w-full btn-action py-3 rounded font-bold text-black" style="background:linear-gradient(to right, #d97706, #fbbf24)" onclick="confirmIAP()">GENERAR MONEDAS</button>
         </div>
     </div>
 
