@@ -973,6 +973,8 @@ window.setMarketMode = function(mode) {
     document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
+    const thPrem = document.getElementById('market-th-prem');
+    if(thPrem) thPrem.style.display = mode === 'buy' ? "table-cell" : "none";
     filterMarket();
 };
 
@@ -984,6 +986,8 @@ window.filterMarket = function(pos) {
 
     const formatM = (num) => (num/1000000).toFixed(1)+'M';
     document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
+    const premEl = document.getElementById('market-prem');
+    if(premEl) premEl.textContent = state.economy.premium.toLocaleString();
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
@@ -1003,16 +1007,27 @@ window.filterMarket = function(pos) {
     items.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         if(marketMode === 'buy') {
-            const canRep = state.stats.rep >= p.rep;
             const alreadyOwned = state.roster.find(rp => rp.id === p.id);
+            const canRep = state.stats.rep >= p.rep;
+            const canAffordPrem = state.economy.premium >= p.pricePrem;
+            let actionBtns = '';
+            if(alreadyOwned) {
+                actionBtns = '<span class="text-[10px] text-slate-500 uppercase font-bold">EN PLANTILLA</span>';
+            } else {
+                actionBtns = `<div class="flex gap-1 justify-center">`;
+                actionBtns += canRep ? `<button class="btn-action py-1.5 px-2 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button>` : `<button class="btn-action py-1.5 px-2 text-[9px] opacity-40 cursor-not-allowed" disabled title="Reputacion insuficiente">FICHAR</button>`;
+                actionBtns += canAffordPrem ? `<button class="btn-buy premium py-1.5 px-2 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')">PREMIUM</button>` : `<button class="btn-buy premium py-1.5 px-2 text-[9px] opacity-40 cursor-not-allowed" disabled title="Monedas insuficientes">PREMIUM</button>`;
+                actionBtns += `</div>`;
+            }
             tbody.innerHTML += `
             <tr class="${alreadyOwned ? 'opacity-40' : ''}">
                 <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">* ${p.rep}</td>
-                <td class="font-mono text-green-400 text-right pr-4">${formatM(p.priceBasic)}</td>
-                <td class="text-center">${alreadyOwned ? '<span class="text-[10px] text-slate-500 uppercase font-bold">EN PLANTILLA</span>' : `<button class="btn-action w-3/4 py-1.5 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button>`}</td>
+                <td class="font-mono text-green-400 text-right pr-2">${formatM(p.priceBasic)}</td>
+                <td class="font-mono text-yellow-400 text-right pr-2">${p.pricePrem.toLocaleString()}</td>
+                <td class="text-center">${actionBtns}</td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6); 
@@ -1021,6 +1036,7 @@ window.filterMarket = function(pos) {
                 <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
+                <td style="display:none;"></td>
                 <td style="display:none;"></td> 
                 <td class="font-mono text-slate-400 text-right pr-4">Oferta: ${formatM(sellValue)}</td>
                 <td class="text-center"><button class="btn-sell w-3/4 py-1.5" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button></td>
@@ -1035,16 +1051,18 @@ window.buyPlayer = function(id, curr) {
     // Prevenir compra duplicada
     if(state.roster.find(rp => rp.id === id)) return showAlert("Este jugador ya esta en tu plantilla.");
     
-    if(state.stats.rep < p.rep) return showAlert(`Reputacion Insuficiente (Req: * ${p.rep}).`);
+    // Solo verificar reputacion para compra con dinero basico
+    if(curr === 'basic' && state.stats.rep < p.rep) return showAlert(`Reputacion Insuficiente (Req: * ${p.rep}).`);
     
     const cost = curr === 'basic' ? p.priceBasic : p.pricePrem;
     const formatM = (num) => (num/1000000).toFixed(1)+'M';
-    const costLabel = curr === 'basic' ? `€${formatM(cost)}` : `${cost} Monedas`;
+    const costLabel = curr === 'basic' ? `€${formatM(cost)}` : `${cost.toLocaleString()} Monedas Premium`;
     
     if(curr === 'basic' && state.economy.coins < cost) return showAlert("Presupuesto insuficiente.");
     if(curr !== 'basic' && state.economy.premium < cost) return showAlert("Moneda Premium insuficiente.");
     
-    showConfirm(`¿Fichar a ${p.name} (OVR ${p.ovr}) por ${costLabel}?`, () => {
+    const repNote = curr !== 'basic' && state.stats.rep < p.rep ? ' (Sin req. reputacion)' : '';
+    showConfirm(`¿Fichar a ${p.name} (OVR ${p.ovr}) por ${costLabel}?${repNote}`, () => {
         // Re-verificar tras confirmar
         if(state.roster.find(rp => rp.id === id)) return showAlert("Este jugador ya esta en tu plantilla.");
         if(curr === 'basic') {

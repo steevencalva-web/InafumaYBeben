@@ -462,13 +462,14 @@
                     <div class="max-w-6xl mx-auto glass-panel flex flex-col h-full overflow-hidden border border-[#313145]">
                         
                         <div class="bg-[#1c1c28] p-5 border-b border-[#313145] flex flex-col gap-5 shrink-0">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center flex-wrap gap-y-3">
                                 <div class="flex gap-4">
                                     <button id="mode-buy" class="text-white font-bold border-b-2 border-red-500 pb-1 uppercase text-xs tracking-widest" onclick="setMarketMode('buy')">Adquisiciones</button>
                                     <button id="mode-sell" class="text-slate-500 hover:text-white font-bold pb-1 uppercase text-xs tracking-widest transition" onclick="setMarketMode('sell')">Salidas (Vender)</button>
                                 </div>
-                                <div class="text-xs uppercase font-bold text-slate-400">
-                                    Presupuesto Activo: <span id="market-funds" class="text-green-400 font-mono text-sm ml-1"></span>
+                                <div class="text-xs uppercase font-bold text-slate-400 flex items-center gap-6 ml-4">
+                                    <span>Presupuesto: <span id="market-funds" class="text-green-400 font-mono text-sm ml-1"></span></span>
+                                    <span>Monedas: <span id="market-prem" class="text-yellow-400 font-mono text-sm ml-1"></span></span>
                                 </div>
                             </div>
                             
@@ -493,8 +494,9 @@
                                         <th class="w-16 text-center">Pos</th>
                                         <th class="w-16 text-center text-yellow-400">OVR</th>
                                         <th id="market-th-rep" class="w-24 text-center">Rep Req.</th>
-                                        <th class="w-32 text-right">Valor Estimado</th>
-                                        <th class="w-32 text-center">Gestión</th>
+                                        <th class="w-28 text-right">Precio</th>
+                                        <th id="market-th-prem" class="w-28 text-right text-yellow-400">Premium</th>
+                                        <th class="w-44 text-center">Gestion</th>
                                     </tr>
                                 </thead>
                                 <tbody id="market-tbody"></tbody>
