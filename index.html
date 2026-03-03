@@ -29,11 +29,57 @@
         </div>
     </div>
 
-    <div id="modal-cookies" class="fixed inset-0 bg-black/95 z-[9990] flex items-center justify-center backdrop-blur-md">
+    <div id="modal-cookies" class="fixed inset-0 bg-black/95 z-[9990] hidden flex items-center justify-center backdrop-blur-md">
         <div class="glass-panel p-10 rounded-xl max-w-md w-full text-center border-t-4 border-blue-500 shadow-2xl">
             <h2 class="text-2xl font-gaming text-blue-400 mb-4 uppercase tracking-widest">Motor de Datos Local</h2>
             <p class="text-slate-300 mb-6 text-sm leading-relaxed">Este simulador requiere uso de almacenamiento local (LocalStorage) para guardar tus avances, plantillas y economía de forma persistente.</p>
             <button class="w-full btn-action py-4 rounded font-bold tracking-widest" onclick="acceptCookies()">CARGAR SISTEMA</button>
+        </div>
+    </div>
+
+    <!-- Modal Verificación +18 y Términos y Condiciones -->
+    <div id="modal-age-verify" class="fixed inset-0 bg-black/95 z-[9995] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="glass-panel p-10 rounded-xl max-w-md w-full text-center border-t-4 border-red-500 shadow-2xl">
+            <h2 class="text-2xl font-gaming text-red-400 mb-4 uppercase tracking-widest">Verificacion de Edad</h2>
+            <p class="text-slate-300 mb-6 text-sm leading-relaxed">Este juego contiene apuestas simuladas. Debes ser mayor de 18 anos para acceder.</p>
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <input type="checkbox" id="age-confirm-check" class="w-5 h-5 cursor-pointer accent-red-500">
+                <label for="age-confirm-check" class="text-slate-300 text-xs font-bold uppercase">Confirmo que soy mayor de 18 anos</label>
+            </div>
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <input type="checkbox" id="terms-confirm-check" class="w-5 h-5 cursor-pointer accent-blue-500">
+                <label for="terms-confirm-check" class="text-slate-300 text-xs">
+                    Acepto los <a href="#" class="text-blue-400 underline hover:text-blue-300 font-bold" onclick="event.preventDefault(); document.getElementById('modal-terms').classList.remove('hidden');">Terminos y Condiciones</a>
+                </label>
+            </div>
+            <button id="age-verify-btn" class="w-full btn-action py-4 rounded font-bold tracking-widest opacity-50 cursor-not-allowed" disabled onclick="confirmAgeVerify()">ACCEDER AL JUEGO</button>
+        </div>
+    </div>
+
+    <!-- Modal Términos y Condiciones -->
+    <div id="modal-terms" class="fixed inset-0 bg-black/95 z-[9998] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="glass-panel p-8 rounded-xl max-w-lg w-full border-t-4 border-blue-500 shadow-2xl relative" style="max-height: 80vh;">
+            <button class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl cursor-pointer transition" onclick="document.getElementById('modal-terms').classList.add('hidden')">&times;</button>
+            <h2 class="text-xl font-gaming text-blue-400 mb-4 uppercase tracking-widest">Terminos y Condiciones</h2>
+            <div class="overflow-y-auto text-left text-xs text-slate-300 space-y-4 leading-relaxed" style="max-height: 55vh;">
+                <p class="font-bold text-white uppercase">1. Aceptacion de los Terminos</p>
+                <p>Al acceder y utilizar Inafuma & Beben FM Web Edition, aceptas estos terminos y condiciones en su totalidad. Si no estas de acuerdo, no debes utilizar este servicio.</p>
+                <p class="font-bold text-white uppercase">2. Descripcion del Servicio</p>
+                <p>Inafuma & Beben es un simulador de gestion futbolistica con fines de entretenimiento. No involucra dinero real ni apuestas reales. Todas las monedas y transacciones son virtuales y no tienen valor monetario.</p>
+                <p class="font-bold text-white uppercase">3. Requisitos de Edad</p>
+                <p>El usuario debe ser mayor de 18 anos para acceder al servicio. El sistema contiene mecanicas de apuestas simuladas que requieren esta restriccion de edad.</p>
+                <p class="font-bold text-white uppercase">4. Datos y Almacenamiento</p>
+                <p>Los datos del juego se almacenan localmente en tu navegador mediante LocalStorage. No recopilamos datos personales ni los enviamos a servidores externos. La perdida de datos por limpieza de cache es responsabilidad del usuario.</p>
+                <p class="font-bold text-white uppercase">5. Propiedad Intelectual</p>
+                <p>Todo el contenido del juego, incluyendo diseno, codigo y mecanicas es propiedad de los creadores de Inafuma & Beben. Queda prohibida la reproduccion sin autorizacion.</p>
+                <p class="font-bold text-white uppercase">6. Compras Virtuales</p>
+                <p>Las monedas premium son una moneda virtual dentro del juego. No tienen valor fuera del simulador y no son reembolsables. Los metodos de pago simulados son parte de la experiencia de juego.</p>
+                <p class="font-bold text-white uppercase">7. Limitacion de Responsabilidad</p>
+                <p>El servicio se proporciona "tal cual". No garantizamos disponibilidad ininterrumpida ni la conservacion permanente de los datos de juego.</p>
+                <p class="font-bold text-white uppercase">8. Modificaciones</p>
+                <p>Nos reservamos el derecho de modificar estos terminos en cualquier momento. El uso continuado del servicio implica la aceptacion de los terminos actualizados.</p>
+            </div>
+            <button class="w-full btn-action py-3 mt-6 rounded font-bold tracking-widest text-sm" onclick="document.getElementById('modal-terms').classList.add('hidden')">CERRAR</button>
         </div>
     </div>
 
@@ -103,18 +149,27 @@
             <div class="p-6 border-b border-[#313145] text-center bg-[#1c1c28]">
                 <h1 class="text-xl font-gaming text-white tracking-widest leading-relaxed">INAFUMA<br><span class="text-blue-500">& BEBEN</span></h1>
             </div>
+
+            <div class="px-4 py-3 border-b border-[#313145] bg-[#15151e] flex items-center gap-3">
+                <div id="sidebar-shield" class="w-8 h-10 shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                    <div id="sidebar-teamname" class="text-xs font-bold text-white uppercase tracking-wide truncate">Club</div>
+                    <div id="sidebar-manager" class="text-[9px] text-slate-400 uppercase tracking-widest truncate">Manager</div>
+                    <div class="text-[9px] text-blue-400 font-mono font-bold mt-0.5">Jornada <span id="ui-jornada">1</span>/38</div>
+                </div>
+            </div>
             
             <nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
-                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')"><i class="nav-icon">⌂</i> Inicio</button>
-                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')"><i class="nav-icon">≡</i> Plantilla</button>
-                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')"><i class="nav-icon">⛶</i> Tácticas</button>
-                <button id="nav-train" class="nav-btn" onclick="switchTab('train')"><i class="nav-icon">⚡</i> Entrenamientos</button>
-                <button id="nav-talk" class="nav-btn" onclick="switchTab('talk')"><i class="nav-icon">💬</i> Vestuario</button>
+                <button id="nav-dash" class="nav-btn active" onclick="switchTab('dash')">Inicio</button>
+                <button id="nav-squad" class="nav-btn" onclick="switchTab('squad')">Plantilla</button>
+                <button id="nav-tactics" class="nav-btn" onclick="switchTab('tactics')">Tacticas</button>
+                <button id="nav-train" class="nav-btn" onclick="switchTab('train')">Entrenamientos</button>
+                <button id="nav-talk" class="nav-btn" onclick="switchTab('talk')">Vestuario</button>
                 <div class="my-2 border-t border-[#313145] mx-2"></div>
-                <button id="nav-league" class="nav-btn" onclick="switchTab('league')"><i class="nav-icon">🏆</i> LaLiga Tussi</button>
-                <button id="nav-season" class="nav-btn" onclick="switchTab('season')"><i class="nav-icon">📅</i> Temporada</button>
-                <button id="nav-market" class="nav-btn" onclick="switchTab('market')"><i class="nav-icon">⇄</i> Mercado</button>
-                <button id="nav-bet" class="nav-btn" onclick="switchTab('bet')"><i class="nav-icon">💰</i> Apuestas</button>
+                <button id="nav-league" class="nav-btn" onclick="switchTab('league')">LaLiga Tussi</button>
+                <button id="nav-season" class="nav-btn" onclick="switchTab('season')">Temporada</button>
+                <button id="nav-market" class="nav-btn" onclick="switchTab('market')">Mercado</button>
+                <button id="nav-bet" class="nav-btn" onclick="switchTab('bet')">Apuestas</button>
             </nav>
 
             <div class="p-5 border-t border-[#313145] bg-[#111119] text-[10px] space-y-3 uppercase font-bold tracking-widest shadow-inner">
@@ -124,7 +179,7 @@
                 </div>
                 <div class="flex justify-between items-center text-slate-300">
                     <span>Reputación:</span> 
-                    <span id="ui-rep" class="font-mono text-blue-400 text-xs">★ 0</span>
+                    <span id="ui-rep" class="font-mono text-blue-400 text-xs">REP: 0</span>
                 </div>
                 <div class="flex justify-between items-center text-slate-300 pt-2 border-t border-[#313145]">
                     <span class="flex items-center gap-1">Monedas: <span id="ui-prem" class="font-mono text-yellow-400 text-xs">0</span></span>
@@ -147,7 +202,7 @@
                     </div>
                     
                     <button id="top-continue-btn" onclick="startMatch()" class="btn-continue px-6 py-2 shadow-lg h-10 flex items-center">
-                        CONTINUAR ⏭
+                        CONTINUAR
                     </button>
 
                     <div class="relative group cursor-pointer border-l border-[#313145] pl-6 h-full flex items-center" onclick="toggleProfileMenu()">
@@ -160,9 +215,9 @@
                         </div>
                         
                         <div id="profile-dropdown" class="dropdown-menu hidden">
-                            <a class="dropdown-item" onclick="showSubpage('settings')">⚙️ Ajustes del Juego</a>
-                            <a class="dropdown-item" onclick="showSubpage('stats')">📊 Historial Mánager</a>
-                            <a class="dropdown-item text-red-400" onclick="logout()">🚪 Guardar y Salir</a>
+                            <a class="dropdown-item" onclick="showSubpage('settings')">Ajustes del Juego</a>
+                            <a class="dropdown-item" onclick="showSubpage('stats')">Historial Manager</a>
+                            <a class="dropdown-item text-red-400" onclick="logout()">Guardar y Salir</a>
                         </div>
                     </div>
                 </div>
@@ -349,7 +404,6 @@
                             <table class="fm-table">
                                 <thead>
                                     <tr>
-                                        <th class="w-10 text-center">Info</th>
                                         <th class="w-12 text-center">Pos</th>
                                         <th>Jugador</th>
                                         <th title="Condición Física (Cansancio)" class="text-center">CON</th>
@@ -435,7 +489,6 @@
                             <table class="fm-table">
                                 <thead>
                                     <tr>
-                                        <th class="w-12 text-center">Info</th>
                                         <th class="pl-4">Jugador</th>
                                         <th class="w-16 text-center">Pos</th>
                                         <th class="w-16 text-center text-yellow-400">OVR</th>
@@ -675,7 +728,7 @@
             <p class="text-slate-400 mb-8 text-sm font-mono uppercase tracking-widest">LaLiga Tussi ha concluido</p>
             
             <div id="season-trophy" class="hidden mb-8 bg-[#111119] border border-yellow-500/50 p-8 rounded-xl">
-                <div class="text-7xl mb-4 drop-shadow-[0_0_15px_rgba(234,179,8,0.8)]">🏆</div>
+                <div class="text-5xl mb-4 font-gaming text-yellow-400 drop-shadow-[0_0_15px_rgba(234,179,8,0.8)]">TROPHY</div>
                 <h3 class="text-2xl font-bold text-yellow-400 uppercase tracking-widest mb-2">¡CAMPEONES!</h3>
                 <p class="text-xs text-slate-300 font-mono">+1 Título de Liga añadido a tu palmarés</p>
             </div>
@@ -689,13 +742,77 @@
         </div>
     </div>
 
+    <!-- Modal Tienda Premium con Carrito y Metodo de Pago -->
     <div id="modal-store" class="fixed inset-0 bg-black/90 z-[500] hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="glass-panel p-10 rounded-xl max-w-sm w-full text-center border-t-4 border-yellow-500 relative shadow-2xl">
-            <button class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl cursor-pointer transition" onclick="document.getElementById('modal-store').classList.add('hidden')">&times;</button>
+        <div class="glass-panel p-10 rounded-xl max-w-lg w-full border-t-4 border-yellow-500 relative shadow-2xl">
+            <button class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl cursor-pointer transition" onclick="closeStore()">&times;</button>
             <h2 class="text-xl font-gaming text-yellow-400 mb-2 uppercase tracking-widest">Tienda Premium</h2>
-            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-6">Añade Monedas a tu cuenta</p>
-            <input type="number" id="dev-coins-input" class="input-fm mb-6 text-center text-3xl font-mono text-yellow-400 font-bold" value="10000">
-            <button class="w-full btn-action py-4 rounded font-bold text-black tracking-widest uppercase text-sm" style="background:linear-gradient(to right, #d97706, #fbbf24)" onclick="confirmIAP()">COMPRAR RECURSOS</button>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-6">Anade Monedas a tu cuenta</p>
+            
+            <!-- Packs de monedas -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="addToCart(500)" class="bg-[#111119] border border-[#313145] p-4 rounded-lg hover:border-yellow-500 transition text-center cursor-pointer">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">500</div>
+                    <div class="text-[9px] text-slate-400 uppercase mt-1">Basico</div>
+                </button>
+                <button onclick="addToCart(2000)" class="bg-[#111119] border border-[#313145] p-4 rounded-lg hover:border-yellow-500 transition text-center cursor-pointer">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">2.000</div>
+                    <div class="text-[9px] text-slate-400 uppercase mt-1">Estandar</div>
+                </button>
+                <button onclick="addToCart(5000)" class="bg-[#111119] border border-[#313145] p-4 rounded-lg hover:border-yellow-500 transition text-center cursor-pointer">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">5.000</div>
+                    <div class="text-[9px] text-slate-400 uppercase mt-1">Premium</div>
+                </button>
+                <button onclick="addToCart(10000)" class="bg-[#111119] border border-yellow-500/50 p-4 rounded-lg hover:border-yellow-400 transition text-center cursor-pointer shadow-[0_0_10px_rgba(234,179,8,0.1)]">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">10.000</div>
+                    <div class="text-[9px] text-yellow-500 uppercase mt-1 font-bold">VIP</div>
+                </button>
+                <button onclick="addToCart(25000)" class="bg-[#111119] border border-yellow-500/50 p-4 rounded-lg hover:border-yellow-400 transition text-center cursor-pointer shadow-[0_0_10px_rgba(234,179,8,0.1)]">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">25.000</div>
+                    <div class="text-[9px] text-yellow-500 uppercase mt-1 font-bold">Elite</div>
+                </button>
+                <button onclick="addToCart(50000)" class="bg-[#111119] border border-yellow-500/50 p-4 rounded-lg hover:border-yellow-400 transition text-center cursor-pointer shadow-[0_0_15px_rgba(234,179,8,0.15)]">
+                    <div class="text-2xl font-bold font-mono text-yellow-400">50.000</div>
+                    <div class="text-[9px] text-yellow-500 uppercase mt-1 font-bold">Leyenda</div>
+                </button>
+            </div>
+
+            <!-- Carrito de compra -->
+            <div class="bg-[#111119] border border-[#313145] rounded-lg p-4 mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Carrito de Compra</span>
+                    <button onclick="clearCart()" class="text-[9px] text-red-400 hover:text-red-300 uppercase font-bold cursor-pointer">Vaciar</button>
+                </div>
+                <div id="cart-items-list" class="space-y-2 max-h-32 overflow-y-auto mb-3">
+                    <div class="text-slate-500 text-xs text-center italic">Carrito vacio</div>
+                </div>
+                <div class="border-t border-[#313145] pt-3 flex justify-between items-center">
+                    <span class="text-xs font-bold text-white uppercase">Total Monedas:</span>
+                    <span id="cart-total" class="text-xl font-bold font-mono text-yellow-400">0</span>
+                </div>
+            </div>
+
+            <!-- Metodo de pago -->
+            <div class="mb-6">
+                <label class="text-[10px] uppercase font-bold text-slate-400 mb-2 block tracking-widest">Metodo de Pago</label>
+                <select id="payment-method" class="input-fm text-xs cursor-pointer mb-3">
+                    <option value="">-- Selecciona un metodo --</option>
+                    <option value="visa">Visa **** 4242</option>
+                    <option value="mastercard">Mastercard **** 5555</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="bizum">Bizum</option>
+                </select>
+                <div id="payment-card-form" class="hidden space-y-3">
+                    <input type="text" id="card-number" class="input-fm text-xs" placeholder="Numero de tarjeta" maxlength="19">
+                    <div class="flex gap-3">
+                        <input type="text" id="card-expiry" class="input-fm text-xs flex-1" placeholder="MM/AA" maxlength="5">
+                        <input type="text" id="card-cvv" class="input-fm text-xs w-24" placeholder="CVV" maxlength="3">
+                    </div>
+                    <input type="text" id="card-name" class="input-fm text-xs" placeholder="Titular de la tarjeta">
+                </div>
+            </div>
+
+            <button id="btn-process-payment" class="w-full btn-action py-4 rounded font-bold text-black tracking-widest uppercase text-sm opacity-50 cursor-not-allowed" style="background:linear-gradient(to right, #d97706, #fbbf24)" disabled onclick="processPayment()">PROCESAR PAGO</button>
         </div>
     </div>
 
