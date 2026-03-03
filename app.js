@@ -33,8 +33,7 @@ const PLAYERS_DB = [
     { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("Navas") },
     { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("Maguire") },
     { id: 404, name: "David Soria", pos: "POR", pac: 35, sho: 10, pas: 60, def: 80, phy: 78, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("Soria") },
-    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 42, sho: 15, pas: 68, def: 78, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("Gazzaniga") },
-    { id: 406, name: "Jan Oblak", pos: "POR", pac: 45, sho: 15, pas: 60, def: 92, phy: 80, rep: 4000, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("Oblak") }
+    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 42, sho: 15, pas: 68, def: 78, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: getAvatar("Gazzaniga") }
 ];
 
 function calcPlayerOVR(p) {
@@ -45,7 +44,7 @@ function calcPlayerOVR(p) {
     return 50;
 }
 
-// Inicializar base de datos con OVR, moral y condición.
+// Inicializar DB (OVR, moral y condición)
 PLAYERS_DB.forEach(p => { 
     p.ovr = calcPlayerOVR(p); 
     p.morale = 100; 
@@ -84,7 +83,7 @@ function initLeague() {
 }
 
 /* =========================================================================
-   SISTEMA LOCAL, ALERTAS PERSONALIZADAS Y LIMPIEZA DE DATOS (NaN)
+   SISTEMA LOCAL, ALERTAS PERSONALIZADAS Y LIMPIEZA DE DATOS
    ========================================================================= */
 let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
 let state = null; 
@@ -107,6 +106,8 @@ window.closeConfirm = function(result) {
 }
 
 function cleanState(s) {
+    if(!s) return null;
+    
     if(!s.stats) s.stats = {};
     s.stats.wins = Number(s.stats.wins) || 0;
     s.stats.draws = Number(s.stats.draws) || 0;
@@ -120,75 +121,71 @@ function cleanState(s) {
     if(!s.economy) s.economy = { coins: 50000000, premium: 0 };
     if(isNaN(s.economy.coins)) s.economy.coins = 50000000;
     
-    if(!s.league || s.league.length < 20) { 
+    if(!s.league || s.league.length < 20) {
         s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
         AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
     } else {
-        s.league.forEach(t => { if(!t.isUser && !t.badge) t.badge = AI_TEAMS.find(ai => ai.name === t.name) || AI_TEAMS[0]; });
+        s.league.forEach(t => { if(!t.isUser && !t.badge) t.badge = AI_TEAMS.find(a => a.name === t.name) || AI_TEAMS[0]; });
     }
 
     if(!s.flags) s.flags = { canTrain: true, canTalk: true };
     if(!s.playedTeams) s.playedTeams = []; 
-    
-    // Variables nuevas para Temporada y Apuestas
     if(!s.history) s.history = {}; 
     if(!s.activeBets) s.activeBets = [];
-    if(!s.nextFixtures) s.nextFixtures = [];
-
-    // Arreglar plantilla si está vacía
-    if(!s.roster || s.roster.length < 11) {
-        const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
-        s.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id) || PLAYERS_DB[0])));
-    }
+    
+    if(!s.roster) s.roster = [];
     s.roster.forEach(p => { if(p.con === undefined) p.con = 100; if(p.morale === undefined) p.morale = 100; });
+    if(!s.lineup) s.lineup = new Array(11).fill(null);
+
+    if(s.team && !s.team.shape) { s.team.shape = "shape-shield"; s.team.c1 = "#e11d48"; s.team.c2 = "#1e293b"; }
     
-    if(!s.lineup || s.lineup.length !== 11) s.lineup = s.roster.slice(0, 11).map(p => p.id);
-    if(!s.formation) s.formation = '4-4-2';
-    
-    if(s.team && !s.team.shape) { s.team.shape = "shape-shield"; s.team.c1 = s.team.color || "#e11d48"; s.team.c2 = "#1e293b"; }
-    
-    // Crear calendario inicial si no existe
-    if(s.nextFixtures.length === 0) generateFixtures(s);
+    // EL CALENDARIO SÓLO SE GENERA SI EL EQUIPO ESTÁ CREADO
+    if(s.team && (!s.nextFixtures || s.nextFixtures.length === 0)) generateFixtures(s);
 
     return s;
 }
 
 window.onload = () => {
     if(!localStorage.getItem('inafuma_cookies')) document.getElementById('modal-cookies').classList.remove('hidden');
-    const activeUserId = localStorage.getItem('inafuma_active_user');
-    if(activeUserId) {
-        let found = UsersDB.find(u => u.auth.user === activeUserId);
-        if (found) state = cleanState(found);
+    const active = localStorage.getItem('inafuma_active_user');
+    if(active) {
+        let found = UsersDB.find(u => u.auth.user === active);
+        if(found) state = cleanState(found);
     }
     routeView();
-    document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-function saveState() { 
+function saveState() {
     if(!state) return;
-    const index = UsersDB.findIndex(u => u.auth.user === state.auth.user);
-    if(index !== -1) UsersDB[index] = state;
+    const idx = UsersDB.findIndex(u => u.auth.user === state.auth.user);
+    if(idx !== -1) UsersDB[idx] = state;
     localStorage.setItem('inafuma_users_db', JSON.stringify(UsersDB));
-    updateUI(); 
+    updateUI();
 }
 
-window.acceptCookies = function() { localStorage.setItem('inafuma_cookies', 'true'); document.getElementById('modal-cookies').classList.add('hidden'); }
+window.acceptCookies = () => document.getElementById('modal-cookies').classList.add('hidden');
 
-window.toggleAuth = function(mode) {
-    document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
-    document.getElementById('register-form').classList.toggle('hidden', mode !== 'register');
-    document.getElementById('tab-login').className = mode === 'login' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase cursor-pointer";
-    document.getElementById('tab-register').className = mode === 'register' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase cursor-pointer";
-}
+window.toggleAuth = (m) => {
+    document.getElementById('login-form').classList.toggle('hidden', m !== 'login');
+    document.getElementById('register-form').classList.toggle('hidden', m !== 'register');
+    document.getElementById('tab-login').className = m==='login' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase transition";
+    document.getElementById('tab-register').className = m==='register' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase transition";
+};
 
+// ---------------------------------------------
+// EVENTOS DE INICIO DE SESIÓN Y REGISTRO
+// ---------------------------------------------
 document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('reg-user').value;
     const pass = document.getElementById('reg-pass').value;
-    if(UsersDB.find(u => u.auth.user === user)) return showAlert("El usuario ya existe.");
+    if(UsersDB.find(u => u.auth.user === user)) return showAlert("El nombre de usuario ya está en uso.");
     
-    state = cleanState({
-        auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 }
+    // Creamos el state base. NO hay equipo todavía.
+    state = cleanState({ 
+        auth: { user, pass }, 
+        team: null, 
+        economy: { coins: 50000000, premium: 0 } 
     });
     
     UsersDB.push(state);
@@ -199,38 +196,40 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const user = document.getElementById('log-user').value;
-    const pass = document.getElementById('log-pass').value;
-    const foundUser = UsersDB.find(u => u.auth.user === user && u.auth.pass === pass);
-    if(foundUser) {
-        state = cleanState(foundUser);
-        localStorage.setItem('inafuma_active_user', user);
-        routeView();
-    } else showAlert("Credenciales incorrectas.");
+    const u = document.getElementById('log-user').value;
+    const p = document.getElementById('log-pass').value;
+    const found = UsersDB.find(x => x.auth.user === u && x.auth.pass === p);
+    if(found) { 
+        state = cleanState(found); 
+        localStorage.setItem('inafuma_active_user', u); 
+        routeView(); 
+    } else {
+        showAlert("Credenciales incorrectas.");
+    }
 });
 
-// Creador Visual de Escudos (Funda tu club)
-window.updatePreviewBadge = function() {
+// Creador Visual de Escudos
+window.updatePreviewBadge = () => {
     const shape = document.getElementById('set-shape').value;
     const c1 = document.getElementById('set-c1').value;
     const c2 = document.getElementById('set-c2').value;
     const badge = document.getElementById('preview-badge');
-    const teamName = document.getElementById('set-team').value || "CLUB";
-    
-    badge.className = `w-12 h-14 club-badge text-[10px] ${shape}`;
+    const name = document.getElementById('set-team').value || "CLUB";
+    badge.className = `w-16 h-20 club-badge text-xs shadow-lg ${shape}`;
     badge.style.background = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
-    badge.textContent = teamName.substring(0,4).toUpperCase();
-}
+    badge.textContent = name.substring(0,4).toUpperCase();
+};
 document.getElementById('set-team').addEventListener('input', updatePreviewBadge);
 
+// Crear Club
 document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
     state.team = { 
         name: document.getElementById('set-team').value, 
         manager: document.getElementById('set-manager').value, 
-        shape: document.getElementById('set-shape').value,
-        c1: document.getElementById('set-c1').value,
-        c2: document.getElementById('set-c2').value
+        shape: document.getElementById('set-shape').value, 
+        c1: document.getElementById('set-c1').value, 
+        c2: document.getElementById('set-c2').value 
     };
     state.league = initLeague();
     
@@ -239,10 +238,12 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id))));
     state.lineup = [...initialIDs];
     
+    // IMPORTANTE: Ahora que existe el equipo, creamos el calendario.
     generateFixtures(state);
 
     addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada de LaLiga Tussi consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
-    saveState(); routeView();
+    saveState(); 
+    routeView();
 });
 
 window.logout = function() { state = null; localStorage.removeItem('inafuma_active_user'); location.reload(); }
@@ -269,38 +270,25 @@ function routeView() {
 }
 
 /* =========================================================================
-   SISTEMA DE PESTAÑAS (STRICT MODE)
+   SISTEMA DE PESTAÑAS Y UI GLOBAL
    ========================================================================= */
 window.switchTab = function(tabId) {
-    // 1. Ocultar todas las pestañas explícitamente
     document.querySelectorAll('.fm-tab').forEach(t => {
         t.classList.remove('active');
-        t.style.display = 'none'; // Fuerza bruta contra solapamientos
+        t.style.display = 'none'; // Evita solapamientos
     });
-    
-    // 2. Desmarcar botones del menú
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    // 3. Mostrar la pestaña deseada
     const targetTab = document.getElementById('tab-' + tabId);
-    if(targetTab) {
-        targetTab.classList.add('active');
-        targetTab.style.display = 'flex'; // Usamos flex para mantener el layout
-    }
+    if(targetTab) { targetTab.classList.add('active'); targetTab.style.display = 'flex'; }
     
     const targetBtn = document.getElementById('nav-' + tabId);
     if(targetBtn) targetBtn.classList.add('active');
     
-    // 4. Cambiar Título
-    const titles = {
-        'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas',
-        'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación',
-        'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'bet': 'Apuestas'
-    };
+    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'bet': 'Apuestas' };
     document.getElementById('page-title').textContent = titles[tabId] || 'Panel';
     
-    // 5. Refrescar datos específicos de la pestaña
-    if(tabId === 'market') filterMarket();
+    if(tabId === 'market') { setMarketMode('buy'); }
     if(tabId === 'tactics') renderTactics();
     if(tabId === 'league') renderLeague();
     if(tabId === 'train') renderTrainStatus();
@@ -308,11 +296,9 @@ window.switchTab = function(tabId) {
     if(tabId === 'season') renderSeasonTab();
     if(tabId === 'bet') renderBetTab();
     if(tabId === 'dash') updateUI();
+    if(tabId === 'squad') renderSquad();
 }
 
-/* =========================================================================
-   UI & CORREOS
-   ========================================================================= */
 function addEmail(sender, subject, body) {
     const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
@@ -323,7 +309,6 @@ function renderInbox() {
     if(!list) return;
     list.innerHTML = '';
     
-    // Notificación en Dashboard
     const unread = state.inbox.filter(m => !m.read).length;
     const badge = document.getElementById('inbox-badge');
     if(badge) {
@@ -340,7 +325,7 @@ function renderInbox() {
         const opacity = mail.read ? 'opacity-60' : 'opacity-100';
         const dot = mail.read ? '' : '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2"></span>';
         list.innerHTML += `
-        <div class="bg-[#111119] p-3 rounded border border-[#313145] cursor-pointer hover:border-slate-500 transition mb-2 ${opacity}" onclick="readEmail(${mail.id})">
+        <div class="bg-[#111119] p-3 rounded border border-[#313145] cursor-pointer hover:border-slate-500 transition mb-2 ${opacity}" onclick="readMail(${mail.id})">
             <div class="flex justify-between items-baseline mb-1">
                 <span class="text-[10px] font-bold text-blue-400">${mail.sender}</span>
                 <span class="text-[9px] text-slate-500">${mail.date}</span>
@@ -350,7 +335,7 @@ function renderInbox() {
         </div>`;
     });
 }
-window.readEmail = function(id) { const m = state.inbox.find(x => x.id === id); if(m) { m.read = true; saveState(); renderInbox(); } }
+window.readMail = function(id) { const m = state.inbox.find(x => x.id === id); if(m) { m.read = true; saveState(); renderInbox(); } }
 
 function getStartingXI() { return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p !== undefined); }
 function getTeamOvr() {
@@ -369,24 +354,36 @@ function updateUI() {
     const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
     
     document.getElementById('ui-rep').textContent = state.stats.rep;
-    document.getElementById('ui-coins').textContent = formatM(state.economy.coins);
+    document.getElementById('ui-coins').textContent = "€" + formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
     document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
+    document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
     
-    document.getElementById('top-teamname').textContent = state.team.name;
-    document.getElementById('top-manager').textContent = state.team.manager;
     document.getElementById('sidebar-teamname').textContent = state.team.name;
     document.getElementById('sidebar-manager').textContent = state.team.manager;
+    document.getElementById('top-manager').textContent = state.team.manager;
+    document.getElementById('top-teamname').textContent = state.team.name;
+    document.getElementById('dash-greeting-team').textContent = state.team.name;
     
     const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow");
     document.getElementById('top-shield').innerHTML = badgeHTML;
     document.getElementById('sidebar-shield').innerHTML = badgeHTML;
-
-    // Próximo Partido en UI
+    
+    // Próximo Partido
     let myNextFix = state.nextFixtures ? state.nextFixtures.find(f => f.isUserMatch) : null;
     if(myNextFix) {
-        let oppName = myNextFix.home === state.team.name ? myNextFix.away : myNextFix.home;
+        let isHome = myNextFix.home === state.team.name;
+        let oppName = isHome ? myNextFix.away : myNextFix.home;
+        let oppData = state.league.find(t => t.name === oppName);
         document.getElementById('ui-next-opp').textContent = oppName;
+        document.getElementById('dash-next-home').textContent = myNextFix.home;
+        document.getElementById('dash-next-away').textContent = myNextFix.away;
+        
+        let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20") : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
+        let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20");
+        
+        document.getElementById('dash-next-home-shield').innerHTML = homeBadge;
+        document.getElementById('dash-next-away-shield').innerHTML = awayBadge;
     } else {
         document.getElementById('ui-next-opp').textContent = "Fin Temporada";
     }
@@ -405,23 +402,21 @@ function updateUI() {
    ========================================================================= */
 function generateFixtures(targetState = state) {
     if(targetState.stats.matchday > 38) return;
-    
     let fixtures = [];
     
-    // 1. Emparejar al Usuario (Buscamos rival que hayamos jugado < 2 veces)
+    // User Match
     const unplayed = targetState.league.filter(t => !t.isUser && targetState.playedTeams.filter(x => x === t.name).length < 2);
     let myOpponent = null;
     
     if(unplayed.length > 0) {
         myOpponent = unplayed[Math.floor(Math.random() * unplayed.length)];
-        let isHome = Math.random() > 0.5; // Randomizamos local/visitante
+        let isHome = Math.random() > 0.5; 
         if(isHome) fixtures.push({ home: targetState.team.name, away: myOpponent.name, isUserMatch: true, homeOvr: getTeamOvr(), awayOvr: myOpponent.ovr });
         else fixtures.push({ home: myOpponent.name, away: targetState.team.name, isUserMatch: true, homeOvr: myOpponent.ovr, awayOvr: getTeamOvr() });
     }
 
-    // 2. Emparejar a la IA entre sí
+    // Partidos IA
     let remainingAIs = targetState.league.filter(t => !t.isUser && (!myOpponent || t.name !== myOpponent.name));
-    // Mezclamos
     remainingAIs = remainingAIs.sort(() => Math.random() - 0.5);
     
     for(let i=0; i<remainingAIs.length; i+=2) {
@@ -435,7 +430,6 @@ function generateFixtures(targetState = state) {
             });
         }
     }
-    
     targetState.nextFixtures = fixtures;
 }
 
@@ -444,14 +438,12 @@ window.renderSeasonTab = function() {
     const list = document.getElementById('season-results-list');
     if(!selector || !list) return;
 
-    // Rellenar selector si está vacío
-    if(selector.options.length === 0) {
+    if(selector.options.length === 0 || selector.options.length < state.stats.matchday - 1) {
+        selector.innerHTML = '';
         for(let i = 1; i < state.stats.matchday; i++) {
             selector.innerHTML += `<option value="${i}">Jornada ${i}</option>`;
         }
-        if(selector.options.length > 0) {
-            selector.value = state.stats.matchday - 1; // Seleccionar la última jugada por defecto
-        }
+        if(selector.options.length > 0) selector.value = state.stats.matchday - 1; 
     }
 
     const selectedDay = selector.value;
@@ -485,13 +477,11 @@ window.renderBetTab = function() {
     const listBets = document.getElementById('active-bets-list');
     if(!selMatch || !listBets) return;
 
-    // Rellenar opciones de partidos de la PROXIMA jornada
     selMatch.innerHTML = '';
     state.nextFixtures.forEach((fix, index) => {
         selMatch.innerHTML += `<option value="${index}">${fix.home} vs ${fix.away}</option>`;
     });
 
-    // Listar apuestas activas
     listBets.innerHTML = '';
     if(!state.activeBets || state.activeBets.length === 0) {
         listBets.innerHTML = '<div class="text-slate-500 text-xs italic">No tienes apuestas activas para esta jornada.</div>';
@@ -528,20 +518,11 @@ window.placeBet = function() {
     if(currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
     if(currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
 
-    // Cobrar
     if(currency === 'coins') state.economy.coins -= amount;
     else state.economy.premium -= amount;
 
     const fixture = state.nextFixtures[matchIdx];
-    
-    state.activeBets.push({
-        home: fixture.home,
-        away: fixture.away,
-        hG: hG,
-        aG: aG,
-        amount: amount,
-        currency: currency
-    });
+    state.activeBets.push({ home: fixture.home, away: fixture.away, hG: hG, aG: aG, amount: amount, currency: currency });
 
     saveState();
     renderBetTab();
@@ -549,7 +530,7 @@ window.placeBet = function() {
 }
 
 /* =========================================================================
-   LIGA Y TABLA
+   LIGA Y CLASIFICACIÓN
    ========================================================================= */
 function renderLeague() {
     const tbody = document.getElementById('league-tbody');
@@ -607,9 +588,9 @@ window.executeWeeklyTraining = function() {
                 if(type==='atk' && (p.pos==='DEL' || p.pos==='MED')) { p.sho++; p.pas++; }
                 if(type==='def' && (p.pos!=='DEL')) { p.def++; p.phy++; }
                 if(type==='phy') { p.pac++; p.phy++; }
-                p.con = Math.max(10, p.con - 6); // Cansa
+                p.con = Math.max(10, p.con - 6); 
             } else {
-                p.con = Math.min(100, p.con + 15); // Recupera
+                p.con = Math.min(100, p.con + 15); 
             }
             p.ovr = calcPlayerOVR(p);
         });
@@ -706,7 +687,6 @@ window.allowDrop = function(e) { e.preventDefault(); };
 
 window.dropOnPitch = function(e, targetSlotIndex) {
     e.preventDefault(); if(!dragSrc.id) return;
-    
     const targetPlayerId = state.lineup[targetSlotIndex]; 
     if (dragSrc.slot !== null) { 
         state.lineup[dragSrc.slot] = targetPlayerId; 
@@ -763,12 +743,12 @@ function renderTactics() {
     pitch.innerHTML = ''; benchContainer.innerHTML = '';
 
     const layouts = {
-        '4-4-2': [ {x:50,y:85},{x:20,y:65},{x:40,y:70},{x:60,y:70},{x:80,y:65},{x:20,y:35},{x:40,y:40},{x:60,y:40},{x:80,y:35},{x:40,y:15},{x:60,y:15} ],
-        '4-3-3': [ {x:50,y:85},{x:20,y:70},{x:40,y:75},{x:60,y:75},{x:80,y:70},{x:30,y:45},{x:50,y:40},{x:70,y:45},{x:20,y:20},{x:50,y:15},{x:80,y:20} ],
-        '5-3-2': [ {x:50,y:85},{x:10,y:65},{x:30,y:75},{x:50,y:78},{x:70,y:75},{x:90,y:65},{x:30,y:40},{x:50,y:45},{x:70,y:40},{x:40,y:15},{x:60,y:15} ],
-        '3-4-3': [ {x:50,y:85},{x:25,y:70},{x:50,y:75},{x:75,y:70},{x:15,y:45},{x:38,y:40},{x:62,y:40},{x:85,y:45},{x:25,y:20},{x:50,y:15},{x:75,y:20} ],
-        '4-2-3-1': [{x:50,y:85},{x:20,y:70},{x:40,y:75},{x:60,y:75},{x:80,y:70},{x:35,y:50},{x:65,y:50},{x:20,y:30},{x:50,y:25},{x:80,y:30},{x:50,y:10} ],
-        '5-4-1': [ {x:50,y:85},{x:10,y:70},{x:30,y:75},{x:50,y:78},{x:70,y:75},{x:90,y:70},{x:20,y:45},{x:40,y:50},{x:60,y:50},{x:80,y:45},{x:50,y:20} ]
+        '4-4-2': [ {x:50,y:85,c:'POR'}, {x:20,y:65,c:'DEF'},{x:40,y:70,c:'DEF'},{x:60,y:70,c:'DEF'},{x:80,y:65,c:'DEF'}, {x:20,y:35,c:'MED'},{x:40,y:40,c:'MED'},{x:60,y:40,c:'MED'},{x:80,y:35,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ],
+        '4-3-3': [ {x:50,y:85,c:'POR'}, {x:20,y:70,c:'DEF'},{x:40,y:75,c:'DEF'},{x:60,y:75,c:'DEF'},{x:80,y:70,c:'DEF'}, {x:30,y:45,c:'MED'},{x:50,y:40,c:'MED'},{x:70,y:45,c:'MED'}, {x:20,y:20,c:'DEL'},{x:50,y:15,c:'DEL'},{x:80,y:20,c:'DEL'} ],
+        '5-3-2': [ {x:50,y:85,c:'POR'}, {x:10,y:65,c:'DEF'},{x:30,y:75,c:'DEF'},{x:50,y:78,c:'DEF'},{x:70,y:75,c:'DEF'},{x:90,y:65,c:'DEF'}, {x:30,y:40,c:'MED'},{x:50,y:45,c:'MED'},{x:70,y:40,c:'MED'}, {x:40,y:15,c:'DEL'},{x:60,y:15,c:'DEL'} ],
+        '3-4-3': [ {x:50,y:85,c:'POR'}, {x:25,y:70,c:'DEF'},{x:50,y:75,c:'DEF'},{x:75,y:70,c:'DEF'}, {x:15,y:45,c:'MED'},{x:38,y:40,c:'MED'},{x:62,y:40,c:'MED'},{x:85,y:45,c:'MED'}, {x:25,y:20,c:'DEL'},{x:50,y:15,c:'DEL'},{x:75,y:20,c:'DEL'} ],
+        '4-2-3-1': [ {x:50,y:85,c:'POR'}, {x:20,y:70,c:'DEF'},{x:40,y:75,c:'DEF'},{x:60,y:75,c:'DEF'},{x:80,y:70,c:'DEF'}, {x:35,y:50,c:'MED'},{x:65,y:50,c:'MED'},{x:20,y:30,c:'MED'},{x:50,y:25,c:'MED'},{x:80,y:30,c:'MED'}, {x:50,y:10,c:'DEL'} ],
+        '5-4-1': [ {x:50,y:85,c:'POR'}, {x:10,y:70,c:'DEF'},{x:30,y:75,c:'DEF'},{x:50,y:78,c:'DEF'},{x:70,y:75,c:'DEF'},{x:90,y:70,c:'DEF'}, {x:20,y:45,c:'MED'},{x:40,y:50,c:'MED'},{x:60,y:50,c:'MED'},{x:80,y:45,c:'MED'}, {x:50,y:20,c:'DEL'} ]
     };
 
     layouts[state.formation].forEach((pos, index) => {
@@ -782,7 +762,7 @@ function renderTactics() {
                 <div class="pitch-name">${player.name.split(' ').pop()}</div>
             `;
         } else {
-            innerHTML = `<div class="pitch-shirt border-dashed bg-transparent opacity-50">+</div>`;
+            innerHTML = `<div class="pitch-shirt border-dashed bg-black/50 text-slate-400">+</div>`;
         }
         pitch.innerHTML += `<div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">${innerHTML}</div>`;
     });
@@ -808,13 +788,15 @@ function renderTactics() {
 }
 
 /* =========================================================================
-   MERCADO (COMPRAR, VENDER Y BUSCADOR CENTRADO)
+   MERCADO (COMPRAR, VENDER Y BUSCADOR CENTRADO SIN LUPA)
    ========================================================================= */
 let marketMode = 'buy';
+let currentMarketFilter = 'ALL';
+
 window.setMarketMode = function(mode) {
     marketMode = mode;
-    document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold text-xs border-b-2 border-red-500 pb-1 uppercase" : "text-slate-500 hover:text-white font-bold text-xs pb-1 uppercase cursor-pointer";
-    document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold text-xs border-b-2 border-red-500 pb-1 uppercase" : "text-slate-500 hover:text-white font-bold text-xs pb-1 uppercase cursor-pointer";
+    document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
+    document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
     filterMarket();
 };
@@ -825,8 +807,9 @@ window.filterMarket = function(pos) {
     const btn = document.getElementById(`filter-${currentMarketFilter}`);
     if(btn) btn.classList.add('active');
 
-    // Actualizar Header Dinero
-    document.getElementById('market-funds').textContent = "€" + (state.economy.coins/1000000).toFixed(1) + "M";
+    // Dinero header
+    const formatM = (num) => (num/1000000).toFixed(1)+'M';
+    document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
@@ -839,7 +822,7 @@ window.filterMarket = function(pos) {
     if(searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
 
     if(items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">Sin resultados en la búsqueda.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">No hay jugadores disponibles aquí.</td></tr>`;
         return;
     }
 
@@ -847,29 +830,27 @@ window.filterMarket = function(pos) {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         if(marketMode === 'buy') {
             const canRep = state.stats.rep >= p.rep;
-            const formatM = (p.priceBasic/1000000).toFixed(1)+'M';
             tbody.innerHTML += `
             <tr>
-                <td class="w-12 text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
                 <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
-                <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
+                <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">★ ${p.rep}</td>
-                <td class="font-mono text-green-400">€${formatM}</td>
-                <td><button class="btn-action w-full py-1 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">Fichar</button></td>
+                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
+                <td class="font-mono text-green-400 text-right pr-4">€${formatM(p.priceBasic)}</td>
+                <td class="text-center"><button class="btn-action w-3/4 py-1.5 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button></td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6); 
-            const formatM = (sellValue/1000000).toFixed(1)+'M';
             tbody.innerHTML += `
             <tr>
-                <td class="w-12 text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
                 <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
-                <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
+                <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td style="display:none;"></td> 
-                <td class="font-mono text-slate-400">Oferta: €${formatM}</td>
-                <td><button class="btn-sell w-full py-1" onclick="sellPlayer(${p.id}, ${sellValue})">Ofrecer a Clubes</button></td>
+                <td class="font-mono text-slate-400 text-right pr-4">Oferta: €${formatM(sellValue)}</td>
+                <td class="text-center"><button class="btn-sell w-3/4 py-1.5" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button></td>
             </tr>`;
         }
     });
@@ -877,26 +858,30 @@ window.filterMarket = function(pos) {
 
 window.buyPlayer = function(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if(state.stats.rep < p.rep) return showAlert(`Reputación Insuficiente (Req: ★ ${p.rep}).`);
+    if(state.stats.rep < p.rep) return showAlert(`No cumples la Reputación Mundial requerida (★ ${p.rep}).`);
     
     if(curr === 'basic') {
-        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
+        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto de traspasos insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
         if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
         state.economy.premium -= p.pricePrem;
     }
 
-    let np = JSON.parse(JSON.stringify(p)); np.con = 100; np.morale = 100;
-    state.roster.push(np);
+    let newPlayer = JSON.parse(JSON.stringify(p));
+    newPlayer.con = 100;
+    newPlayer.morale = 100;
+    
+    state.roster.push(newPlayer);
     const emptySlot = state.lineup.findIndex(slot => slot === null);
     if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
-    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Traspaso completado y jugador disponible.`);
+    
+    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos llegado a un acuerdo y el jugador ya está en la plantilla.`);
     saveState(); filterMarket();
 }
 
 window.sellPlayer = function(id, sellValue) {
-    showConfirm(`¿Vender por €${(sellValue/1000000).toFixed(1)}M?`, () => {
+    showConfirm(`¿Vender al jugador a cambio de €${(sellValue/1000000).toFixed(1)}M?`, () => {
         state.economy.coins += sellValue;
         state.roster = state.roster.filter(p => p.id !== id);
         for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
@@ -911,14 +896,17 @@ window.confirmIAP = function() {
 }
 
 /* =========================================================================
-   MOTOR DE PARTIDO Y RESOLUCIÓN DE JORNADAS
+   MOTOR DE PARTIDO AVANZADO (FM STYLE)
    ========================================================================= */
-let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0, stats: {hPoss:50, aPoss:50, hShots:0, aShots:0} };
+let matchState = { 
+    mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0,
+    stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
+};
 let currentOpponent = null;
 
 window.startMatch = function() {
     const xi = getStartingXI();
-    if(xi.length < 11) return showAlert(`Faltan jugadores en tu 11 titular.`);
+    if(xi.length < 11) return showAlert(`Plantilla incompleta. Alinea a 11 jugadores.`);
 
     if(!state.nextFixtures || state.nextFixtures.length === 0) generateFixtures(state);
     
@@ -937,29 +925,33 @@ window.startMatch = function() {
     document.getElementById('match-halftime').classList.add('hidden');
     document.getElementById('match-actions').classList.add('hidden');
     
-    const hTeam = isHome ? state.team : currentOpponent.badge;
-    const aTeam = isHome ? currentOpponent.badge : state.team;
-    
     document.getElementById('sim-home-name').textContent = isHome ? state.team.name : currentOpponent.name;
     document.getElementById('sim-away-name').textContent = isHome ? currentOpponent.name : state.team.name;
     
+    const hTeam = isHome ? state.team : currentOpponent.badge;
+    const aTeam = isHome ? currentOpponent.badge : state.team;
+    
     document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(isHome ? state.team.name : currentOpponent.name, hTeam.shape, hTeam.c1, hTeam.c2, "w-12 h-16 text-xs");
     document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(isHome ? currentOpponent.name : state.team.name, aTeam.shape, aTeam.c1, aTeam.c2, "w-12 h-16 text-xs");
-
-    // Cansancio
-    state.roster.forEach(p => { if(state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 12); });
+    
+    const myOvr = getTeamOvr(); 
+    document.getElementById('sim-home-ovr').textContent = isHome ? myOvr : currentOpponent.ovr;
+    document.getElementById('sim-away-ovr').textContent = isHome ? currentOpponent.ovr : myOvr;
+    
+    state.roster.forEach(p => { if(state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
 
     matchState = {
-        mG: 0, oG: 0, min: 0, talkMod: 0, isHome: isHome,
-        myProb: 0.08 + ((getTeamOvr() - currentOpponent.ovr) * 0.003),
-        oppProb: 0.08 - ((getTeamOvr() - currentOpponent.ovr) * 0.003),
-        interval: null, stats: {hPoss:50, aPoss:50, hShots:0, aShots:0}
+        mG: 0, oG: 0, min: 0,
+        myProb: 0.08 + ((myOvr - currentOpponent.ovr) * 0.003),
+        oppProb: 0.08 - ((myOvr - currentOpponent.ovr) * 0.003),
+        interval: null, talkMod: 0, isHome: isHome,
+        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
     };
 
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     document.getElementById('match-progress').style.width = "0%";
-    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>¡Rueda el balón en LaLiga Tussi!</div>";
+    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>Pitido inicial. Rueda el balón en LaLiga Tussi.</div>";
 
     updateMatchStatsUI();
     runMatchLoop(45); 
@@ -970,8 +962,10 @@ function updateMatchStatsUI() {
     document.getElementById('stat-poss-away').textContent = matchState.stats.aPoss + "%";
     document.getElementById('bar-poss-home').style.width = matchState.stats.hPoss + "%";
     document.getElementById('bar-poss-away').style.width = matchState.stats.aPoss + "%";
+
     document.getElementById('stat-shots-home').textContent = matchState.stats.hShots;
     document.getElementById('stat-shots-away').textContent = matchState.stats.aShots;
+    
     let totalShots = matchState.stats.hShots + matchState.stats.aShots;
     document.getElementById('bar-shots-home').style.width = totalShots > 0 ? ((matchState.stats.hShots / totalShots) * 100) + "%" : "50%";
     document.getElementById('bar-shots-away').style.width = totalShots > 0 ? ((matchState.stats.aShots / totalShots) * 100) + "%" : "50%";
@@ -979,30 +973,29 @@ function updateMatchStatsUI() {
 
 function runMatchLoop(targetMinute) {
     const logDiv = document.getElementById('match-narrative');
-    const commentary = ["Controlando el ritmo en el centro.", "Pase filtrado cortado por la defensa.", "Falta táctica.", "Disparo que se va fuera.", "Despeje del guardameta."];
+    const commentary = ["Controlando el ritmo en la medular.", "Pase filtrado que corta la defensa.", "Falta táctica dura.", "Disparo potente desviado.", "Intervención del portero.", "Despeje de cabeza."];
 
     matchState.interval = setInterval(() => {
         matchState.min += 3;
         document.getElementById('match-time').textContent = `${matchState.min}'`;
         document.getElementById('match-progress').style.width = `${(matchState.min/90)*100}%`;
 
-        // Fluctuación de Posesión
         matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random()*11)-5)));
         matchState.stats.aPoss = 100 - matchState.stats.hPoss;
+        updateMatchStatsUI();
 
         if(matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
-            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400">45': DESCANSO.</strong></div>`;
+            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
             document.getElementById('match-actions').classList.remove('hidden');
             document.getElementById('match-halftime').classList.remove('hidden');
-            updateMatchStatsUI();
             return;
         }
 
         if(matchState.min >= 90) {
             clearInterval(matchState.interval);
-            finishMatch(); return;
+            finishMatch(matchState.mG, matchState.oG); return;
         }
 
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
@@ -1012,19 +1005,21 @@ function runMatchLoop(targetMinute) {
         if(rand < (activeMyProb * 0.4)) {
             matchState.mG++;
             matchState.isHome ? matchState.stats.hShots++ : matchState.stats.aShots++;
-            let s = getStartingXI().find(p => p.pos === 'DEL') || getStartingXI()[0];
-            eventText = `<span class="text-green-400 font-bold">¡GOLAZO de ${s.name}!</span>`;
+            const xi = getStartingXI();
+            const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
+            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el delantero";
+            eventText = `<span class="text-green-400 font-bold text-base">¡GOLAZO de ${scorer}!</span>`;
         } else if (rand > 1 - (matchState.oppProb * 0.4)) {
             matchState.oG++;
             matchState.isHome ? matchState.stats.aShots++ : matchState.stats.hShots++;
-            eventText = `<span class="text-red-400 font-bold">¡Gol del Rival!</span>`;
-        } else if(rand < 0.3) {
-            matchState.stats.hShots++;
-        } else if(rand > 0.7) {
-            matchState.stats.aShots++;
+            eventText = `<span class="text-red-400 font-bold text-base">¡Gol del Rival! Mala cobertura.</span>`;
+        } else if (rand < 0.3) {
+            matchState.stats.hShots++; 
+        } else if (rand > 0.7) {
+            matchState.stats.aShots++; 
         }
 
-        logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
+        logDiv.innerHTML += `<div><span class="text-slate-500 font-bold">${matchState.min}'</span> - ${eventText}</div>`;
         logDiv.scrollTop = logDiv.scrollHeight; 
         document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
         document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
@@ -1035,62 +1030,84 @@ function runMatchLoop(targetMinute) {
 
 window.matchTalk = function(type) {
     const logDiv = document.getElementById('match-narrative');
-    if(type === 'animar') { matchState.talkMod = 0.01; logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">Charla motivacional efectiva.</div>`; } 
-    else { matchState.talkMod = Math.random() < 0.6 ? 0.02 : -0.01; logDiv.innerHTML += `<div class="text-yellow-400 mt-2 text-xs italic">Bronca dada. Veremos si reaccionan.</div>`; }
+
+    if(type === 'animar') {
+        matchState.talkMod = 0.01; 
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado.</div>`;
+    } else {
+        if(Math.random() < 0.6) {
+            matchState.talkMod = 0.02; 
+            logDiv.innerHTML += `<div class="text-green-400 mt-2 text-xs italic">Reaccionan bien a la bronca.</div>`;
+        } else {
+            matchState.talkMod = -0.01; 
+            logDiv.innerHTML += `<div class="text-red-400 mt-2 text-xs italic">Se han puesto nerviosos.</div>`;
+        }
+    }
     logDiv.scrollTop = logDiv.scrollHeight;
-    document.getElementById('match-halftime').innerHTML = '<button onclick="resumeMatch()" class="w-full bg-green-600 text-white font-bold py-2 rounded text-xs uppercase">Comenzar 2ª Parte</button>';
+    document.getElementById('match-halftime').innerHTML = '<button onclick="resumeMatch()" class="w-full bg-green-600 text-white font-bold py-3 rounded text-sm uppercase tracking-widest mt-2">Segunda Parte</button>';
 }
 
 window.goToTacticsFromMatch = function() {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     switchTab('tactics');
+    
     const topBtn = document.getElementById('top-continue-btn');
     topBtn.innerHTML = 'VOLVER AL VESTUARIO ⏱';
-    topBtn.onclick = () => {
-        document.getElementById('app-layout').classList.add('hidden');
-        document.getElementById('match-modal').classList.remove('hidden');
-        topBtn.innerHTML = 'CONTINUAR ⏭';
-        topBtn.onclick = startMatch;
-    };
+    topBtn.className = "btn-continue shadow-lg bg-yellow-600";
+    topBtn.onclick = returnToMatch;
+}
+
+window.returnToMatch = function() {
+    document.getElementById('app-layout').classList.add('hidden');
+    document.getElementById('match-modal').classList.remove('hidden');
+    
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'CONTINUAR ⏭';
+    topBtn.className = "btn-continue shadow-lg";
+    topBtn.onclick = startMatch;
 }
 
 window.resumeMatch = function() {
     document.getElementById('match-actions').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
+    
     const newOvr = getTeamOvr(); 
     matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003); 
-    document.getElementById('match-narrative').innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la 2T.</strong></div>`;
+
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la segunda mitad.</strong></div>`;
+    logDiv.scrollTop = logDiv.scrollHeight; 
     runMatchLoop(90); 
 }
 
-function finishMatch() {
+function finishMatch(mG, oG) {
     document.getElementById('match-actions').classList.remove('hidden');
     document.getElementById('match-post').classList.remove('hidden');
-    document.getElementById('match-narrative').innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">FIN DEL PARTIDO.</div>`;
     
-    // Resolver Jornada Completa (Todas las fixtures)
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+
+    let ptsEarned = 0; let coins = 0; let rep = 0;
+
+    if(mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; } 
+    else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; } 
+    else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
+
+    state.stats.goals += mG;
+
+    // Resolver todos los partidos de la jornada
     let results = [];
     state.nextFixtures.forEach(fix => {
         let hG = 0, aG = 0;
         if(fix.isUserMatch) {
-            hG = matchState.isHome ? matchState.mG : matchState.oG;
-            aG = matchState.isHome ? matchState.oG : matchState.mG;
-            
-            let ptsEarned = matchState.mG > matchState.oG ? 3 : (matchState.mG === matchState.oG ? 1 : 0);
-            let coins = ptsEarned === 3 ? 5000000 : (ptsEarned === 1 ? 1500000 : 500000);
-            let rep = ptsEarned === 3 ? 150 : (ptsEarned === 1 ? 50 : -10);
-            
-            state.economy.coins += coins; state.stats.rep = Math.max(0, state.stats.rep + rep);
-            state.stats.matches++; state.stats.goals += matchState.mG;
-            if(ptsEarned===3) state.stats.wins++; else if(ptsEarned===1) state.stats.draws++; else state.stats.losses++;
-            
-            document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;
-            document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] text-slate-400">REP: ${rep>0?'+':''}${rep}</span>`;
+            hG = matchState.isHome ? mG : oG;
+            aG = matchState.isHome ? oG : mG;
         } else {
             let p = 0.5 + ((fix.homeOvr - fix.awayOvr)*0.02);
-            hG = Math.random() < p ? Math.floor(Math.random()*3)+1 : Math.floor(Math.random()*2);
-            aG = Math.random() > p ? Math.floor(Math.random()*3)+1 : Math.floor(Math.random()*2);
+            hG = Math.random() < p ? Math.floor(Math.random()*4) : Math.floor(Math.random()*2);
+            aG = Math.random() > p ? Math.floor(Math.random()*4) : Math.floor(Math.random()*2);
         }
         
         results.push({ home: fix.home, away: fix.away, hG, aG });
@@ -1098,7 +1115,6 @@ function finishMatch() {
         updateTeamStats(state.league.find(t=>t.name===fix.away), aG, hG);
     });
 
-    // Guardar en historial de Temporada
     state.history[state.stats.matchday.toString()] = results;
     
     // Evaluar Apuestas
@@ -1123,22 +1139,34 @@ function finishMatch() {
         }
     });
     
-    if(betResults.length > 0) addEmail('Casa de Apuestas', 'Resultados de Jornada', betResults.join(' | '));
-    state.activeBets = [];
+    if(betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
+    state.activeBets = []; // Limpiar apuestas
 
     state.playedTeams.push(currentOpponent.name);
+    state.stats.matches++;
     state.stats.matchday++;
-    state.flags = { canTrain: true, canTalk: true };
+    state.economy.coins += coins;
+    state.stats.rep = Math.max(0, state.stats.rep + rep);
     
-    generateFixtures(state); // Crear los partidos de la sig jornada para las apuestas
+    state.flags.canTrain = true;
+    state.flags.canTalk = true;
+
+    generateFixtures(state); // Preparar la próxima jornada
     saveState();
+    
+    document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;
+    document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">Reputación: ${rep > 0 ? '+' : ''}${rep}</span>`;
 }
 
 window.endMatchAndReturn = function() {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
-    if(state.stats.matchday > 38) endSeason();
-    else switchTab('league'); 
+    
+    if(state.stats.matchday > 38) {
+        endSeason();
+    } else {
+        switchTab('league'); 
+    }
 }
 
 /* =========================================================================
@@ -1147,7 +1175,11 @@ window.endMatchAndReturn = function() {
 function endSeason() {
     document.getElementById('modal-season-end').classList.remove('hidden');
     
-    const sorted = [...state.league].sort((a,b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    const sorted = [...state.league].sort((a,b) => {
+        if(b.pts !== a.pts) return b.pts - a.pts;
+        return (b.gf - b.ga) - (a.gf - a.ga);
+    });
+    
     const userPos = sorted.findIndex(t => t.isUser) + 1;
     
     if(userPos === 1) {
@@ -1159,7 +1191,7 @@ function endSeason() {
         document.getElementById('season-trophy').classList.add('hidden');
         document.getElementById('season-no-trophy').classList.remove('hidden');
         document.getElementById('season-pos').textContent = userPos + "º";
-        addEmail('Directiva', 'Revisión de Temporada', `Terminamos ${userPos}º. Exigimos mejores resultados el próximo año.`);
+        addEmail('Directiva', 'Revisión de Temporada', `Hemos finalizado en la posición ${userPos}. Debemos reforzar la plantilla.`);
     }
     saveState();
 }
@@ -1169,11 +1201,16 @@ window.startNewSeason = function() {
     state.playedTeams = []; 
     state.history = {};
     state.activeBets = [];
-    state.league.forEach(t => { t.pld=0; t.w=0; t.d=0; t.l=0; t.gf=0; t.ga=0; t.pts=0; });
+    
+    state.league.forEach(t => {
+        t.pld = 0; t.w = 0; t.d = 0; t.l = 0; t.gf = 0; t.ga = 0; t.pts = 0;
+    });
+    
     state.roster.forEach(p => { p.morale = 100; p.con = 100; });
     generateFixtures(state);
+    
     saveState();
     document.getElementById('modal-season-end').classList.add('hidden');
     switchTab('dash');
-    showAlert("¡Arranca una nueva edición de LaLiga Tussi! Dinero y plantilla conservados.");
+    showAlert("¡Arranca una nueva edición de LaLiga Tussi! Dinero y plantilla se han conservado.");
 }
