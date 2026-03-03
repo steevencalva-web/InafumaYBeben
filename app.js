@@ -1,3 +1,17 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyBvlnwg6VwX-U5yqjiG350ERFtc6cGrNlA",
+    authDomain: "inafuma-y-beben-10cfc.firebaseapp.com",
+    projectId: "inafuma-y-beben-10cfc",
+    storageBucket: "inafuma-y-beben-10cfc.firebasestorage.app",
+    messagingSenderId: "745321582772",
+    appId: "1:745321582772:web:eb3f39dcb80df0d6eec7e1",
+    measurementId: "G-JZGK0D0JMS"
+};
+
+// Arrancamos los motores de la nube
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 /* =========================================================================
    BASE DE DATOS: JUGADORES Y AVATARES
    ========================================================================= */
@@ -6,7 +20,7 @@ function getAvatar(name) { return `https://ui-avatars.com/api/?name=${encodeURIC
 const PLAYERS_DB = [
     { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://us-tuna-sounds-images.voicemod.net/f0a3dd8a-eea8-4f46-9e4b-26637d97899c-1682820619597.jpeg" },
     { id: 102, name: "Cristiano Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://i.pinimg.com/236x/fc/16/9c/fc169c4de125f69c56bf67c9ef03d931.jpg" },
-    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://pbs.twimg.com/media/FUMiCSJXEAAHdvH.jpg"},
+    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://pbs.twimg.com/media/FUMiCSJXEAAHdvH.jpg" },
     { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.redd.it/ekbnqb2za2y51.jpg" },
     { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGWdbul4YolKhJhyNFg6s3G57zUScIbryrtw&s" },
     { id: 401, name: "Thibaut Courtois", pos: "POR", pac: 40, sho: 20, pas: 65, def: 95, phy: 88, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: "https://www.clarin.com/2022/05/28/-h5dvaCni_360x240__1.jpg" },
@@ -19,14 +33,14 @@ const PLAYERS_DB = [
     { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://pbs.twimg.com/media/GSeKCF4XMAAILjg.jpg" },
     { id: 403, name: "Unai Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://assets.goal.com/images/v3/blt58f6b3a15aac644b/0b605ad106ff7459d79745dd71267d9de5783cb3.png?auto=webp&format=pjpg&width=3840&quality=60" },
     { id: 506, name: "Neymar Jr.", pos: "DEL", pac: 88, sho: 90, pas: 90, def: 40, phy: 80, rep: 5000, priceBasic: 135000000, pricePrem: 10500, img: "https://peopleenespanol.com/thmb/mupW5fAgLVCwjZHm_CyhZ4kXaNE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/memes-de-neymar23-00f89d757f3c46279829547ff5eaf52b.png" },
-    { id: 506, name: "Luis Suarez", pos: "DEL", pac: 85, sho: 88, pas: 85, def: 50, phy: 85, rep: 5000, priceBasic: 130000000, pricePrem: 10000, img: "https://i.pinimg.com/736x/37/04/b0/3704b045926c5754515afcb51bc5cb37.jpg" },
+    { id: 507, name: "Luis Suarez", pos: "DEL", pac: 85, sho: 88, pas: 85, def: 50, phy: 85, rep: 5000, priceBasic: 130000000, pricePrem: 10000, img: "https://i.pinimg.com/736x/37/04/b0/3704b045926c5754515afcb51bc5cb37.jpg" },
     // Nivel Base Inicial (Plantilla de Regalo)
     { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://estaticos-cdn.prensaiberica.es/clip/916e8357-aa8e-450f-95d7-0fd46b11ccf1_source-aspect-ratio_default_0.jpg" },
     { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://static.eldiario.es/clip/dc7c24bc-4e9b-46fa-b0d7-bd9080e2986a_16-9-discover-aspect-ratio_default_1134172.jpg" },
     { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://image.ondacero.es/clipping/cmsimages02/2024/01/23/BA3CE66A-7976-4522-95D4-3B094E6A5BCB/hugo-duro_103.jpg?crop=600,450,x137,y0&width=1200&height=900&optimize=low&format=webply" },
     { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEyOd-ScVKgWFmy4Uwuf5Q20jDrEOFvmHi4w&s" },
     { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
-    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" },-
+    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" }, -
     { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
     { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 0, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
     { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
@@ -38,18 +52,18 @@ const PLAYERS_DB = [
 ];
 
 function calcPlayerOVR(p) {
-    if(p.pos === 'DEL') return Math.round((p.pac*0.20) + (p.sho*0.45) + (p.phy*0.15) + (p.pas*0.20));
-    if(p.pos === 'MED') return Math.round((p.pac*0.10) + (p.pas*0.45) + (p.def*0.25) + (p.phy*0.20));
-    if(p.pos === 'DEF') return Math.round((p.pac*0.15) + (p.def*0.50) + (p.phy*0.25) + (p.pas*0.10));
-    if(p.pos === 'POR') return Math.round((p.def*0.70) + (p.phy*0.20) + (p.pas*0.10));
+    if (p.pos === 'DEL') return Math.round((p.pac * 0.20) + (p.sho * 0.45) + (p.phy * 0.15) + (p.pas * 0.20));
+    if (p.pos === 'MED') return Math.round((p.pac * 0.10) + (p.pas * 0.45) + (p.def * 0.25) + (p.phy * 0.20));
+    if (p.pos === 'DEF') return Math.round((p.pac * 0.15) + (p.def * 0.50) + (p.phy * 0.25) + (p.pas * 0.10));
+    if (p.pos === 'POR') return Math.round((p.def * 0.70) + (p.phy * 0.20) + (p.pas * 0.10));
     return 50;
 }
 
 // Inicializar DB 
-PLAYERS_DB.forEach(p => { 
-    p.ovr = calcPlayerOVR(p); 
-    p.morale = 100; 
-    p.con = 100; 
+PLAYERS_DB.forEach(p => {
+    p.ovr = calcPlayerOVR(p);
+    p.morale = 100;
+    p.con = 100;
 });
 
 /* =========================================================================
@@ -78,56 +92,55 @@ const AI_TEAMS = [
 ];
 
 function initLeague() {
-    let league = [{ name: state.team.name, isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
-    AI_TEAMS.forEach(ai => league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
+    let league = [{ name: state.team.name, isUser: true, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }];
+    AI_TEAMS.forEach(ai => league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, badge: ai }));
     return league;
 }
 
 /* =========================================================================
    SISTEMA DE ALERTAS Y SEGURIDAD DOM
    ========================================================================= */
-window.showAlert = function(msg) {
+window.showAlert = function (msg) {
     const alertModal = document.getElementById('custom-alert');
-    if(alertModal) {
+    if (alertModal) {
         document.getElementById('alert-message').textContent = msg;
         alertModal.classList.remove('hidden');
     } else {
         alert(msg); // Fallback por si falta el HTML
     }
 }
-window.closeAlert = function() { 
+window.closeAlert = function () {
     const alertModal = document.getElementById('custom-alert');
-    if(alertModal) alertModal.classList.add('hidden'); 
+    if (alertModal) alertModal.classList.add('hidden');
 }
 
 let confirmCallback = null;
-window.showConfirm = function(msg, callback) {
+window.showConfirm = function (msg, callback) {
     const confirmModal = document.getElementById('custom-confirm');
-    if(confirmModal) {
+    if (confirmModal) {
         document.getElementById('confirm-message').textContent = msg;
         confirmCallback = callback;
         confirmModal.classList.remove('hidden');
     } else {
-        if(confirm(msg)) callback(); // Fallback por si falta el HTML
+        if (confirm(msg)) callback(); // Fallback por si falta el HTML
     }
 }
-window.closeConfirm = function(result) {
+window.closeConfirm = function (result) {
     const confirmModal = document.getElementById('custom-confirm');
-    if(confirmModal) confirmModal.classList.add('hidden');
-    if(result && confirmCallback) confirmCallback();
+    if (confirmModal) confirmModal.classList.add('hidden');
+    if (result && confirmCallback) confirmCallback();
 }
 
 /* =========================================================================
    SISTEMA DE LIMPIEZA DE NaNs (VITAL PARA CUENTAS ANTIGUAS)
    ========================================================================= */
-let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
-let state = null; 
+let state = null;
 
 function cleanState(s) {
-    if(!s) return null;
-    
+    if (!s) return null;
+
     // Convertir todo a números seguros para borrar los NaNs
-    if(!s.stats) s.stats = {};
+    if (!s.stats) s.stats = {};
     s.stats.wins = isNaN(parseInt(s.stats.wins)) ? 0 : parseInt(s.stats.wins);
     s.stats.draws = isNaN(parseInt(s.stats.draws)) ? 0 : parseInt(s.stats.draws);
     s.stats.losses = isNaN(parseInt(s.stats.losses)) ? 0 : parseInt(s.stats.losses);
@@ -138,43 +151,43 @@ function cleanState(s) {
     s.stats.trophies = isNaN(parseInt(s.stats.trophies)) ? 0 : parseInt(s.stats.trophies);
 
     // Economía
-    if(!s.economy) s.economy = { coins: 50000000, premium: 0 };
-    if(isNaN(parseInt(s.economy.coins))) s.economy.coins = 50000000;
-    if(isNaN(parseInt(s.economy.premium))) s.economy.premium = 0;
-    
+    if (!s.economy) s.economy = { coins: 50000000, premium: 0 };
+    if (isNaN(parseInt(s.economy.coins))) s.economy.coins = 50000000;
+    if (isNaN(parseInt(s.economy.premium))) s.economy.premium = 0;
+
     // Liga y Equipos IA
-    if(!s.league || s.league.length < 20) {
-        s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
-        AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
+    if (!s.league || s.league.length < 20) {
+        s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }];
+        AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, badge: ai }));
     } else {
-        s.league.forEach(t => { if(!t.isUser && !t.badge) t.badge = AI_TEAMS.find(a => a.name === t.name) || AI_TEAMS[0]; });
+        s.league.forEach(t => { if (!t.isUser && !t.badge) t.badge = AI_TEAMS.find(a => a.name === t.name) || AI_TEAMS[0]; });
     }
 
-    if(!s.flags) s.flags = { canTrain: true, canTalk: true };
-    if(!s.playedTeams || !Array.isArray(s.playedTeams)) s.playedTeams = []; 
-    if(!s.history) s.history = {}; 
-    if(!s.activeBets) s.activeBets = [];
-    if(!s.nextFixtures) s.nextFixtures = [];
-    
+    if (!s.flags) s.flags = { canTrain: true, canTalk: true };
+    if (!s.playedTeams || !Array.isArray(s.playedTeams)) s.playedTeams = [];
+    if (!s.history) s.history = {};
+    if (!s.activeBets) s.activeBets = [];
+    if (!s.nextFixtures) s.nextFixtures = [];
+
     // Plantilla a prueba de errores
-    if(!s.roster || s.roster.length < 11) {
+    if (!s.roster || s.roster.length < 11) {
         const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
         s.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id) || PLAYERS_DB[0])));
     }
-    s.roster.forEach(p => { if(p.con === undefined) p.con = 100; if(p.morale === undefined) p.morale = 100; });
-    
-    if(!s.lineup || s.lineup.length !== 11) s.lineup = s.roster.slice(0,11).map(p => p.id);
-    if(!s.formation) s.formation = '4-4-2';
+    s.roster.forEach(p => { if (p.con === undefined) p.con = 100; if (p.morale === undefined) p.morale = 100; });
+
+    if (!s.lineup || s.lineup.length !== 11) s.lineup = s.roster.slice(0, 11).map(p => p.id);
+    if (!s.formation) s.formation = '4-4-2';
 
     // Asegurar estructura del escudo del equipo de usuario
-    if(s.team && !s.team.shape) { 
-        s.team.shape = "shape-shield"; 
-        s.team.c1 = s.team.color || "#e11d48"; 
-        s.team.c2 = "#1e293b"; 
+    if (s.team && !s.team.shape) {
+        s.team.shape = "shape-shield";
+        s.team.c1 = s.team.color || "#e11d48";
+        s.team.c2 = "#1e293b";
     }
-    
+
     // Forzar creación de calendario si no lo hay
-    if(s.team && s.nextFixtures.length === 0) {
+    if (s.team && s.nextFixtures.length === 0) {
         generateFixtures(s);
     }
 
@@ -183,43 +196,52 @@ function cleanState(s) {
 
 window.onload = () => {
     const cookiesModal = document.getElementById('modal-cookies');
-    if(!localStorage.getItem('inafuma_cookies') && cookiesModal) cookiesModal.classList.remove('hidden');
-    
-    const activeUserId = localStorage.getItem('inafuma_active_user');
-    if(activeUserId) {
-        let found = UsersDB.find(u => u.auth.user === activeUserId);
-        if (found) state = cleanState(found);
-    }
-    routeView();
+    if (!localStorage.getItem('inafuma_cookies') && cookiesModal) cookiesModal.classList.remove('hidden');
+
+    // Escuchar cambios de autenticación de Firebase
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists) {
+                    state = cleanState(doc.data());
+                }
+            } catch (err) {
+                console.error('Error al cargar estado desde Firestore:', err);
+            }
+        }
+        routeView();
+    });
 };
 
-function saveState() { 
-    if(!state) return;
-    const index = UsersDB.findIndex(u => u.auth.user === state.auth.user);
-    if(index !== -1) {
-        UsersDB[index] = state;
-        localStorage.setItem('inafuma_users_db', JSON.stringify(UsersDB));
+function saveState() {
+    if (!state) return;
+    const user = auth.currentUser;
+    if (user) {
+        // Subir el estado completo a Firestore
+        db.collection('users').doc(user.uid).set(JSON.parse(JSON.stringify(state)))
+            .catch(err => console.error('Error al guardar en Firestore:', err));
     }
-    updateUI(); 
+    updateUI();
 }
 
-window.acceptCookies = function() { 
-    localStorage.setItem('inafuma_cookies', 'true'); 
+window.acceptCookies = function () {
+    localStorage.setItem('inafuma_cookies', 'true');
     const cookiesModal = document.getElementById('modal-cookies');
-    if(cookiesModal) cookiesModal.classList.add('hidden'); 
+    if (cookiesModal) cookiesModal.classList.add('hidden');
 }
 
 /* =========================================================================
    SISTEMA DE LOGIN, REGISTRO Y CLUB
    ========================================================================= */
-window.toggleAuth = function(mode) {
+window.toggleAuth = function (mode) {
     document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
     document.getElementById('register-form').classList.toggle('hidden', mode !== 'register');
-    
+
     const tabLogin = document.getElementById('tab-login');
     const tabReg = document.getElementById('tab-register');
-    
-    if(tabLogin && tabReg) {
+
+    if (tabLogin && tabReg) {
         tabLogin.className = mode === 'login' ? "flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
         tabReg.className = mode === 'register' ? "flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
     }
@@ -229,92 +251,104 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('reg-user').value;
     const pass = document.getElementById('reg-pass').value;
-    if(UsersDB.find(u => u.auth.user === user)) return showAlert("El usuario ya existe.");
-    
-    state = cleanState({ auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 } });
-    UsersDB.push(state);
-    localStorage.setItem('inafuma_active_user', user);
-    routeView();
+    const email = user + '@inafuma.com';
+
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then((cred) => {
+            state = cleanState({ auth: { user }, team: null, economy: { coins: 50000000, premium: 0 } });
+            // Guardar estado inicial en Firestore
+            db.collection('users').doc(cred.user.uid).set(JSON.parse(JSON.stringify(state)));
+            routeView();
+        })
+        .catch((err) => {
+            if (err.code === 'auth/email-already-in-use') showAlert("El usuario ya existe.");
+            else if (err.code === 'auth/weak-password') showAlert("La contraseña debe tener al menos 6 caracteres.");
+            else showAlert("Error al registrar: " + err.message);
+        });
 });
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const u = document.getElementById('log-user').value;
     const p = document.getElementById('log-pass').value;
-    
-    // Failsafe de cuenta: Intenta iniciar sesión incluso si la pass es errónea pero el usuario existe 
-    // (Útil por si los datos se desincronizaron en versiones antiguas)
-    let foundUser = UsersDB.find(x => x.auth.user === u && x.auth.pass === p);
-    if(!foundUser) {
-        foundUser = UsersDB.find(x => x.auth.user === u);
-        if(foundUser) foundUser.auth.pass = p; // Actualiza la password automáticamente
-    }
-    
-    if(foundUser) {
-        state = cleanState(foundUser);
-        localStorage.setItem('inafuma_active_user', u);
-        routeView();
-    } else {
-        showAlert("No existe ninguna cuenta con este usuario.");
-    }
+    const email = u + '@inafuma.com';
+
+    auth.signInWithEmailAndPassword(email, p)
+        .then(async (cred) => {
+            // Descargar estado desde Firestore
+            const doc = await db.collection('users').doc(cred.user.uid).get();
+            if (doc.exists) {
+                state = cleanState(doc.data());
+            } else {
+                // Si no existe documento (cuenta legacy), crear uno nuevo
+                state = cleanState({ auth: { user: u }, team: null, economy: { coins: 50000000, premium: 0 } });
+                db.collection('users').doc(cred.user.uid).set(JSON.parse(JSON.stringify(state)));
+            }
+            routeView();
+        })
+        .catch((err) => {
+            if (err.code === 'auth/user-not-found') showAlert("No existe ninguna cuenta con este usuario.");
+            else if (err.code === 'auth/wrong-password') showAlert("Contraseña incorrecta.");
+            else showAlert("Error al iniciar sesión: " + err.message);
+        });
 });
 
 // Creador Visual de Escudos (Seguro)
-window.updatePreviewBadge = function() {
+window.updatePreviewBadge = function () {
     const shapeEl = document.getElementById('set-shape');
     const c1El = document.getElementById('set-c1');
     const c2El = document.getElementById('set-c2');
     const badgeEl = document.getElementById('preview-badge');
     const nameEl = document.getElementById('set-team');
-    
-    if(!badgeEl) return;
-    
+
+    if (!badgeEl) return;
+
     const shape = shapeEl ? shapeEl.value : 'shape-shield';
     const c1 = c1El ? c1El.value : '#e11d48';
     const c2 = c2El ? c2El.value : '#1e293b';
     const name = nameEl ? nameEl.value : 'CLUB';
-    
+
     badgeEl.className = `w-16 h-20 club-badge text-xs shadow-lg ${shape}`;
     badgeEl.style.background = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
-    badgeEl.textContent = name.substring(0,4).toUpperCase();
+    badgeEl.textContent = name.substring(0, 4).toUpperCase();
 }
 
 const teamInput = document.getElementById('set-team');
-if(teamInput) teamInput.addEventListener('input', updatePreviewBadge);
+if (teamInput) teamInput.addEventListener('input', updatePreviewBadge);
 
 document.getElementById('setup-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     const shapeEl = document.getElementById('set-shape');
     const c1El = document.getElementById('set-c1');
     const c2El = document.getElementById('set-c2');
-    
-    state.team = { 
-        name: document.getElementById('set-team').value, 
-        manager: document.getElementById('set-manager').value, 
+
+    state.team = {
+        name: document.getElementById('set-team').value,
+        manager: document.getElementById('set-manager').value,
         shape: shapeEl ? shapeEl.value : 'shape-shield',
         c1: c1El ? c1El.value : '#e11d48',
         c2: c2El ? c2El.value : '#1e293b'
     };
     state.league = initLeague();
-    
+
     const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
     state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id) || PLAYERS_DB[0])));
     state.lineup = [...initialIDs];
-    
+
     generateFixtures(state);
 
-    if(!state.inbox) state.inbox = [];
+    if (!state.inbox) state.inbox = [];
     addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
     saveState(); routeView();
 });
 
-window.logout = function() { state = null; localStorage.removeItem('inafuma_active_user'); location.reload(); }
-window.toggleProfileMenu = function() { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
+window.logout = function () { auth.signOut().then(() => { state = null; location.reload(); }).catch(err => console.error('Error al cerrar sesión:', err)); }
+window.toggleProfileMenu = function () { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
 
-window.showSubpage = function(id) {
-    document.getElementById('page-'+id).classList.remove('hidden');
-    if(id === 'stats') {
+window.showSubpage = function (id) {
+    document.getElementById('page-' + id).classList.remove('hidden');
+    if (id === 'stats') {
         document.getElementById('stat-goals').textContent = state.stats.goals;
         document.getElementById('stat-matches').textContent = state.stats.matches;
         document.getElementById('stat-trophies').textContent = state.stats.trophies;
@@ -323,66 +357,66 @@ window.showSubpage = function(id) {
         document.getElementById('stat-losses').textContent = state.stats.losses;
     }
 }
-window.closeSubpage = function() { document.querySelectorAll('.subpage-container').forEach(el => el.classList.add('hidden')); }
+window.closeSubpage = function () { document.querySelectorAll('.subpage-container').forEach(el => el.classList.add('hidden')); }
 
 function routeView() {
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-    if(!state) document.getElementById('view-landing').classList.remove('hidden');
-    else if(!state.team) document.getElementById('view-setup').classList.remove('hidden');
-    else { 
-        document.getElementById('app-layout').classList.remove('hidden'); 
-        updateUI(); 
+    if (!state) document.getElementById('view-landing').classList.remove('hidden');
+    else if (!state.team) document.getElementById('view-setup').classList.remove('hidden');
+    else {
+        document.getElementById('app-layout').classList.remove('hidden');
+        updateUI();
         const savedTab = localStorage.getItem('inafuma_active_tab') || 'dash';
-        switchTab(savedTab); 
+        switchTab(savedTab);
     }
 }
 
 /* =========================================================================
    UI GLOBAL, TABS Y BUZÓN
    ========================================================================= */
-window.switchTab = function(tabId) {
+window.switchTab = function (tabId) {
     document.querySelectorAll('.fm-tab').forEach(t => { t.classList.remove('active'); t.style.display = 'none'; });
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
+
     const targetTab = document.getElementById('tab-' + tabId);
-    if(targetTab) { targetTab.classList.add('active'); targetTab.style.display = 'flex'; }
-    
+    if (targetTab) { targetTab.classList.add('active'); targetTab.style.display = 'flex'; }
+
     const targetBtn = document.getElementById('nav-' + tabId);
-    if(targetBtn) targetBtn.classList.add('active');
-    
+    if (targetBtn) targetBtn.classList.add('active');
+
     const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'bet': 'Apuestas' };
     const pTitle = document.getElementById('page-title');
-    if(pTitle) pTitle.textContent = titles[tabId] || 'Panel';
-    
+    if (pTitle) pTitle.textContent = titles[tabId] || 'Panel';
+
     // Guardar tab activo en localStorage
     localStorage.setItem('inafuma_active_tab', tabId);
-    
-    if(tabId === 'market') { setMarketMode('buy'); filterMarket(); }
-    if(tabId === 'tactics') renderTactics();
-    if(tabId === 'league') renderLeague();
-    if(tabId === 'train') renderTrainStatus();
-    if(tabId === 'talk') renderTalkStatus();
-    if(tabId === 'season') renderSeasonTab();
-    if(tabId === 'bet') renderBetTab();
-    if(tabId === 'dash') updateUI();
-    if(tabId === 'squad') renderSquad();
+
+    if (tabId === 'market') { setMarketMode('buy'); filterMarket(); }
+    if (tabId === 'tactics') renderTactics();
+    if (tabId === 'league') renderLeague();
+    if (tabId === 'train') renderTrainStatus();
+    if (tabId === 'talk') renderTalkStatus();
+    if (tabId === 'season') renderSeasonTab();
+    if (tabId === 'bet') renderBetTab();
+    if (tabId === 'dash') updateUI();
+    if (tabId === 'squad') renderSquad();
 }
 
 function addEmail(sender, subject, body) {
-    const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
+    const date = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
 }
 
 function renderInbox() {
     const list = document.getElementById('inbox-list');
-    if(!list) return;
+    if (!list) return;
     list.innerHTML = '';
-    
-    if(state.inbox.length === 0) {
+
+    if (state.inbox.length === 0) {
         list.innerHTML = '<div class="text-slate-500 text-sm text-center italic mt-4">Sin noticias.</div>';
         return;
     }
-    
+
     state.inbox.forEach(mail => {
         const opacity = mail.read ? 'opacity-60' : 'opacity-100';
         const dot = mail.read ? '' : '<span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2"></span>';
@@ -397,18 +431,18 @@ function renderInbox() {
         </div>`;
     });
 }
-window.readMail = function(id) { const m = state.inbox.find(x => x.id === id); if(m) { m.read = true; saveState(); renderInbox(); } }
+window.readMail = function (id) { const m = state.inbox.find(x => x.id === id); if (m) { m.read = true; saveState(); renderInbox(); } }
 
 function getStartingXI() { return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p !== undefined); }
 function getTeamOvr() {
     const xi = getStartingXI();
-    if(xi.length === 0) return 0;
+    if (xi.length === 0) return 0;
     const sum = xi.reduce((acc, p) => acc + (p.ovr * (1 + ((p.morale - 50) / 200)) * (p.con / 100)), 0);
     return Math.round(sum / xi.length);
 }
 
-function getBadgeHTML(name, shape, c1, c2, extraClass="w-8 h-10 text-[10px]") {
-    let n = name ? name.substring(0,3).toUpperCase() : "FM";
+function getBadgeHTML(name, shape, c1, c2, extraClass = "w-8 h-10 text-[10px]") {
+    let n = name ? name.substring(0, 3).toUpperCase() : "FM";
     let sh = shape || "shape-shield";
     let col1 = c1 || "#1e293b";
     let col2 = c2 || "#0f172a";
@@ -416,39 +450,39 @@ function getBadgeHTML(name, shape, c1, c2, extraClass="w-8 h-10 text-[10px]") {
 }
 
 function updateUI() {
-    if(!state || !state.team) return;
-    const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
-    
+    if (!state || !state.team) return;
+    const formatM = (num) => num >= 1000000 ? (num / 1000000).toFixed(1) + 'M' : num.toLocaleString();
+
     document.getElementById('ui-rep').textContent = "★ " + state.stats.rep;
     document.getElementById('ui-coins').textContent = "€" + formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
     document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
     document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
-    
+
     document.getElementById('top-manager').textContent = state.team.manager;
     document.getElementById('sidebar-manager').textContent = state.team.manager;
-    
+
     const teamNameEls = document.querySelectorAll('#top-teamname, #sidebar-teamname, #dash-greeting-team');
     teamNameEls.forEach(el => el.textContent = state.team.name);
-    
+
     const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow");
     document.getElementById('top-shield').innerHTML = badgeHTML;
     document.getElementById('sidebar-shield').innerHTML = badgeHTML;
-    
+
     // Próximo Partido en UI
     let myNextFix = state.nextFixtures ? state.nextFixtures.find(f => f.isUserMatch) : null;
-    if(myNextFix) {
+    if (myNextFix) {
         let isHome = myNextFix.home === state.team.name;
         let oppName = isHome ? myNextFix.away : myNextFix.home;
         let oppData = state.league.find(t => t.name === oppName) || { badge: AI_TEAMS[0] };
-        
+
         document.getElementById('ui-next-opp').textContent = oppName;
         document.getElementById('dash-next-home').textContent = myNextFix.home;
         document.getElementById('dash-next-away').textContent = myNextFix.away;
-        
+
         let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20") : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
         let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20");
-        
+
         document.getElementById('dash-next-home-shield').innerHTML = homeBadge;
         document.getElementById('dash-next-away-shield').innerHTML = awayBadge;
     } else {
@@ -462,62 +496,62 @@ function updateUI() {
     document.getElementById('dash-losses').textContent = state.stats.losses;
 
     renderInbox(); renderSquad();
-    if(document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
+    if (document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
 }
 
 /* =========================================================================
    FIXTURES (CALENDARIO DE 38 JORNADAS) Y RESULTADOS
    ========================================================================= */
 function generateFixtures(targetState = state) {
-    if(targetState.stats.matchday > 38) return;
+    if (targetState.stats.matchday > 38) return;
     let fixtures = [];
-    
+
     // Buscamos equipo que el usuario haya jugado MENOS de 2 veces.
     const unplayed = targetState.league.filter(t => !t.isUser && targetState.playedTeams.filter(x => x === t.name).length < 2);
     let myOpponent = null;
-    
-    if(unplayed.length > 0) {
+
+    if (unplayed.length > 0) {
         myOpponent = unplayed[Math.floor(Math.random() * unplayed.length)];
-        let isHome = Math.random() > 0.5; 
-        if(isHome) fixtures.push({ home: targetState.team.name, away: myOpponent.name, isUserMatch: true, homeOvr: getTeamOvr(), awayOvr: myOpponent.ovr });
+        let isHome = Math.random() > 0.5;
+        if (isHome) fixtures.push({ home: targetState.team.name, away: myOpponent.name, isUserMatch: true, homeOvr: getTeamOvr(), awayOvr: myOpponent.ovr });
         else fixtures.push({ home: myOpponent.name, away: targetState.team.name, isUserMatch: true, homeOvr: myOpponent.ovr, awayOvr: getTeamOvr() });
     }
 
     // Partidos IA contra IA
     let remainingAIs = targetState.league.filter(t => !t.isUser && (!myOpponent || t.name !== myOpponent.name));
     remainingAIs = remainingAIs.sort(() => Math.random() - 0.5);
-    
-    for(let i=0; i<remainingAIs.length; i+=2) {
-        if(remainingAIs[i+1]) {
+
+    for (let i = 0; i < remainingAIs.length; i += 2) {
+        if (remainingAIs[i + 1]) {
             fixtures.push({
                 home: remainingAIs[i].name,
-                away: remainingAIs[i+1].name,
+                away: remainingAIs[i + 1].name,
                 isUserMatch: false,
                 homeOvr: remainingAIs[i].ovr,
-                awayOvr: remainingAIs[i+1].ovr
+                awayOvr: remainingAIs[i + 1].ovr
             });
         }
     }
     targetState.nextFixtures = fixtures;
 }
 
-window.renderSeasonTab = function() {
+window.renderSeasonTab = function () {
     const selector = document.getElementById('season-matchday-select');
     const list = document.getElementById('season-results-list');
-    if(!selector || !list) return;
+    if (!selector || !list) return;
 
-    if(selector.options.length === 0 || selector.options.length < state.stats.matchday - 1) {
+    if (selector.options.length === 0 || selector.options.length < state.stats.matchday - 1) {
         selector.innerHTML = '';
-        for(let i = 1; i < state.stats.matchday; i++) {
+        for (let i = 1; i < state.stats.matchday; i++) {
             selector.innerHTML += `<option value="${i}">Jornada ${i}</option>`;
         }
-        if(selector.options.length > 0) selector.value = state.stats.matchday - 1; 
+        if (selector.options.length > 0) selector.value = state.stats.matchday - 1;
     }
 
     const selectedDay = selector.value;
     list.innerHTML = '';
 
-    if(!state.history || !state.history[selectedDay]) {
+    if (!state.history || !state.history[selectedDay]) {
         list.innerHTML = '<div class="text-center text-slate-500 text-xs mt-10">Selecciona una jornada pasada.</div>';
         return;
     }
@@ -540,20 +574,20 @@ window.renderSeasonTab = function() {
 /* =========================================================================
    APUESTAS DEPORTIVAS
    ========================================================================= */
-window.renderBetTab = function() {
+window.renderBetTab = function () {
     const selMatch = document.getElementById('bet-match-select');
     const listBets = document.getElementById('active-bets-list');
-    if(!selMatch || !listBets) return;
+    if (!selMatch || !listBets) return;
 
     selMatch.innerHTML = '';
-    if(state.nextFixtures) {
+    if (state.nextFixtures) {
         state.nextFixtures.forEach((fix, index) => {
             selMatch.innerHTML += `<option value="${index}">${fix.home} vs ${fix.away}</option>`;
         });
     }
 
     listBets.innerHTML = '';
-    if(!state.activeBets || state.activeBets.length === 0) {
+    if (!state.activeBets || state.activeBets.length === 0) {
         listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas para esta jornada.</div>';
         return;
     }
@@ -569,25 +603,25 @@ window.renderBetTab = function() {
             </div>
             <div class="text-right">
                 <div class="text-[9px] font-bold text-slate-300 uppercase">Inversión</div>
-                <div class="text-lg font-mono font-bold text-${bet.currency==='coins'?'green':'yellow'}-400">${bet.amount}</div>
+                <div class="text-lg font-mono font-bold text-${bet.currency === 'coins' ? 'green' : 'yellow'}-400">${bet.amount}</div>
                 <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
             </div>
         </div>`;
     });
 }
 
-window.placeBet = function() {
+window.placeBet = function () {
     const matchIdx = document.getElementById('bet-match-select').value;
     const hG = parseInt(document.getElementById('bet-hg').value);
     const aG = parseInt(document.getElementById('bet-ag').value);
     const amount = parseInt(document.getElementById('bet-amount').value);
     const currency = document.getElementById('bet-currency').value;
 
-    if(isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos válidos. Mínimo 10 de apuesta.");
-    if(currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
-    if(currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
+    if (isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos válidos. Mínimo 10 de apuesta.");
+    if (currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
+    if (currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
 
-    if(currency === 'coins') state.economy.coins -= amount;
+    if (currency === 'coins') state.economy.coins -= amount;
     else state.economy.premium -= amount;
 
     const fixture = state.nextFixtures[matchIdx];
@@ -603,18 +637,18 @@ window.placeBet = function() {
    ========================================================================= */
 function renderLeague() {
     const tbody = document.getElementById('league-tbody');
-    if(!tbody) return;
+    if (!tbody) return;
     tbody.innerHTML = '';
-    const sorted = [...state.league].sort((a,b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    const sorted = [...state.league].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
 
     sorted.forEach((t, i) => {
         const isUserClass = t.isUser ? 'user-row' : '';
         const badgeObj = t.isUser ? state.team : (t.badge || AI_TEAMS[0]);
         const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto border border-white/10");
-        
+
         tbody.innerHTML += `
         <tr class="${isUserClass}">
-            <td class="text-center font-bold">${i+1}</td>
+            <td class="text-center font-bold">${i + 1}</td>
             <td class="text-center p-1">${miniBadge}</td>
             <td class="text-white">${t.name}</td>
             <td>${t.pld}</td>
@@ -630,36 +664,36 @@ function renderLeague() {
 }
 
 function updateTeamStats(team, gf, ga) {
-    if(!team) return;
-    team.pld++; team.gf+=gf; team.ga+=ga;
-    if(gf>ga) { team.w++; team.pts+=3; }
-    else if(gf===ga) { team.d++; team.pts+=1; }
+    if (!team) return;
+    team.pld++; team.gf += gf; team.ga += ga;
+    if (gf > ga) { team.w++; team.pts += 3; }
+    else if (gf === ga) { team.d++; team.pts += 1; }
     else { team.l++; }
 }
 
 /* =========================================================================
    ENTRENAMIENTO Y VESTUARIO
    ========================================================================= */
-function renderTrainStatus() { 
+function renderTrainStatus() {
     const st = document.getElementById('train-status');
-    if(st) st.textContent = state.flags.canTrain ? "PROGRAMACIÓN DISPONIBLE" : "SESIÓN COMPLETADA. JUEGA PARA AVANZAR."; 
+    if (st) st.textContent = state.flags.canTrain ? "PROGRAMACIÓN DISPONIBLE" : "SESIÓN COMPLETADA. JUEGA PARA AVANZAR.";
 }
 
-window.executeWeeklyTraining = function() {
-    if(!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
-    if(state.roster.length === 0) return showAlert("No tienes jugadores.");
+window.executeWeeklyTraining = function () {
+    if (!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
+    if (state.roster.length === 0) return showAlert("No tienes jugadores.");
 
-    const days = ['mon','tue','wed','thu','fri'];
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
     days.forEach(d => {
         let type = document.getElementById(`train-${d}`).value;
         state.roster.forEach(p => {
-            if(type !== 'rest') {
-                if(type==='atk' && (p.pos==='DEL' || p.pos==='MED')) { p.sho++; p.pas++; }
-                if(type==='def' && (p.pos!=='DEL')) { p.def++; p.phy++; }
-                if(type==='phy') { p.pac++; p.phy++; }
-                p.con = Math.max(10, p.con - 6); 
+            if (type !== 'rest') {
+                if (type === 'atk' && (p.pos === 'DEL' || p.pos === 'MED')) { p.sho++; p.pas++; }
+                if (type === 'def' && (p.pos !== 'DEL')) { p.def++; p.phy++; }
+                if (type === 'phy') { p.pac++; p.phy++; }
+                p.con = Math.max(10, p.con - 6);
             } else {
-                p.con = Math.min(100, p.con + 15); 
+                p.con = Math.min(100, p.con + 15);
             }
             p.ovr = calcPlayerOVR(p);
         });
@@ -669,33 +703,33 @@ window.executeWeeklyTraining = function() {
     showAlert("Programa completado. Atributos y Condición Física actualizados.");
 }
 
-function renderTalkStatus() { 
+function renderTalkStatus() {
     const st = document.getElementById('talk-status');
-    if(st) st.textContent = state.flags.canTalk ? "DISPONIBLE" : "COMPLETADO"; 
+    if (st) st.textContent = state.flags.canTalk ? "DISPONIBLE" : "COMPLETADO";
 }
 
-window.executeTalk = function(tone) {
-    if(!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
+window.executeTalk = function (tone) {
+    if (!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
     let xi = getStartingXI();
     let bench = state.roster.filter(p => !state.lineup.includes(p.id));
 
-    if(tone === 'calm') {
-        state.roster.forEach(p => p.morale = Math.min(100, p.morale+5));
+    if (tone === 'calm') {
+        state.roster.forEach(p => p.morale = Math.min(100, p.morale + 5));
         showAlert("Toda la plantilla sube +5 de Moral.");
-    } else if(tone === 'aggressive') {
-        if(Math.random() < 0.7) {
-            state.roster.forEach(p => p.morale = Math.min(100, p.morale+20));
+    } else if (tone === 'aggressive') {
+        if (Math.random() < 0.7) {
+            state.roster.forEach(p => p.morale = Math.min(100, p.morale + 20));
             showAlert("¡La bronca ha funcionado! (+20 Moral).");
         } else {
-            state.roster.forEach(p => p.morale = Math.max(0, p.morale-15));
+            state.roster.forEach(p => p.morale = Math.max(0, p.morale - 15));
             showAlert("Te has pasado. El equipo está presionado (-15 Moral).");
         }
-    } else if(tone === 'passionate') {
-        state.roster.forEach(p => { if(Math.random() < 0.5) p.morale = Math.min(100, p.morale+15); });
+    } else if (tone === 'passionate') {
+        state.roster.forEach(p => { if (Math.random() < 0.5) p.morale = Math.min(100, p.morale + 15); });
         showAlert("El discurso ha calado en parte de la plantilla (+15 Moral).");
-    } else if(tone === 'assertive') {
-        xi.forEach(p => p.morale = Math.min(100, p.morale+10));
-        bench.forEach(p => p.morale = Math.max(0, p.morale-5));
+    } else if (tone === 'assertive') {
+        xi.forEach(p => p.morale = Math.min(100, p.morale + 10));
+        bench.forEach(p => p.morale = Math.max(0, p.morale - 5));
         showAlert("Titulares suben (+10 Moral), suplentes bajan (-5 Moral).");
     }
 
@@ -706,25 +740,25 @@ window.executeTalk = function(tone) {
    PLANTILLA Y TÁCTICAS (ARRASTRAR Y SOLTAR)
    ========================================================================= */
 function getAttrClass(val) {
-    if(val >= 85) return 'bg-[#10b981] text-white';
-    if(val >= 70) return 'bg-[#eab308] text-black';
-    if(val >= 50) return 'bg-[#f97316] text-white';
+    if (val >= 85) return 'bg-[#10b981] text-white';
+    if (val >= 70) return 'bg-[#eab308] text-black';
+    if (val >= 50) return 'bg-[#f97316] text-white';
     return 'bg-[#ef4444] text-white';
 }
 
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
-    if(!tbody) return;
+    if (!tbody) return;
     tbody.innerHTML = '';
-    
+
     const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
-    const sorted = [...state.roster].sort((a,b) => posOrder[a.pos] - posOrder[b.pos] || b.ovr - a.ovr);
-    
+    const sorted = [...state.roster].sort((a, b) => posOrder[a.pos] - posOrder[b.pos] || b.ovr - a.ovr);
+
     sorted.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
         let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
-        
+
         tbody.innerHTML += `
         <tr>
             <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
@@ -743,69 +777,69 @@ function renderSquad() {
         </tr>`;
     });
     const ovrTag = document.getElementById('squad-ovr');
-    if(ovrTag) ovrTag.textContent = getTeamOvr();
+    if (ovrTag) ovrTag.textContent = getTeamOvr();
 }
 
 let dragSrc = { id: null, slot: null };
-window.dragStart = function(e, pId, slotIndex) { 
-    dragSrc = { id: pId, slot: slotIndex }; 
-    
+window.dragStart = function (e, pId, slotIndex) {
+    dragSrc = { id: pId, slot: slotIndex };
+
     // Crear ghost personalizado: solo la bola con la imagen del jugador
     const player = state.roster.find(p => p.id === pId);
     const ghost = document.createElement('div');
     ghost.className = 'drag-ghost';
-    if(player) {
+    if (player) {
         ghost.style.backgroundImage = `url(${player.img})`;
     }
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, 22, 22);
     // Limpiar ghost después de que el navegador lo capture
-    setTimeout(() => { if(ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 100);
-    
-    setTimeout(() => e.target.classList.add('opacity-50'), 0); 
-};
-window.dragEnd = function(e) { e.target.classList.remove('opacity-50'); };
-window.allowDrop = function(e) { e.preventDefault(); };
+    setTimeout(() => { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 100);
 
-window.dropOnPitch = function(e, targetSlotIndex) {
-    e.preventDefault(); if(!dragSrc.id) return;
-    
-    const targetPlayerId = state.lineup[targetSlotIndex]; 
-    if (dragSrc.slot !== null) { 
-        state.lineup[dragSrc.slot] = targetPlayerId; 
-        state.lineup[targetSlotIndex] = dragSrc.id; 
-    } else { 
-        state.lineup[targetSlotIndex] = dragSrc.id; 
+    setTimeout(() => e.target.classList.add('opacity-50'), 0);
+};
+window.dragEnd = function (e) { e.target.classList.remove('opacity-50'); };
+window.allowDrop = function (e) { e.preventDefault(); };
+
+window.dropOnPitch = function (e, targetSlotIndex) {
+    e.preventDefault(); if (!dragSrc.id) return;
+
+    const targetPlayerId = state.lineup[targetSlotIndex];
+    if (dragSrc.slot !== null) {
+        state.lineup[dragSrc.slot] = targetPlayerId;
+        state.lineup[targetSlotIndex] = dragSrc.id;
+    } else {
+        state.lineup[targetSlotIndex] = dragSrc.id;
     }
     saveState(); renderTactics();
 };
 
-window.dropOnBench = function(e) { 
-    e.preventDefault(); 
-    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); } 
+window.dropOnBench = function (e) {
+    e.preventDefault();
+    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); }
 };
 
-window.changeFormation = function() { state.formation = document.getElementById('tactics-formation').value; saveState(); renderTactics(); }
+window.changeFormation = function () { state.formation = document.getElementById('tactics-formation').value; saveState(); renderTactics(); }
 
-window.autoFillLineup = function() {
+window.autoFillLineup = function () {
     const posMap = {
-        '4-4-2': ['POR', 'DEF','DEF','DEF','DEF', 'MED','MED','MED','MED', 'DEL','DEL'],
-        '4-3-3': ['POR', 'DEF','DEF','DEF','DEF', 'MED','MED','MED', 'DEL','DEL','DEL'],
-        '5-3-2': ['POR', 'DEF','DEF','DEF','DEF','DEF', 'MED','MED','MED', 'DEL','DEL'],
-        '3-4-3': ['POR', 'DEF','DEF','DEF', 'MED','MED','MED','MED', 'DEL','DEL','DEL'],
-        '4-2-3-1': ['POR', 'DEF','DEF','DEF','DEF', 'MED','MED','MED','MED','MED', 'DEL'],
-        '5-4-1': ['POR', 'DEF','DEF','DEF','DEF','DEF', 'MED','MED','MED','MED', 'DEL']
+        '4-4-2': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL'],
+        '4-3-3': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'DEL', 'DEL', 'DEL'],
+        '5-3-2': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'DEL', 'DEL'],
+        '3-4-3': ['POR', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL', 'DEL'],
+        '4-2-3-1': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'MED', 'DEL'],
+        '5-4-1': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL']
     };
     const targetLayout = posMap[state.formation];
     let newLineup = new Array(11).fill(null);
-    let availableRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr); 
+    let availableRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr);
 
     for (let i = 0; i < 11; i++) {
         let neededPos = targetLayout[i];
         let bestPlayerIndex = availableRoster.findIndex(p => p.pos === neededPos);
         if (bestPlayerIndex !== -1) {
             newLineup[i] = availableRoster[bestPlayerIndex].id;
-            availableRoster.splice(bestPlayerIndex, 1); 
+            availableRoster.splice(bestPlayerIndex, 1);
         }
     }
     for (let i = 0; i < 11; i++) {
@@ -819,25 +853,25 @@ window.autoFillLineup = function() {
 
 function renderTactics() {
     const formSelect = document.getElementById('tactics-formation');
-    if(formSelect) formSelect.value = state.formation;
+    if (formSelect) formSelect.value = state.formation;
     const pitch = document.getElementById('pitch-players');
     const benchContainer = document.getElementById('bench-list');
-    if(!pitch || !benchContainer) return;
+    if (!pitch || !benchContainer) return;
     pitch.innerHTML = ''; benchContainer.innerHTML = '';
 
     const layouts = {
-        '4-4-2': [ {x:50,y:85},{x:20,y:65},{x:40,y:70},{x:60,y:70},{x:80,y:65},{x:20,y:35},{x:40,y:40},{x:60,y:40},{x:80,y:35},{x:40,y:15},{x:60,y:15} ],
-        '4-3-3': [ {x:50,y:85},{x:20,y:70},{x:40,y:75},{x:60,y:75},{x:80,y:70},{x:30,y:45},{x:50,y:40},{x:70,y:45},{x:20,y:20},{x:50,y:15},{x:80,y:20} ],
-        '5-3-2': [ {x:50,y:85},{x:10,y:65},{x:30,y:75},{x:50,y:78},{x:70,y:75},{x:90,y:65},{x:30,y:40},{x:50,y:45},{x:70,y:40},{x:40,y:15},{x:60,y:15} ],
-        '3-4-3': [ {x:50,y:85},{x:25,y:70},{x:50,y:75},{x:75,y:70},{x:15,y:45},{x:38,y:40},{x:62,y:40},{x:85,y:45},{x:25,y:20},{x:50,y:15},{x:75,y:20} ],
-        '4-2-3-1': [{x:50,y:85},{x:20,y:70},{x:40,y:75},{x:60,y:75},{x:80,y:70},{x:35,y:50},{x:65,y:50},{x:20,y:30},{x:50,y:25},{x:80,y:30},{x:50,y:10} ],
-        '5-4-1': [ {x:50,y:85},{x:10,y:70},{x:30,y:75},{x:50,y:78},{x:70,y:75},{x:90,y:70},{x:20,y:45},{x:40,y:50},{x:60,y:50},{x:80,y:45},{x:50,y:20} ]
+        '4-4-2': [{ x: 50, y: 85 }, { x: 20, y: 65 }, { x: 40, y: 70 }, { x: 60, y: 70 }, { x: 80, y: 65 }, { x: 20, y: 35 }, { x: 40, y: 40 }, { x: 60, y: 40 }, { x: 80, y: 35 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '4-3-3': [{ x: 50, y: 85 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 30, y: 45 }, { x: 50, y: 40 }, { x: 70, y: 45 }, { x: 20, y: 20 }, { x: 50, y: 15 }, { x: 80, y: 20 }],
+        '5-3-2': [{ x: 50, y: 85 }, { x: 10, y: 65 }, { x: 30, y: 75 }, { x: 50, y: 78 }, { x: 70, y: 75 }, { x: 90, y: 65 }, { x: 30, y: 40 }, { x: 50, y: 45 }, { x: 70, y: 40 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '3-4-3': [{ x: 50, y: 85 }, { x: 25, y: 70 }, { x: 50, y: 75 }, { x: 75, y: 70 }, { x: 15, y: 45 }, { x: 38, y: 40 }, { x: 62, y: 40 }, { x: 85, y: 45 }, { x: 25, y: 20 }, { x: 50, y: 15 }, { x: 75, y: 20 }],
+        '4-2-3-1': [{ x: 50, y: 85 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 35, y: 50 }, { x: 65, y: 50 }, { x: 20, y: 30 }, { x: 50, y: 25 }, { x: 80, y: 30 }, { x: 50, y: 10 }],
+        '5-4-1': [{ x: 50, y: 85 }, { x: 10, y: 70 }, { x: 30, y: 75 }, { x: 50, y: 78 }, { x: 70, y: 75 }, { x: 90, y: 70 }, { x: 20, y: 45 }, { x: 40, y: 50 }, { x: 60, y: 50 }, { x: 80, y: 45 }, { x: 50, y: 20 }]
     };
 
     layouts[state.formation].forEach((pos, index) => {
         const player = state.roster.find(p => p.id === state.lineup[index]);
         let innerHTML = '';
-        if(player) {
+        if (player) {
             let conColor = player.con >= 85 ? '#10b981' : player.con >= 60 ? '#eab308' : '#ef4444';
             innerHTML = `
                 <div class="pitch-ovr-tag">${player.ovr}</div>
@@ -874,7 +908,7 @@ function renderTactics() {
 let marketMode = 'buy';
 let currentMarketFilter = 'ALL';
 
-window.setMarketMode = function(mode) {
+window.setMarketMode = function (mode) {
     marketMode = mode;
     document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
@@ -882,33 +916,33 @@ window.setMarketMode = function(mode) {
     filterMarket();
 };
 
-window.filterMarket = function(pos) {
-    if(pos) currentMarketFilter = pos;
+window.filterMarket = function (pos) {
+    if (pos) currentMarketFilter = pos;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById(`filter-${currentMarketFilter}`);
-    if(btn) btn.classList.add('active');
+    if (btn) btn.classList.add('active');
 
-    const formatM = (num) => (num/1000000).toFixed(1)+'M';
+    const formatM = (num) => (num / 1000000).toFixed(1) + 'M';
     document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     const tbody = document.getElementById('market-tbody');
-    if(!tbody) return;
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     let items = marketMode === 'buy' ? PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id)) : state.roster;
-    if(currentMarketFilter !== 'ALL') items = items.filter(p => p.pos === currentMarketFilter);
-    if(searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
+    if (currentMarketFilter !== 'ALL') items = items.filter(p => p.pos === currentMarketFilter);
+    if (searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
 
-    if(items.length === 0) {
+    if (items.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">Sin resultados de búsqueda.</td></tr>`;
         return;
     }
 
     items.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
-        if(marketMode === 'buy') {
+        if (marketMode === 'buy') {
             const canRep = state.stats.rep >= p.rep;
             tbody.innerHTML += `
             <tr>
@@ -921,7 +955,7 @@ window.filterMarket = function(pos) {
                 <td class="text-center"><button class="btn-action w-3/4 py-1.5 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button></td>
             </tr>`;
         } else {
-            const sellValue = Math.floor(p.priceBasic * 0.6); 
+            const sellValue = Math.floor(p.priceBasic * 0.6);
             tbody.innerHTML += `
             <tr>
                 <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
@@ -936,49 +970,49 @@ window.filterMarket = function(pos) {
     });
 }
 
-window.buyPlayer = function(id, curr) {
+window.buyPlayer = function (id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if(state.stats.rep < p.rep) return showAlert(`Reputación Insuficiente (Req: ★ ${p.rep}).`);
-    
-    if(curr === 'basic') {
-        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
+    if (state.stats.rep < p.rep) return showAlert(`Reputación Insuficiente (Req: ★ ${p.rep}).`);
+
+    if (curr === 'basic') {
+        if (state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
-        if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
+        if (state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
         state.economy.premium -= p.pricePrem;
     }
 
     let newPlayer = JSON.parse(JSON.stringify(p));
     newPlayer.con = 100;
     newPlayer.morale = 100;
-    
+
     state.roster.push(newPlayer);
     const emptySlot = state.lineup.findIndex(slot => slot === null);
-    if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
-    
+    if (emptySlot !== -1) state.lineup[emptySlot] = p.id;
+
     addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Hemos llegado a un acuerdo y el jugador se incorpora al club.`);
     saveState(); filterMarket();
 }
 
-window.sellPlayer = function(id, sellValue) {
-    showConfirm(`¿Vender al jugador y añadir €${(sellValue/1000000).toFixed(1)}M al club?`, () => {
+window.sellPlayer = function (id, sellValue) {
+    showConfirm(`¿Vender al jugador y añadir €${(sellValue / 1000000).toFixed(1)}M al club?`, () => {
         state.economy.coins += sellValue;
         state.roster = state.roster.filter(p => p.id !== id);
-        for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
+        for (let i = 0; i < state.lineup.length; i++) { if (state.lineup[i] === id) state.lineup[i] = null; }
         saveState(); filterMarket();
     });
 }
 
-window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); renderCart(); }
+window.buyIAP = function () { document.getElementById('modal-store').classList.remove('hidden'); renderCart(); }
 
 /* =========================================================================
    CARRITO DE COMPRA Y METODO DE PAGO (1 PACK A LA VEZ CON PRECIOS EUR)
    ========================================================================= */
 let selectedPack = null; // { amount: number, price: number } o null
 
-window.selectPack = function(amount, price) {
+window.selectPack = function (amount, price) {
     // Solo un paquete a la vez: si ya está seleccionado el mismo, deseleccionar
-    if(selectedPack && selectedPack.amount === amount) {
+    if (selectedPack && selectedPack.amount === amount) {
         selectedPack = null;
     } else {
         selectedPack = { amount, price };
@@ -986,18 +1020,18 @@ window.selectPack = function(amount, price) {
     renderCart();
 }
 
-window.addToCart = function(amount) {
+window.addToCart = function (amount) {
     // Legacy compat - mapear a selectPack
-    const priceMap = {500:0.99, 2000:3.99, 5000:7.99, 10000:14.99, 25000:34.99, 50000:59.99};
+    const priceMap = { 500: 0.99, 2000: 3.99, 5000: 7.99, 10000: 14.99, 25000: 34.99, 50000: 59.99 };
     selectPack(amount, priceMap[amount] || 0.99);
 }
 
-window.clearCart = function() {
+window.clearCart = function () {
     selectedPack = null;
     renderCart();
 }
 
-window.removeFromCart = function() {
+window.removeFromCart = function () {
     selectedPack = null;
     renderCart();
 }
@@ -1007,25 +1041,25 @@ function renderCart() {
     const totalEl = document.getElementById('cart-total');
     const totalEurEl = document.getElementById('cart-total-eur');
     const btnPayAmount = document.getElementById('btn-pay-amount');
-    if(!listEl || !totalEl) return;
-    
+    if (!listEl || !totalEl) return;
+
     // Actualizar selección visual de packs
     document.querySelectorAll('.store-pack').forEach(el => {
         el.classList.remove('selected');
-        if(selectedPack && el.dataset.pack == selectedPack.amount) {
+        if (selectedPack && el.dataset.pack == selectedPack.amount) {
             el.classList.add('selected');
         }
     });
-    
-    if(!selectedPack) {
+
+    if (!selectedPack) {
         listEl.innerHTML = '<div class="text-sky-500 text-xs text-center italic">Ningún paquete seleccionado</div>';
         totalEl.textContent = '0';
-        if(totalEurEl) totalEurEl.textContent = '0,00 €';
-        if(btnPayAmount) btnPayAmount.textContent = '0,00 €';
+        if (totalEurEl) totalEurEl.textContent = '0,00 €';
+        if (btnPayAmount) btnPayAmount.textContent = '0,00 €';
         updatePaymentButton();
         return;
     }
-    
+
     const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
     listEl.innerHTML = `
     <div class="flex justify-between items-center bg-[#132a4a] p-3 rounded border border-yellow-500/30">
@@ -1037,22 +1071,22 @@ function renderCart() {
             <button onclick="removeFromCart()" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">✕</button>
         </div>
     </div>`;
-    
+
     totalEl.textContent = selectedPack.amount.toLocaleString();
-    if(totalEurEl) totalEurEl.textContent = priceStr + ' €';
-    if(btnPayAmount) btnPayAmount.textContent = priceStr + ' €';
+    if (totalEurEl) totalEurEl.textContent = priceStr + ' €';
+    if (btnPayAmount) btnPayAmount.textContent = priceStr + ' €';
     updatePaymentButton();
 }
 
 function updatePaymentButton() {
     const payBtn = document.getElementById('btn-process-payment');
     const payMethod = document.getElementById('payment-method');
-    if(!payBtn || !payMethod) return;
-    
+    if (!payBtn || !payMethod) return;
+
     const hasPack = selectedPack !== null;
     const hasMethod = payMethod.value !== '';
-    
-    if(hasPack && hasMethod) {
+
+    if (hasPack && hasMethod) {
         payBtn.disabled = false;
         payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
@@ -1061,32 +1095,32 @@ function updatePaymentButton() {
     }
 }
 
-window.closeStore = function() {
+window.closeStore = function () {
     document.getElementById('modal-store').classList.add('hidden');
     selectedPack = null;
     renderCart();
     const payMethod = document.getElementById('payment-method');
-    if(payMethod) payMethod.value = '';
+    if (payMethod) payMethod.value = '';
     const cardForm = document.getElementById('payment-card-form');
-    if(cardForm) cardForm.classList.add('hidden');
+    if (cardForm) cardForm.classList.add('hidden');
 }
 
-window.processPayment = function() {
-    if(!selectedPack) return showAlert("Selecciona un paquete de monedas.");
+window.processPayment = function () {
+    if (!selectedPack) return showAlert("Selecciona un paquete de monedas.");
     const payMethod = document.getElementById('payment-method');
-    if(!payMethod || payMethod.value === '') return showAlert("Selecciona un metodo de pago.");
-    
+    if (!payMethod || payMethod.value === '') return showAlert("Selecciona un metodo de pago.");
+
     // Validar datos de tarjeta si es visa/mastercard
-    if(payMethod.value === 'visa' || payMethod.value === 'mastercard') {
+    if (payMethod.value === 'visa' || payMethod.value === 'mastercard') {
         const cardNum = document.getElementById('card-number').value.trim();
         const cardExpiry = document.getElementById('card-expiry').value.trim();
         const cardCvv = document.getElementById('card-cvv').value.trim();
         const cardName = document.getElementById('card-name').value.trim();
-        if(!cardNum || !cardExpiry || !cardCvv || !cardName) {
+        if (!cardNum || !cardExpiry || !cardCvv || !cardName) {
             return showAlert("Completa todos los datos de la tarjeta.");
         }
     }
-    
+
     const amount = selectedPack.amount;
     const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
     state.economy.premium += amount;
@@ -1096,7 +1130,7 @@ window.processPayment = function() {
     showAlert(`Pago de ${priceStr} € procesado correctamente. +${amount.toLocaleString()} Monedas Premium añadidas.`);
 }
 
-window.confirmIAP = function() {
+window.confirmIAP = function () {
     // Legacy - kept for compatibility
     processPayment();
 }
@@ -1107,14 +1141,14 @@ window.confirmIAP = function() {
 let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0, isHome: true, stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 } };
 let currentOpponent = null;
 
-window.startMatch = function() {
+window.startMatch = function () {
     const xi = getStartingXI();
-    if(xi.length < 11) return showAlert(`Plantilla incompleta. Asigna a 11 titulares en Tácticas.`);
+    if (xi.length < 11) return showAlert(`Plantilla incompleta. Asigna a 11 titulares en Tácticas.`);
 
-    if(!state.nextFixtures || state.nextFixtures.length === 0) generateFixtures(state);
-    
+    if (!state.nextFixtures || state.nextFixtures.length === 0) generateFixtures(state);
+
     let myMatch = state.nextFixtures.find(f => f.isUserMatch);
-    if(!myMatch || state.stats.matchday > 38) {
+    if (!myMatch || state.stats.matchday > 38) {
         endSeason();
         return;
     }
@@ -1127,22 +1161,22 @@ window.startMatch = function() {
     document.getElementById('match-post').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
     document.getElementById('match-actions').classList.add('hidden');
-    
+
     document.getElementById('sim-home-name').textContent = isHome ? state.team.name : currentOpponent.name;
     document.getElementById('sim-away-name').textContent = isHome ? currentOpponent.name : state.team.name;
-    
+
     const hTeam = isHome ? state.team : currentOpponent.badge;
     const aTeam = isHome ? currentOpponent.badge : state.team;
-    
+
     document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(isHome ? state.team.name : currentOpponent.name, hTeam.shape, hTeam.c1, hTeam.c2, "w-12 h-16 text-xs");
     document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(isHome ? currentOpponent.name : state.team.name, aTeam.shape, aTeam.c1, aTeam.c2, "w-12 h-16 text-xs");
-    
-    const myOvr = getTeamOvr(); 
+
+    const myOvr = getTeamOvr();
     document.getElementById('sim-home-ovr').textContent = isHome ? myOvr : currentOpponent.ovr;
     document.getElementById('sim-away-ovr').textContent = isHome ? currentOpponent.ovr : myOvr;
-    
+
     // Cansancio Post Partido
-    state.roster.forEach(p => { if(state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
+    state.roster.forEach(p => { if (state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
 
     matchState = {
         mG: 0, oG: 0, min: 0, talkMod: 0, isHome: isHome,
@@ -1157,7 +1191,7 @@ window.startMatch = function() {
     document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>¡El árbitro señala el inicio del partido!</div>";
 
     updateMatchStatsUI();
-    runMatchLoop(45); 
+    runMatchLoop(45);
 }
 
 function updateMatchStatsUI() {
@@ -1168,7 +1202,7 @@ function updateMatchStatsUI() {
 
     document.getElementById('stat-shots-home').textContent = matchState.stats.hShots;
     document.getElementById('stat-shots-away').textContent = matchState.stats.aShots;
-    
+
     let totalShots = matchState.stats.hShots + matchState.stats.aShots;
     document.getElementById('bar-shots-home').style.width = totalShots > 0 ? ((matchState.stats.hShots / totalShots) * 100) + "%" : "50%";
     document.getElementById('bar-shots-away').style.width = totalShots > 0 ? ((matchState.stats.aShots / totalShots) * 100) + "%" : "50%";
@@ -1181,13 +1215,13 @@ function runMatchLoop(targetMinute) {
     matchState.interval = setInterval(() => {
         matchState.min += 3;
         document.getElementById('match-time').textContent = `${matchState.min}'`;
-        document.getElementById('match-progress').style.width = `${(matchState.min/90)*100}%`;
+        document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
 
         // Posesión dinámica
-        matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random()*11)-5)));
+        matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random() * 11) - 5)));
         matchState.stats.aPoss = 100 - matchState.stats.hPoss;
 
-        if(matchState.min === 45 && targetMinute === 45) {
+        if (matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
             logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al descanso.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
@@ -1197,52 +1231,52 @@ function runMatchLoop(targetMinute) {
             return;
         }
 
-        if(matchState.min >= 90) {
+        if (matchState.min >= 90) {
             clearInterval(matchState.interval);
             finishMatch(matchState.mG, matchState.oG); return;
         }
 
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
         let rand = Math.random();
-        let activeMyProb = matchState.myProb + matchState.talkMod; 
+        let activeMyProb = matchState.myProb + matchState.talkMod;
 
-        if(rand < (activeMyProb * 0.4)) {
+        if (rand < (activeMyProb * 0.4)) {
             matchState.mG++;
             matchState.isHome ? matchState.stats.hShots++ : matchState.stats.aShots++;
             const xi = getStartingXI();
             const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
-            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el delantero";
+            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
             eventText = `<span class="text-green-400 font-bold">¡GOL! Definición perfecta de ${scorer}.</span>`;
         } else if (rand > 1 - (matchState.oppProb * 0.4)) {
             matchState.oG++;
             matchState.isHome ? matchState.stats.aShots++ : matchState.stats.hShots++;
             eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Grave error en defensa.</span>`;
         } else if (rand < 0.3) {
-            matchState.stats.hShots++; 
+            matchState.stats.hShots++;
         } else if (rand > 0.7) {
-            matchState.stats.aShots++; 
+            matchState.stats.aShots++;
         }
 
         logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
-        logDiv.scrollTop = logDiv.scrollHeight; 
+        logDiv.scrollTop = logDiv.scrollHeight;
         document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
         document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
         updateMatchStatsUI();
 
-    }, 350); 
+    }, 350);
 }
 
-window.matchTalk = function(type) {
+window.matchTalk = function (type) {
     const logDiv = document.getElementById('match-narrative');
-    if(type === 'animar') {
-        matchState.talkMod = 0.01; 
+    if (type === 'animar') {
+        matchState.talkMod = 0.01;
         logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado para la 2ª parte.</div>`;
     } else {
-        if(Math.random() < 0.6) {
-            matchState.talkMod = 0.02; 
+        if (Math.random() < 0.6) {
+            matchState.talkMod = 0.02;
             logDiv.innerHTML += `<div class="text-green-400 mt-2 text-xs italic">Los jugadores reaccionan bien a la bronca.</div>`;
         } else {
-            matchState.talkMod = -0.01; 
+            matchState.talkMod = -0.01;
             logDiv.innerHTML += `<div class="text-red-400 mt-2 text-xs italic">La plantilla se pone nerviosa tras los gritos.</div>`;
         }
     }
@@ -1250,52 +1284,52 @@ window.matchTalk = function(type) {
     document.getElementById('match-halftime').innerHTML = '<button onclick="resumeMatch()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded text-xs uppercase tracking-widest mt-2 transition">JUGAR SEGUNDA PARTE</button>';
 }
 
-window.goToTacticsFromMatch = function() {
+window.goToTacticsFromMatch = function () {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     switchTab('tactics');
-    
+
     const topBtn = document.getElementById('top-continue-btn');
     topBtn.innerHTML = 'VOLVER AL PARTIDO ⏱';
     topBtn.className = "btn-continue shadow-lg bg-yellow-600";
     topBtn.onclick = returnToMatch;
 }
 
-window.returnToMatch = function() {
+window.returnToMatch = function () {
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('match-modal').classList.remove('hidden');
-    
+
     const topBtn = document.getElementById('top-continue-btn');
     topBtn.innerHTML = 'CONTINUAR ⏭';
     topBtn.className = "btn-continue shadow-lg";
     topBtn.onclick = startMatch;
 }
 
-window.resumeMatch = function() {
+window.resumeMatch = function () {
     document.getElementById('match-actions').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
-    
-    const newOvr = getTeamOvr(); 
-    matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003); 
+
+    const newOvr = getTeamOvr();
+    matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003);
 
     const logDiv = document.getElementById('match-narrative');
     logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la segunda mitad.</strong></div>`;
-    logDiv.scrollTop = logDiv.scrollHeight; 
-    runMatchLoop(90); 
+    logDiv.scrollTop = logDiv.scrollHeight;
+    runMatchLoop(90);
 }
 
 function finishMatch(mG, oG) {
     document.getElementById('match-actions').classList.remove('hidden');
     document.getElementById('match-post').classList.remove('hidden');
-    
+
     const logDiv = document.getElementById('match-narrative');
     logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
     logDiv.scrollTop = logDiv.scrollHeight;
 
     let ptsEarned = 0; let coins = 0; let rep = 0;
 
-    if(mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; } 
-    else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; } 
+    if (mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; }
+    else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; }
     else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
 
     state.stats.goals += mG;
@@ -1304,71 +1338,71 @@ function finishMatch(mG, oG) {
     let results = [];
     state.nextFixtures.forEach(fix => {
         let hG = 0, aG = 0;
-        if(fix.isUserMatch) {
+        if (fix.isUserMatch) {
             hG = matchState.isHome ? mG : oG;
             aG = matchState.isHome ? oG : mG;
         } else {
-            let p = 0.5 + ((fix.homeOvr - fix.awayOvr)*0.02);
-            hG = Math.random() < p ? Math.floor(Math.random()*4) : Math.floor(Math.random()*2);
-            aG = Math.random() > p ? Math.floor(Math.random()*4) : Math.floor(Math.random()*2);
+            let p = 0.5 + ((fix.homeOvr - fix.awayOvr) * 0.02);
+            hG = Math.random() < p ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+            aG = Math.random() > p ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
         }
-        
+
         results.push({ home: fix.home, away: fix.away, hG, aG });
-        updateTeamStats(state.league.find(t=>t.name===fix.home), hG, aG);
-        updateTeamStats(state.league.find(t=>t.name===fix.away), aG, hG);
+        updateTeamStats(state.league.find(t => t.name === fix.home), hG, aG);
+        updateTeamStats(state.league.find(t => t.name === fix.away), aG, hG);
     });
 
     state.history[state.stats.matchday.toString()] = results;
-    
+
     // Evaluar Apuestas
     let betResults = [];
     state.activeBets.forEach(b => {
         const actual = results.find(r => r.home === b.home && r.away === b.away);
-        if(actual) {
+        if (actual) {
             let actualWinner = actual.hG > actual.aG ? 'h' : (actual.aG > actual.hG ? 'a' : 'd');
             let predictedWinner = b.hG > b.aG ? 'h' : (b.aG > b.hG ? 'a' : 'd');
-            
-            if(actual.hG === b.hG && actual.aG === b.aG) {
+
+            if (actual.hG === b.hG && actual.aG === b.aG) {
                 let winAmt = b.amount * 2;
-                if(b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
+                if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
                 betResults.push(`Acierto EXACTO (${b.home}): +${winAmt}`);
             } else if (actualWinner === predictedWinner) {
                 let winAmt = Math.floor(b.amount * 1.5);
-                if(b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
+                if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
                 betResults.push(`Acierto GANADOR (${b.home}): +${winAmt}`);
             } else {
                 betResults.push(`Fallo (${b.home}): -${b.amount}`);
             }
         }
     });
-    
-    if(betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
-    state.activeBets = []; 
+
+    if (betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
+    state.activeBets = [];
 
     state.playedTeams.push(currentOpponent.name);
     state.stats.matches++;
     state.stats.matchday++;
     state.economy.coins += coins;
     state.stats.rep = Math.max(0, state.stats.rep + rep);
-    
+
     state.flags.canTrain = true;
     state.flags.canTalk = true;
 
     generateFixtures(state); // Crear siguiente jornada (Para verla en apuestas y demás)
     saveState();
-    
-    document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;
+
+    document.getElementById('match-coins').textContent = `+€${(coins / 1000000).toFixed(1)}M`;
     document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">REP: ${rep > 0 ? '+' : ''}${rep}</span>`;
 }
 
-window.endMatchAndReturn = function() {
+window.endMatchAndReturn = function () {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
-    
-    if(state.stats.matchday > 38) {
+
+    if (state.stats.matchday > 38) {
         endSeason();
     } else {
-        switchTab('league'); 
+        switchTab('league');
     }
 }
 
@@ -1377,15 +1411,15 @@ window.endMatchAndReturn = function() {
    ========================================================================= */
 function endSeason() {
     document.getElementById('modal-season-end').classList.remove('hidden');
-    
-    const sorted = [...state.league].sort((a,b) => {
-        if(b.pts !== a.pts) return b.pts - a.pts;
+
+    const sorted = [...state.league].sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
         return (b.gf - b.ga) - (a.gf - a.ga);
     });
-    
+
     const userPos = sorted.findIndex(t => t.isUser) + 1;
-    
-    if(userPos === 1) {
+
+    if (userPos === 1) {
         document.getElementById('season-trophy').classList.remove('hidden');
         document.getElementById('season-no-trophy').classList.add('hidden');
         state.stats.trophies++;
@@ -1399,19 +1433,19 @@ function endSeason() {
     saveState();
 }
 
-window.startNewSeason = function() {
+window.startNewSeason = function () {
     state.stats.matchday = 1;
-    state.playedTeams = []; 
+    state.playedTeams = [];
     state.history = {};
     state.activeBets = [];
-    
+
     state.league.forEach(t => {
         t.pld = 0; t.w = 0; t.d = 0; t.l = 0; t.gf = 0; t.ga = 0; t.pts = 0;
     });
-    
+
     state.roster.forEach(p => { p.morale = 100; p.con = 100; });
     generateFixtures(state);
-    
+
     saveState();
     document.getElementById('modal-season-end').classList.add('hidden');
     switchTab('dash');
