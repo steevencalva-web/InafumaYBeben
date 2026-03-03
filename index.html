@@ -202,8 +202,182 @@
         </div>
     </main>
 
+    <!-- ============== SELECCIÓN DE MODO DE JUEGO ============== -->
+    <main id="view-mode-select" class="view-section bg-[#0b1628] hidden items-center justify-center">
+        <div
+            class="glass-panel p-10 rounded-2xl max-w-2xl w-full border-t-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.15)]">
+            <h2 class="text-3xl font-gaming text-center text-white mb-2 uppercase tracking-widest">Modo de Juego</h2>
+            <p class="text-center text-slate-400 text-xs mb-8 uppercase tracking-widest">Elige cómo quieres competir</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- MODO LOCAL -->
+                <div class="bg-[#111119] border-2 border-[#313145] hover:border-blue-500 p-8 rounded-xl cursor-pointer transition-all duration-300 group hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] flex flex-col items-center text-center"
+                    onclick="selectGameMode('local')">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🏆</div>
+                    <h3 class="text-xl font-gaming text-blue-400 uppercase tracking-widest mb-3">Modo Local</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">Modo Carrera contra la IA. Compite en LaLiga
+                        Tussi durante 38 jornadas, entrena a tu equipo y lucha por el título.</p>
+                    <div class="mt-auto pt-4">
+                        <span
+                            class="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest">1
+                            Jugador</span>
+                    </div>
+                </div>
+
+                <!-- MODO MULTIJUGADOR -->
+                <div class="bg-[#111119] border-2 border-[#313145] hover:border-green-500 p-8 rounded-xl cursor-pointer transition-all duration-300 group hover:shadow-[0_0_30px_rgba(34,197,94,0.2)] flex flex-col items-center text-center"
+                    onclick="selectGameMode('multiplayer')">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">⚔️</div>
+                    <h3 class="text-xl font-gaming text-green-400 uppercase tracking-widest mb-3">Modo Multijugador
+                    </h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">Enfréntate a un rival real en tiempo real.
+                        Conecta con otro mánager y demuestra quién tiene el mejor equipo.</p>
+                    <div class="mt-auto pt-4">
+                        <span
+                            class="bg-green-600/20 text-green-400 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest">PvP
+                            Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============== OVERLAY BUSCANDO RIVAL ============== -->
+    <div id="pvp-searching-overlay"
+        class="fixed inset-0 bg-[#0a0a0f]/95 z-[200] hidden flex flex-col items-center justify-center backdrop-blur-md">
+        <div class="text-center">
+            <div class="relative w-24 h-24 mx-auto mb-6">
+                <div
+                    class="absolute inset-0 border-4 border-transparent border-t-green-400 border-r-green-400 rounded-full animate-spin">
+                </div>
+                <div class="absolute inset-2 border-4 border-transparent border-b-blue-400 border-l-blue-400 rounded-full animate-spin"
+                    style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-3xl">⚽</div>
+            </div>
+            <h2 class="text-2xl font-gaming text-white uppercase tracking-widest mb-2">Buscando Rival</h2>
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-6" id="pvp-search-status">Conectando al
+                servidor...</p>
+            <button onclick="cancelMultiplayerSearch()"
+                class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded text-xs uppercase tracking-widest transition">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- ============== MODAL PARTIDO PVP ============== -->
+    <div id="pvp-match-modal" class="view-section bg-[#0a0a0f] hidden flex-col z-[100]">
+        <header
+            class="bg-[#1c1c28] border-b border-[#313145] p-5 flex items-center justify-between shadow-2xl shrink-0">
+            <div class="flex items-center gap-6 w-1/3">
+                <div id="pvp-home-shield" class="w-16 h-20 text-xs"></div>
+                <div>
+                    <h2 id="pvp-home-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">
+                        LOCAL</h2>
+                    <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
+                        <span id="pvp-home-ovr" class="text-yellow-400">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-1/3 text-center flex flex-col items-center">
+                <div
+                    class="text-[10px] font-bold text-slate-300 bg-slate-700 px-4 py-1 rounded-full uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    PvP en Vivo <span id="pvp-match-time" class="text-white ml-2">00'</span>
+                </div>
+                <div
+                    class="text-6xl font-black text-white font-gaming bg-black/60 px-8 py-3 rounded-xl border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center gap-6">
+                    <span id="pvp-home-score" class="text-blue-400">0</span>
+                    <span class="text-2xl text-slate-600">-</span>
+                    <span id="pvp-away-score" class="text-red-400">0</span>
+                </div>
+                <div class="match-progress-bg w-3/4 max-w-xs mt-4">
+                    <div id="pvp-match-progress" class="match-progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-6 w-1/3 text-right">
+                <div>
+                    <h2 id="pvp-away-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">
+                        RIVAL</h2>
+                    <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
+                        <span id="pvp-away-ovr" class="text-yellow-400">0</span>
+                    </div>
+                </div>
+                <div id="pvp-away-shield" class="w-16 h-20 text-xs"></div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex gap-6 p-8 overflow-hidden max-w-[1400px] mx-auto w-full">
+            <div class="flex-1 glass-panel flex flex-col h-full overflow-hidden shadow-2xl">
+                <div
+                    class="bg-[#272738] p-4 text-xs font-bold uppercase border-b border-[#313145] text-white tracking-widest">
+                    Narración en Directo</div>
+                <div id="pvp-match-narrative" class="flex-1 overflow-y-auto p-4 text-xs space-y-1 bg-[#0f0f17]"></div>
+            </div>
+
+            <div class="w-72 flex flex-col gap-6 shrink-0">
+                <div class="glass-panel p-6">
+                    <h3
+                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 text-center border-b border-[#313145] pb-2">
+                        Estadísticas</h3>
+                    <div class="space-y-4 text-[10px]">
+                        <div>
+                            <div class="flex justify-between font-bold text-slate-300 mb-1">
+                                <span id="pvp-stat-poss-home">50%</span>
+                                <span class="text-slate-500 uppercase">Posesión</span>
+                                <span id="pvp-stat-poss-away">50%</span>
+                            </div>
+                            <div class="flex h-1.5 rounded overflow-hidden bg-slate-800">
+                                <div id="pvp-bar-poss-home" class="bg-blue-500 transition-all" style="width:50%"></div>
+                                <div id="pvp-bar-poss-away" class="bg-red-500 transition-all" style="width:50%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-bold text-slate-300 mb-1">
+                                <span id="pvp-stat-shots-home">0</span>
+                                <span class="text-slate-500 uppercase">Tiros</span>
+                                <span id="pvp-stat-shots-away">0</span>
+                            </div>
+                            <div class="flex h-1.5 rounded overflow-hidden bg-slate-800">
+                                <div id="pvp-bar-shots-home" class="bg-blue-500 transition-all" style="width:50%">
+                                </div>
+                                <div id="pvp-bar-shots-away" class="bg-red-500 transition-all" style="width:50%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones PvP de descanso -->
+                <div id="pvp-halftime-actions" class="glass-panel p-6 hidden">
+                    <h3
+                        class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-4 text-center border-b border-[#313145] pb-2">
+                        Descanso</h3>
+                    <div class="space-y-2">
+                        <button onclick="pvpHalftimeAction('animar')"
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-xs uppercase tracking-widest transition">Animar</button>
+                        <button onclick="pvpHalftimeAction('bronca')"
+                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 rounded text-xs uppercase tracking-widest transition">Bronca</button>
+                    </div>
+                </div>
+
+                <!-- Post partido PvP -->
+                <div id="pvp-post-match" class="glass-panel p-6 hidden text-center">
+                    <h3
+                        class="text-lg font-gaming text-yellow-400 uppercase tracking-widest mb-4 border-b border-[#313145] pb-2">
+                        Resultado</h3>
+                    <div id="pvp-result-text" class="text-white text-sm font-bold mb-2"></div>
+                    <div id="pvp-rewards-text" class="text-slate-400 text-xs mb-4"></div>
+                    <button onclick="exitPvpMatch()"
+                        class="w-full btn-action py-3 text-xs uppercase tracking-widest">Volver al
+                        Menú</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="app-layout" class="hidden flex h-screen w-full bg-[#0b1628]"
         style="background-image: radial-gradient(rgba(56,189,248,0.03) 1px, transparent 1px); background-size: 20px 20px;">
+
 
         <aside class="w-64 glass-panel border-r border-[#1e3a5f] flex flex-col z-20 shadow-2xl relative rounded-none">
             <div class="p-4 border-b border-[#1e3a5f] text-center bg-[#0f1f3a]">
@@ -304,7 +478,8 @@
                                 <h2 class="text-2xl font-gaming text-white uppercase tracking-widest"
                                     id="dash-greeting-team">TU CLUB</h2>
                                 <p class="text-slate-400 text-xs uppercase tracking-widest mt-1">LaLiga Tussi - Jornada
-                                    <span id="dash-jornada">1</span>/38</p>
+                                    <span id="dash-jornada">1</span>/38
+                                </p>
                             </div>
                         </div>
 
@@ -761,7 +936,8 @@
                     <h2 id="sim-home-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">LOCAL
                     </h2>
                     <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
-                        <span id="sim-home-ovr" class="text-yellow-400">0</span></div>
+                        <span id="sim-home-ovr" class="text-yellow-400">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -787,7 +963,8 @@
                     <h2 id="sim-away-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">RIVAL
                     </h2>
                     <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
-                        <span id="sim-away-ovr" class="text-yellow-400">0</span></div>
+                        <span id="sim-away-ovr" class="text-yellow-400">0</span>
+                    </div>
                 </div>
                 <div id="sim-away-shield" class="w-16 h-20 text-xs"></div>
             </div>
@@ -1086,6 +1263,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script src="app.js"></script>
 </body>
 

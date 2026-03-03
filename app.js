@@ -370,11 +370,222 @@ function routeView() {
     if (!state) document.getElementById('view-landing').classList.remove('hidden');
     else if (!state.team) document.getElementById('view-setup').classList.remove('hidden');
     else {
+        // Mostrar menú de selección de modo
+        document.getElementById('view-mode-select').classList.remove('hidden');
+    }
+}
+
+/* =========================================================================
+   SELECCIÓN DE MODO DE JUEGO (LOCAL / MULTIJUGADOR)
+   ========================================================================= */
+let currentGameMode = null;
+let pvpSocket = null;
+let pvpRoomId = null;
+let pvpSide = null; // 'home' o 'away'
+
+window.selectGameMode = function (mode) {
+    currentGameMode = mode;
+    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+
+    if (mode === 'local') {
+        // Modo carrera contra IA — flujo original
         document.getElementById('app-layout').classList.remove('hidden');
         updateUI();
         const savedTab = localStorage.getItem('inafuma_active_tab') || 'dash';
         switchTab(savedTab);
+    } else if (mode === 'multiplayer') {
+        // Modo PvP — conectar al servidor y buscar rival
+        startMultiplayerSearch();
     }
+}
+
+/* =========================================================================
+   MULTIPLAYER — Cliente Socket.io
+   ========================================================================= */
+const PVP_SERVER_URL = 'http://localhost:3001';
+
+function startMultiplayerSearch() {
+    document.getElementById('pvp-searching-overlay').classList.remove('hidden');
+    document.getElementById('pvp-search-status').textContent = 'Conectando al servidor...';
+
+    // Conectar al servidor PvP
+    pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
+
+    pvpSocket.on('connect', () => {
+        document.getElementById('pvp-search-status').textContent = 'Buscando rival...';
+
+        // Enviar datos del equipo al lobby
+        pvpSocket.emit('join_lobby', {
+            teamName: state.team.name,
+            managerName: state.team.manager,
+            roster: state.roster,
+            lineup: state.lineup,
+            badge: { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2 }
+        });
+    });
+
+    pvpSocket.on('connect_error', () => {
+        document.getElementById('pvp-search-status').textContent = 'Error: Servidor no disponible';
+    });
+
+    pvpSocket.on('lobby_waiting', (data) => {
+        document.getElementById('pvp-search-status').textContent = data.message;
+    });
+
+    // ---- PARTIDO ENCONTRADO ----
+    pvpSocket.on('match_start', (data) => {
+        pvpRoomId = data.roomId;
+        pvpSide = data.you; // 'home' o 'away'
+
+        // Cerrar overlay de búsqueda
+        document.getElementById('pvp-searching-overlay').classList.add('hidden');
+
+        // Mostrar modal del partido PvP
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.getElementById('pvp-match-modal').classList.remove('hidden');
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        document.getElementById('pvp-post-match').classList.add('hidden');
+
+        // Rellenar datos
+        document.getElementById('pvp-home-name').textContent = data.homeName;
+        document.getElementById('pvp-away-name').textContent = data.awayName;
+        document.getElementById('pvp-home-ovr').textContent = data.homeOvr;
+        document.getElementById('pvp-away-ovr').textContent = data.awayOvr;
+        document.getElementById('pvp-home-score').textContent = '0';
+        document.getElementById('pvp-away-score').textContent = '0';
+        document.getElementById('pvp-match-progress').style.width = '0%';
+        document.getElementById('pvp-match-narrative').innerHTML = '';
+
+        // Escudos
+        const myBadge = { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2 };
+        const oppBadge = data.opponentBadge || { shape: 'shape-shield', c1: '#666', c2: '#333' };
+
+        if (pvpSide === 'home') {
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-12 h-16 text-xs');
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-12 h-16 text-xs');
+        } else {
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-12 h-16 text-xs');
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-12 h-16 text-xs');
+        }
+    });
+
+    // ---- KICKOFF ----
+    pvpSocket.on('match_kickoff', (data) => {
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class='text-blue-400 font-bold'>${data.message}</div>`;
+    });
+
+    // ---- TICK DEL PARTIDO ----
+    pvpSocket.on('match_tick', (data) => {
+        document.getElementById('pvp-match-time').textContent = data.min + "'";
+        document.getElementById('pvp-home-score').textContent = data.homeGoals;
+        document.getElementById('pvp-away-score').textContent = data.awayGoals;
+        document.getElementById('pvp-match-progress').style.width = data.progress + '%';
+
+        // Narrativa
+        const logDiv = document.getElementById('pvp-match-narrative');
+        let cssClass = '';
+        if (data.eventType === 'home_goal') cssClass = 'text-green-400 font-bold';
+        else if (data.eventType === 'away_goal') cssClass = 'text-red-400 font-bold';
+        logDiv.innerHTML += `<div><span class="text-slate-500">${data.min}'</span> - <span class="${cssClass}">${data.narrative.split(' - ').slice(1).join(' - ') || data.narrative}</span></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+        // Estadísticas
+        document.getElementById('pvp-stat-poss-home').textContent = data.stats.hPoss + '%';
+        document.getElementById('pvp-stat-poss-away').textContent = data.stats.aPoss + '%';
+        document.getElementById('pvp-bar-poss-home').style.width = data.stats.hPoss + '%';
+        document.getElementById('pvp-bar-poss-away').style.width = data.stats.aPoss + '%';
+        document.getElementById('pvp-stat-shots-home').textContent = data.stats.hShots;
+        document.getElementById('pvp-stat-shots-away').textContent = data.stats.aShots;
+        let totalShots = data.stats.hShots + data.stats.aShots;
+        document.getElementById('pvp-bar-shots-home').style.width = totalShots > 0 ? ((data.stats.hShots / totalShots) * 100) + '%' : '50%';
+        document.getElementById('pvp-bar-shots-away').style.width = totalShots > 0 ? ((data.stats.aShots / totalShots) * 100) + '%' : '50%';
+    });
+
+    // ---- DESCANSO ----
+    pvpSocket.on('match_halftime', (data) => {
+        document.getElementById('pvp-halftime-actions').classList.remove('hidden');
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">${data.narrative}</strong></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    });
+
+    pvpSocket.on('halftime_response', (data) => {
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">${data.message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+    });
+
+    pvpSocket.on('match_resume', (data) => {
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">${data.message}</strong></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    });
+
+    // ---- FIN DEL PARTIDO ----
+    pvpSocket.on('match_result', (data) => {
+        document.getElementById('pvp-post-match').classList.remove('hidden');
+
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+        const rewards = data.yourRewards;
+        let resultText = '';
+        if (rewards.result === 'win') resultText = '🏆 ¡VICTORIA!';
+        else if (rewards.result === 'draw') resultText = '🤝 EMPATE';
+        else resultText = '💔 DERROTA';
+
+        document.getElementById('pvp-result-text').textContent = resultText;
+        document.getElementById('pvp-rewards-text').innerHTML = `+€${(rewards.coins / 1000000).toFixed(1)}M | +${rewards.pts} PTS | REP: ${rewards.rep > 0 ? '+' : ''}${rewards.rep}`;
+
+        // Aplicar recompensas al estado local
+        if (rewards.result === 'win') state.stats.wins++;
+        else if (rewards.result === 'draw') state.stats.draws++;
+        else state.stats.losses++;
+        state.stats.matches++;
+        state.stats.goals += rewards.goalsScored;
+        state.economy.coins += rewards.coins;
+        state.stats.rep = Math.max(0, state.stats.rep + rewards.rep);
+        saveState();
+    });
+
+    // ---- RIVAL DESCONECTADO ----
+    pvpSocket.on('opponent_disconnected', (data) => {
+        document.getElementById('pvp-searching-overlay').classList.add('hidden');
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        document.getElementById('pvp-post-match').classList.remove('hidden');
+        document.getElementById('pvp-result-text').textContent = '🏆 ¡VICTORIA POR ABANDONO!';
+        document.getElementById('pvp-rewards-text').textContent = data.message;
+    });
+}
+
+window.pvpHalftimeAction = function (action) {
+    if (pvpSocket && pvpRoomId) {
+        pvpSocket.emit('match_halftime_action', { roomId: pvpRoomId, action: action });
+    }
+}
+
+window.cancelMultiplayerSearch = function () {
+    if (pvpSocket) {
+        pvpSocket.disconnect();
+        pvpSocket = null;
+    }
+    document.getElementById('pvp-searching-overlay').classList.add('hidden');
+    routeView();
+}
+
+window.exitPvpMatch = function () {
+    if (pvpSocket) {
+        pvpSocket.disconnect();
+        pvpSocket = null;
+    }
+    pvpRoomId = null;
+    pvpSide = null;
+    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    routeView();
 }
 
 /* =========================================================================
