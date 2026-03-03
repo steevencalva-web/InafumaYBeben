@@ -18,7 +18,6 @@ const PLAYERS_DB = [
     { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: getAvatar("Pedri") },
     { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: getAvatar("Carvajal") },
     { id: 403, name: "Unai Simón", pos: "POR", pac: 45, sho: 20, pas: 75, def: 85, phy: 75, rep: 400, priceBasic: 12000000, pricePrem: 900, img: getAvatar("Simon") },
-    { id: 102, name: "Neymar Jr.", pos: "DEL", pac: 85, sho: 92, pas: 90, def: 45, phy: 80, rep: 5000, priceBasic: 145000000, pricePrem: 11500, img: getAvatar("Neymar") },
     
     // Nivel Base Inicial (Plantilla de Regalo)
     { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Joselu") },
