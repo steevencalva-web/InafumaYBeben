@@ -275,14 +275,20 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
     auth.signInWithEmailAndPassword(email, p)
         .then(async (cred) => {
-            // Descargar estado desde Firestore
-            const doc = await db.collection('users').doc(cred.user.uid).get();
-            if (doc.exists) {
-                state = cleanState(doc.data());
-            } else {
-                // Si no existe documento (cuenta legacy), crear uno nuevo
+            // Login exitoso — intentar descargar estado desde Firestore
+            try {
+                const doc = await db.collection('users').doc(cred.user.uid).get();
+                if (doc.exists) {
+                    state = cleanState(doc.data());
+                } else {
+                    // Si no existe documento (cuenta legacy), crear uno nuevo
+                    state = cleanState({ auth: { user: u }, team: null, economy: { coins: 50000000, premium: 0 } });
+                    db.collection('users').doc(cred.user.uid).set(JSON.parse(JSON.stringify(state))).catch(() => { });
+                }
+            } catch (firestoreErr) {
+                console.error('Firestore no disponible, usando estado local:', firestoreErr);
+                // Crear estado local si Firestore falla
                 state = cleanState({ auth: { user: u }, team: null, economy: { coins: 50000000, premium: 0 } });
-                db.collection('users').doc(cred.user.uid).set(JSON.parse(JSON.stringify(state)));
             }
             routeView();
         })
