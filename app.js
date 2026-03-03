@@ -284,8 +284,8 @@ window.toggleAuth = function(mode) {
     const tabReg = document.getElementById('tab-register');
     
     if(tabLogin && tabReg) {
-        tabLogin.className = mode === 'login' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
-        tabReg.className = mode === 'register' ? "flex-1 pb-2 text-white border-b-2 border-red-500 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-slate-500 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
+        tabLogin.className = mode === 'login' ? "flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
+        tabReg.className = mode === 'register' ? "flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition" : "flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition cursor-pointer";
     }
 }
 
@@ -396,7 +396,12 @@ function routeView() {
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
     if(!state) document.getElementById('view-landing').classList.remove('hidden');
     else if(!state.team) document.getElementById('view-setup').classList.remove('hidden');
-    else { document.getElementById('app-layout').classList.remove('hidden'); updateUI(); switchTab('dash'); }
+    else { 
+        document.getElementById('app-layout').classList.remove('hidden'); 
+        updateUI(); 
+        const savedTab = localStorage.getItem('inafuma_active_tab') || 'dash';
+        switchTab(savedTab); 
+    }
 }
 
 /* =========================================================================
@@ -415,6 +420,9 @@ window.switchTab = function(tabId) {
     const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'bet': 'Apuestas' };
     const pTitle = document.getElementById('page-title');
     if(pTitle) pTitle.textContent = titles[tabId] || 'Panel';
+    
+    // Guardar tab activo en localStorage
+    localStorage.setItem('inafuma_active_tab', tabId);
     
     if(tabId === 'market') { setMarketMode('buy'); filterMarket(); }
     if(tabId === 'tactics') renderTactics();
@@ -848,6 +856,19 @@ function renderSquad() {
 let dragSrc = { id: null, slot: null };
 window.dragStart = function(e, pId, slotIndex) { 
     dragSrc = { id: pId, slot: slotIndex }; 
+    
+    // Crear ghost personalizado: solo la bola con la imagen del jugador
+    const player = state.roster.find(p => p.id === pId);
+    const ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    if(player) {
+        ghost.style.backgroundImage = `url(${player.img})`;
+    }
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, 22, 22);
+    // Limpiar ghost después de que el navegador lo capture
+    setTimeout(() => { if(ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 100);
+    
     setTimeout(() => e.target.classList.add('opacity-50'), 0); 
 };
 window.dragEnd = function(e) { e.target.classList.remove('opacity-50'); };
@@ -1104,48 +1125,75 @@ window.sellPlayer = function(id, sellValue) {
 window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); renderCart(); }
 
 /* =========================================================================
-   CARRITO DE COMPRA Y METODO DE PAGO
+   CARRITO DE COMPRA Y METODO DE PAGO (1 PACK A LA VEZ CON PRECIOS EUR)
    ========================================================================= */
-let shoppingCart = [];
+let selectedPack = null; // { amount: number, price: number } o null
+
+window.selectPack = function(amount, price) {
+    // Solo un paquete a la vez: si ya está seleccionado el mismo, deseleccionar
+    if(selectedPack && selectedPack.amount === amount) {
+        selectedPack = null;
+    } else {
+        selectedPack = { amount, price };
+    }
+    renderCart();
+}
 
 window.addToCart = function(amount) {
-    shoppingCart.push(amount);
-    renderCart();
+    // Legacy compat - mapear a selectPack
+    const priceMap = {500:0.99, 2000:3.99, 5000:7.99, 10000:14.99, 25000:34.99, 50000:59.99};
+    selectPack(amount, priceMap[amount] || 0.99);
 }
 
 window.clearCart = function() {
-    shoppingCart = [];
+    selectedPack = null;
     renderCart();
 }
 
-window.removeFromCart = function(index) {
-    shoppingCart.splice(index, 1);
+window.removeFromCart = function() {
+    selectedPack = null;
     renderCart();
 }
 
 function renderCart() {
     const listEl = document.getElementById('cart-items-list');
     const totalEl = document.getElementById('cart-total');
+    const totalEurEl = document.getElementById('cart-total-eur');
+    const btnPayAmount = document.getElementById('btn-pay-amount');
     if(!listEl || !totalEl) return;
     
-    if(shoppingCart.length === 0) {
-        listEl.innerHTML = '<div class="text-slate-500 text-xs text-center italic">Carrito vacio</div>';
+    // Actualizar selección visual de packs
+    document.querySelectorAll('.store-pack').forEach(el => {
+        el.classList.remove('selected');
+        if(selectedPack && el.dataset.pack == selectedPack.amount) {
+            el.classList.add('selected');
+        }
+    });
+    
+    if(!selectedPack) {
+        listEl.innerHTML = '<div class="text-sky-500 text-xs text-center italic">Ningún paquete seleccionado</div>';
         totalEl.textContent = '0';
+        if(totalEurEl) totalEurEl.textContent = '0,00 €';
+        if(btnPayAmount) btnPayAmount.textContent = '0,00 €';
         updatePaymentButton();
         return;
     }
     
-    listEl.innerHTML = '';
-    shoppingCart.forEach((amount, i) => {
-        listEl.innerHTML += `
-        <div class="flex justify-between items-center bg-[#1c1c28] p-2 rounded border border-[#313145]">
-            <span class="text-xs text-yellow-400 font-mono font-bold">${amount.toLocaleString()} Monedas</span>
-            <button onclick="removeFromCart(${i})" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">X</button>
-        </div>`;
-    });
+    const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
+    listEl.innerHTML = `
+    <div class="flex justify-between items-center bg-[#132a4a] p-3 rounded border border-yellow-500/30">
+        <div>
+            <span class="text-sm text-yellow-400 font-mono font-bold">${selectedPack.amount.toLocaleString()} Monedas</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-green-400 font-bold text-sm font-mono">${priceStr} €</span>
+            <button onclick="removeFromCart()" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">✕</button>
+        </div>
+    </div>`;
     
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
-    totalEl.textContent = total.toLocaleString();
+    totalEl.textContent = selectedPack.amount.toLocaleString();
+    if(totalEurEl) totalEurEl.textContent = priceStr + ' €';
+    if(btnPayAmount) btnPayAmount.textContent = priceStr + ' €';
     updatePaymentButton();
 }
 
@@ -1154,10 +1202,10 @@ function updatePaymentButton() {
     const payMethod = document.getElementById('payment-method');
     if(!payBtn || !payMethod) return;
     
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
+    const hasPack = selectedPack !== null;
     const hasMethod = payMethod.value !== '';
     
-    if(total > 0 && hasMethod) {
+    if(hasPack && hasMethod) {
         payBtn.disabled = false;
         payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
@@ -1168,7 +1216,7 @@ function updatePaymentButton() {
 
 window.closeStore = function() {
     document.getElementById('modal-store').classList.add('hidden');
-    shoppingCart = [];
+    selectedPack = null;
     renderCart();
     const payMethod = document.getElementById('payment-method');
     if(payMethod) payMethod.value = '';
@@ -1177,10 +1225,9 @@ window.closeStore = function() {
 }
 
 window.processPayment = function() {
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
+    if(!selectedPack) return showAlert("Selecciona un paquete de monedas.");
     const payMethod = document.getElementById('payment-method');
     if(!payMethod || payMethod.value === '') return showAlert("Selecciona un metodo de pago.");
-    if(total <= 0) return showAlert("El carrito esta vacio.");
     
     // Validar datos de tarjeta si es visa/mastercard
     if(payMethod.value === 'visa' || payMethod.value === 'mastercard') {
@@ -1193,11 +1240,13 @@ window.processPayment = function() {
         }
     }
     
-    state.economy.premium += total;
-    shoppingCart = [];
+    const amount = selectedPack.amount;
+    const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
+    state.economy.premium += amount;
+    selectedPack = null;
     saveState();
     closeStore();
-    showAlert(`Pago procesado correctamente. +${total.toLocaleString()} Monedas Premium anadidas.`);
+    showAlert(`Pago de ${priceStr} € procesado correctamente. +${amount.toLocaleString()} Monedas Premium añadidas.`);
 }
 
 window.confirmIAP = function() {
