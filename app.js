@@ -25,7 +25,7 @@ const PLAYERS_DB = [
     { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: getAvatar("Duro") },
     { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: getAvatar("Darder") },
     { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: getAvatar("Isco") },
-    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: getAvatar("Pepelu") },
+    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: getAvatar("Pepelu") },-
     { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: getAvatar("Trejo") },
     { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 0, priceBasic: 8000000, pricePrem: 600, img: getAvatar("Cubarsi") },
     { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: getAvatar("Garcia") },
@@ -181,11 +181,8 @@ function cleanState(s) {
 }
 
 window.onload = () => {
-    // Cookie modal: solo mostrar si nunca se acepto
     const cookiesModal = document.getElementById('modal-cookies');
-    if(!localStorage.getItem('inafuma_cookies') && cookiesModal) {
-        cookiesModal.classList.remove('hidden');
-    }
+    if(!localStorage.getItem('inafuma_cookies') && cookiesModal) cookiesModal.classList.remove('hidden');
     
     const activeUserId = localStorage.getItem('inafuma_active_user');
     if(activeUserId) {
@@ -193,39 +190,6 @@ window.onload = () => {
         if (found) state = cleanState(found);
     }
     routeView();
-
-    // Age verify checkboxes listener
-    const ageCheck = document.getElementById('age-confirm-check');
-    const termsCheck = document.getElementById('terms-confirm-check');
-    const ageBtn = document.getElementById('age-verify-btn');
-    if(ageCheck && termsCheck && ageBtn) {
-        const updateAgeBtn = () => {
-            if(ageCheck.checked && termsCheck.checked) {
-                ageBtn.disabled = false;
-                ageBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                ageBtn.disabled = true;
-                ageBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-        };
-        ageCheck.addEventListener('change', updateAgeBtn);
-        termsCheck.addEventListener('change', updateAgeBtn);
-    }
-
-    // Payment method listener
-    const paymentSelect = document.getElementById('payment-method');
-    if(paymentSelect) {
-        paymentSelect.addEventListener('change', function() {
-            const cardForm = document.getElementById('payment-card-form');
-            const payBtn = document.getElementById('btn-process-payment');
-            if(this.value === 'visa' || this.value === 'mastercard') {
-                cardForm.classList.remove('hidden');
-            } else {
-                cardForm.classList.add('hidden');
-            }
-            updatePaymentButton();
-        });
-    }
 };
 
 function saveState() { 
@@ -242,35 +206,6 @@ window.acceptCookies = function() {
     localStorage.setItem('inafuma_cookies', 'true'); 
     const cookiesModal = document.getElementById('modal-cookies');
     if(cookiesModal) cookiesModal.classList.add('hidden'); 
-}
-
-/* =========================================================================
-   VERIFICACION DE EDAD Y TERMINOS
-   ========================================================================= */
-window.confirmAgeVerify = function() {
-    localStorage.setItem('inafuma_age_verified', 'true');
-    const modal = document.getElementById('modal-age-verify');
-    if(modal) modal.classList.add('hidden');
-}
-
-function showAgeVerifyIfNeeded(callback) {
-    if(localStorage.getItem('inafuma_age_verified')) {
-        callback();
-        return;
-    }
-    const modal = document.getElementById('modal-age-verify');
-    if(modal) {
-        modal.classList.remove('hidden');
-        const btn = document.getElementById('age-verify-btn');
-        const origOnclick = btn.onclick;
-        btn.onclick = function() {
-            localStorage.setItem('inafuma_age_verified', 'true');
-            modal.classList.add('hidden');
-            callback();
-        };
-    } else {
-        callback();
-    }
 }
 
 /* =========================================================================
@@ -295,12 +230,10 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     const pass = document.getElementById('reg-pass').value;
     if(UsersDB.find(u => u.auth.user === user)) return showAlert("El usuario ya existe.");
     
-    showAgeVerifyIfNeeded(function() {
-        state = cleanState({ auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 } });
-        UsersDB.push(state);
-        localStorage.setItem('inafuma_active_user', user);
-        routeView();
-    });
+    state = cleanState({ auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 } });
+    UsersDB.push(state);
+    localStorage.setItem('inafuma_active_user', user);
+    routeView();
 });
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
@@ -308,22 +241,21 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     const u = document.getElementById('log-user').value;
     const p = document.getElementById('log-pass').value;
     
-    showAgeVerifyIfNeeded(function() {
-        // Failsafe de cuenta: Intenta iniciar sesion incluso si la pass es erronea pero el usuario existe 
-        let foundUser = UsersDB.find(x => x.auth.user === u && x.auth.pass === p);
-        if(!foundUser) {
-            foundUser = UsersDB.find(x => x.auth.user === u);
-            if(foundUser) foundUser.auth.pass = p;
-        }
-        
-        if(foundUser) {
-            state = cleanState(foundUser);
-            localStorage.setItem('inafuma_active_user', u);
-            routeView();
-        } else {
-            showAlert("No existe ninguna cuenta con este usuario.");
-        }
-    });
+    // Failsafe de cuenta: Intenta iniciar sesión incluso si la pass es errónea pero el usuario existe 
+    // (Útil por si los datos se desincronizaron en versiones antiguas)
+    let foundUser = UsersDB.find(x => x.auth.user === u && x.auth.pass === p);
+    if(!foundUser) {
+        foundUser = UsersDB.find(x => x.auth.user === u);
+        if(foundUser) foundUser.auth.pass = p; // Actualiza la password automáticamente
+    }
+    
+    if(foundUser) {
+        state = cleanState(foundUser);
+        localStorage.setItem('inafuma_active_user', u);
+        routeView();
+    } else {
+        showAlert("No existe ninguna cuenta con este usuario.");
+    }
 });
 
 // Creador Visual de Escudos (Seguro)
@@ -477,24 +409,22 @@ function getBadgeHTML(name, shape, c1, c2, extraClass="w-8 h-10 text-[10px]") {
 function updateUI() {
     if(!state || !state.team) return;
     const formatM = (num) => num >= 1000000 ? (num/1000000).toFixed(1)+'M' : num.toLocaleString();
-    const safeText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-    const safeHTML = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
     
-    safeText('ui-rep', "REP: " + state.stats.rep);
-    safeText('ui-coins', "€" + formatM(state.economy.coins));
-    safeText('ui-prem', state.economy.premium);
-    safeText('ui-jornada', state.stats.matchday || 1);
-    safeText('dash-jornada', state.stats.matchday || 1);
+    document.getElementById('ui-rep').textContent = "★ " + state.stats.rep;
+    document.getElementById('ui-coins').textContent = "€" + formatM(state.economy.coins);
+    document.getElementById('ui-prem').textContent = state.economy.premium;
+    document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
+    document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
     
-    safeText('top-manager', state.team.manager);
-    safeText('sidebar-manager', state.team.manager);
+    document.getElementById('top-manager').textContent = state.team.manager;
+    document.getElementById('sidebar-manager').textContent = state.team.manager;
     
     const teamNameEls = document.querySelectorAll('#top-teamname, #sidebar-teamname, #dash-greeting-team');
     teamNameEls.forEach(el => el.textContent = state.team.name);
     
     const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow");
-    safeHTML('top-shield', badgeHTML);
-    safeHTML('sidebar-shield', badgeHTML);
+    document.getElementById('top-shield').innerHTML = badgeHTML;
+    document.getElementById('sidebar-shield').innerHTML = badgeHTML;
     
     // Próximo Partido en UI
     let myNextFix = state.nextFixtures ? state.nextFixtures.find(f => f.isUserMatch) : null;
@@ -503,24 +433,24 @@ function updateUI() {
         let oppName = isHome ? myNextFix.away : myNextFix.home;
         let oppData = state.league.find(t => t.name === oppName) || { badge: AI_TEAMS[0] };
         
-        safeText('ui-next-opp', oppName);
-        safeText('dash-next-home', myNextFix.home);
-        safeText('dash-next-away', myNextFix.away);
+        document.getElementById('ui-next-opp').textContent = oppName;
+        document.getElementById('dash-next-home').textContent = myNextFix.home;
+        document.getElementById('dash-next-away').textContent = myNextFix.away;
         
         let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20") : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
         let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20");
         
-        safeHTML('dash-next-home-shield', homeBadge);
-        safeHTML('dash-next-away-shield', awayBadge);
+        document.getElementById('dash-next-home-shield').innerHTML = homeBadge;
+        document.getElementById('dash-next-away-shield').innerHTML = awayBadge;
     } else {
-        safeText('ui-next-opp', "Fin Temporada");
+        document.getElementById('ui-next-opp').textContent = "Fin Temporada";
     }
 
-    safeText('dash-ovr-big', getTeamOvr());
-    safeText('dash-matches', state.stats.matches);
-    safeText('dash-wins', state.stats.wins);
-    safeText('dash-draws', state.stats.draws);
-    safeText('dash-losses', state.stats.losses);
+    document.getElementById('dash-ovr-big').textContent = getTeamOvr();
+    document.getElementById('dash-matches').textContent = state.stats.matches;
+    document.getElementById('dash-wins').textContent = state.stats.wins;
+    document.getElementById('dash-draws').textContent = state.stats.draws;
+    document.getElementById('dash-losses').textContent = state.stats.losses;
 
     renderInbox(); renderSquad();
     if(document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
@@ -606,39 +536,32 @@ window.renderBetTab = function() {
     const listBets = document.getElementById('active-bets-list');
     if(!selMatch || !listBets) return;
 
-    // Mostrar la jornada actual en la que se apuesta
     selMatch.innerHTML = '';
-    if(state.nextFixtures && state.nextFixtures.length > 0) {
+    if(state.nextFixtures) {
         state.nextFixtures.forEach((fix, index) => {
             selMatch.innerHTML += `<option value="${index}">${fix.home} vs ${fix.away}</option>`;
         });
-    } else {
-        selMatch.innerHTML = '<option value="">No hay partidos disponibles</option>';
     }
 
     listBets.innerHTML = '';
     if(!state.activeBets || state.activeBets.length === 0) {
-        listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas.</div>';
+        listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas para esta jornada.</div>';
         return;
     }
 
-    state.activeBets.forEach((bet, idx) => {
-        let currText = bet.currency === 'coins' ? 'Club' : 'Premium';
-        let statusClass = bet.resolved ? (bet.won ? 'border-green-500/50' : 'border-red-500/50') : 'border-yellow-500/50';
-        let statusText = bet.resolved ? (bet.won ? `<span class="text-green-400 font-bold">GANADA +${bet.winnings}</span>` : '<span class="text-red-400 font-bold">PERDIDA</span>') : `<span class="text-yellow-400">Jornada ${bet.matchday}</span>`;
-        
+    state.activeBets.forEach(bet => {
+        let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
         listBets.innerHTML += `
-        <div class="bg-[#111119] border ${statusClass} p-3 rounded flex justify-between items-center">
+        <div class="bg-[#111119] border border-yellow-500/50 p-3 rounded flex justify-between items-center">
             <div>
-                <div class="text-[10px] font-bold mb-1 uppercase">${statusText}</div>
+                <div class="text-[10px] text-yellow-400 font-bold mb-1 uppercase">Boleto Registrado</div>
                 <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
-                <div class="text-[10px] text-slate-400 mt-1">Pronostico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
             </div>
             <div class="text-right">
-                <div class="text-[9px] font-bold text-slate-300 uppercase">Inversion</div>
+                <div class="text-[9px] font-bold text-slate-300 uppercase">Inversión</div>
                 <div class="text-lg font-mono font-bold text-${bet.currency==='coins'?'green':'yellow'}-400">${bet.amount}</div>
                 <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
-                ${!bet.resolved ? `<button onclick="cancelBet(${idx})" class="text-[9px] text-red-400 hover:text-red-300 uppercase font-bold mt-1 cursor-pointer">Cancelar</button>` : ''}
             </div>
         </div>`;
     });
@@ -646,55 +569,24 @@ window.renderBetTab = function() {
 
 window.placeBet = function() {
     const matchIdx = document.getElementById('bet-match-select').value;
-    if(matchIdx === '' || !state.nextFixtures || state.nextFixtures.length === 0) return showAlert("No hay partidos disponibles para apostar.");
-    
     const hG = parseInt(document.getElementById('bet-hg').value);
     const aG = parseInt(document.getElementById('bet-ag').value);
     const amount = parseInt(document.getElementById('bet-amount').value);
     const currency = document.getElementById('bet-currency').value;
 
-    if(isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos validos. Minimo 10 de apuesta.");
-    if(hG < 0 || aG < 0) return showAlert("Los goles no pueden ser negativos.");
+    if(isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos válidos. Mínimo 10 de apuesta.");
     if(currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
     if(currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
-
-    // Verificar que no se haya apostado ya por el mismo partido en esta jornada
-    const fixture = state.nextFixtures[matchIdx];
-    const alreadyBet = state.activeBets.find(b => !b.resolved && b.home === fixture.home && b.away === fixture.away && b.matchday === state.stats.matchday);
-    if(alreadyBet) return showAlert("Ya tienes una apuesta activa para este partido.");
 
     if(currency === 'coins') state.economy.coins -= amount;
     else state.economy.premium -= amount;
 
-    state.activeBets.push({ 
-        home: fixture.home, 
-        away: fixture.away, 
-        hG: hG, 
-        aG: aG, 
-        amount: amount, 
-        currency: currency, 
-        matchday: state.stats.matchday,
-        resolved: false,
-        won: false,
-        winnings: 0
-    });
+    const fixture = state.nextFixtures[matchIdx];
+    state.activeBets.push({ home: fixture.home, away: fixture.away, hG: hG, aG: aG, amount: amount, currency: currency });
 
     saveState();
     renderBetTab();
-    showAlert(`Boleto validado: ${amount} apostados al resultado ${hG}-${aG} para Jornada ${state.stats.matchday}.`);
-}
-
-window.cancelBet = function(idx) {
-    const bet = state.activeBets[idx];
-    if(!bet || bet.resolved) return;
-    
-    showConfirm(`Cancelar apuesta de ${bet.amount} en ${bet.home} vs ${bet.away}? Se devolvera la inversion.`, () => {
-        if(bet.currency === 'coins') state.economy.coins += bet.amount;
-        else state.economy.premium += bet.amount;
-        state.activeBets.splice(idx, 1);
-        saveState();
-        renderBetTab();
-    });
+    showAlert(`Boleto validado: ${amount} apostados al resultado ${hG}-${aG}.`);
 }
 
 /* =========================================================================
@@ -821,14 +713,14 @@ function renderSquad() {
     
     sorted.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
-        let conColor = p.con >= 85 ? '#10b981' : p.con >= 60 ? '#eab308' : '#ef4444';
-        let conIcon = `<span class="inline-block w-2 h-2 rounded-full" style="background:${conColor}"></span>`;
+        let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
         let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
         
         tbody.innerHTML += `
         <tr>
+            <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
             <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
+            <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
             <td class="font-bold text-[10px]">${conIcon} ${p.con}%</td>
             <td style="width: 60px;">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
@@ -856,27 +748,19 @@ window.allowDrop = function(e) { e.preventDefault(); };
 window.dropOnPitch = function(e, targetSlotIndex) {
     e.preventDefault(); if(!dragSrc.id) return;
     
-    const targetPlayerId = state.lineup[targetSlotIndex];
-    // If dragging from another pitch slot, swap
+    const targetPlayerId = state.lineup[targetSlotIndex]; 
     if (dragSrc.slot !== null) { 
         state.lineup[dragSrc.slot] = targetPlayerId; 
         state.lineup[targetSlotIndex] = dragSrc.id; 
-    } else {
-        // Dragging from bench: remove player from any existing slot first
-        for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === dragSrc.id) state.lineup[i] = null; }
-        // If target slot was occupied, that player goes to bench (set null)
+    } else { 
         state.lineup[targetSlotIndex] = dragSrc.id; 
     }
-    dragSrc = { id: null, slot: null };
     saveState(); renderTactics();
 };
 
 window.dropOnBench = function(e) { 
     e.preventDefault(); 
-    if(!dragSrc.id) return;
-    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; }
-    dragSrc = { id: null, slot: null };
-    saveState(); renderTactics(); 
+    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); } 
 };
 
 window.changeFormation = function() { state.formation = document.getElementById('tactics-formation').value; saveState(); renderTactics(); }
@@ -973,8 +857,6 @@ window.setMarketMode = function(mode) {
     document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
-    const thPrem = document.getElementById('market-th-prem');
-    if(thPrem) thPrem.style.display = mode === 'buy' ? "table-cell" : "none";
     filterMarket();
 };
 
@@ -986,8 +868,6 @@ window.filterMarket = function(pos) {
 
     const formatM = (num) => (num/1000000).toFixed(1)+'M';
     document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
-    const premEl = document.getElementById('market-prem');
-    if(premEl) premEl.textContent = state.economy.premium.toLocaleString();
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
@@ -1007,38 +887,27 @@ window.filterMarket = function(pos) {
     items.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         if(marketMode === 'buy') {
-            const alreadyOwned = state.roster.find(rp => rp.id === p.id);
             const canRep = state.stats.rep >= p.rep;
-            const canAffordPrem = state.economy.premium >= p.pricePrem;
-            let actionBtns = '';
-            if(alreadyOwned) {
-                actionBtns = '<span class="text-[10px] text-slate-500 uppercase font-bold">EN PLANTILLA</span>';
-            } else {
-                actionBtns = `<div class="flex gap-1 justify-center">`;
-                actionBtns += canRep ? `<button class="btn-action py-1.5 px-2 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button>` : `<button class="btn-action py-1.5 px-2 text-[9px] opacity-40 cursor-not-allowed" disabled title="Reputacion insuficiente">FICHAR</button>`;
-                actionBtns += canAffordPrem ? `<button class="btn-buy premium py-1.5 px-2 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')">PREMIUM</button>` : `<button class="btn-buy premium py-1.5 px-2 text-[9px] opacity-40 cursor-not-allowed" disabled title="Monedas insuficientes">PREMIUM</button>`;
-                actionBtns += `</div>`;
-            }
             tbody.innerHTML += `
-            <tr class="${alreadyOwned ? 'opacity-40' : ''}">
-                <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
+            <tr>
+                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">* ${p.rep}</td>
-                <td class="font-mono text-green-400 text-right pr-2">${formatM(p.priceBasic)}</td>
-                <td class="font-mono text-yellow-400 text-right pr-2">${p.pricePrem.toLocaleString()}</td>
-                <td class="text-center">${actionBtns}</td>
+                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
+                <td class="font-mono text-green-400 text-right pr-4">€${formatM(p.priceBasic)}</td>
+                <td class="text-center"><button class="btn-action w-3/4 py-1.5 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button></td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6); 
             tbody.innerHTML += `
             <tr>
-                <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
+                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td style="display:none;"></td>
                 <td style="display:none;"></td> 
-                <td class="font-mono text-slate-400 text-right pr-4">Oferta: ${formatM(sellValue)}</td>
+                <td class="font-mono text-slate-400 text-right pr-4">Oferta: €${formatM(sellValue)}</td>
                 <td class="text-center"><button class="btn-sell w-3/4 py-1.5" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button></td>
             </tr>`;
         }
@@ -1047,162 +916,41 @@ window.filterMarket = function(pos) {
 
 window.buyPlayer = function(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
+    if(state.stats.rep < p.rep) return showAlert(`Reputación Insuficiente (Req: ★ ${p.rep}).`);
     
-    // Prevenir compra duplicada
-    if(state.roster.find(rp => rp.id === id)) return showAlert("Este jugador ya esta en tu plantilla.");
-    
-    // Solo verificar reputacion para compra con dinero basico
-    if(curr === 'basic' && state.stats.rep < p.rep) return showAlert(`Reputacion Insuficiente (Req: * ${p.rep}).`);
-    
-    const cost = curr === 'basic' ? p.priceBasic : p.pricePrem;
-    const formatM = (num) => (num/1000000).toFixed(1)+'M';
-    const costLabel = curr === 'basic' ? `€${formatM(cost)}` : `${cost.toLocaleString()} Monedas Premium`;
-    
-    if(curr === 'basic' && state.economy.coins < cost) return showAlert("Presupuesto insuficiente.");
-    if(curr !== 'basic' && state.economy.premium < cost) return showAlert("Moneda Premium insuficiente.");
-    
-    const repNote = curr !== 'basic' && state.stats.rep < p.rep ? ' (Sin req. reputacion)' : '';
-    showConfirm(`¿Fichar a ${p.name} (OVR ${p.ovr}) por ${costLabel}?${repNote}`, () => {
-        // Re-verificar tras confirmar
-        if(state.roster.find(rp => rp.id === id)) return showAlert("Este jugador ya esta en tu plantilla.");
-        if(curr === 'basic') {
-            if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
-            state.economy.coins -= p.priceBasic;
-        } else {
-            if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
-            state.economy.premium -= p.pricePrem;
-        }
+    if(curr === 'basic') {
+        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
+        state.economy.coins -= p.priceBasic;
+    } else {
+        if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
+        state.economy.premium -= p.pricePrem;
+    }
 
-        let newPlayer = JSON.parse(JSON.stringify(p));
-        newPlayer.con = 100;
-        newPlayer.morale = 100;
-        
-        state.roster.push(newPlayer);
-        const emptySlot = state.lineup.findIndex(slot => slot === null);
-        if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
-        
-        addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Hemos llegado a un acuerdo y el jugador se incorpora al club.`);
-        saveState(); filterMarket(); renderSquad(); renderTactics(); updateUI();
-        showAlert(`Fichaje completado: ${p.name} se incorpora a tu plantilla.`);
-    });
+    let newPlayer = JSON.parse(JSON.stringify(p));
+    newPlayer.con = 100;
+    newPlayer.morale = 100;
+    
+    state.roster.push(newPlayer);
+    const emptySlot = state.lineup.findIndex(slot => slot === null);
+    if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
+    
+    addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Hemos llegado a un acuerdo y el jugador se incorpora al club.`);
+    saveState(); filterMarket();
 }
 
 window.sellPlayer = function(id, sellValue) {
-    const player = state.roster.find(p => p.id === id);
-    if(!player) return showAlert("Este jugador ya no está en tu plantilla.");
-    showConfirm(`¿Vender a ${player.name} y añadir €${(sellValue/1000000).toFixed(1)}M al club?`, () => {
-        if(!state.roster.find(p => p.id === id)) return;
+    showConfirm(`¿Vender al jugador y añadir €${(sellValue/1000000).toFixed(1)}M al club?`, () => {
         state.economy.coins += sellValue;
-        const soldName = state.roster.find(p => p.id === id).name;
         state.roster = state.roster.filter(p => p.id !== id);
         for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
-        saveState(); filterMarket(); renderSquad(); renderTactics(); updateUI();
-        showAlert(`Venta completada: ${soldName} ha sido traspasado.`);
+        saveState(); filterMarket();
     });
 }
 
-window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); renderCart(); }
-
-/* =========================================================================
-   CARRITO DE COMPRA Y METODO DE PAGO
-   ========================================================================= */
-let shoppingCart = [];
-
-window.addToCart = function(amount) {
-    shoppingCart.push(amount);
-    renderCart();
-}
-
-window.clearCart = function() {
-    shoppingCart = [];
-    renderCart();
-}
-
-window.removeFromCart = function(index) {
-    shoppingCart.splice(index, 1);
-    renderCart();
-}
-
-function renderCart() {
-    const listEl = document.getElementById('cart-items-list');
-    const totalEl = document.getElementById('cart-total');
-    if(!listEl || !totalEl) return;
-    
-    if(shoppingCart.length === 0) {
-        listEl.innerHTML = '<div class="text-slate-500 text-xs text-center italic">Carrito vacio</div>';
-        totalEl.textContent = '0';
-        updatePaymentButton();
-        return;
-    }
-    
-    listEl.innerHTML = '';
-    shoppingCart.forEach((amount, i) => {
-        listEl.innerHTML += `
-        <div class="flex justify-between items-center bg-[#1c1c28] p-2 rounded border border-[#313145]">
-            <span class="text-xs text-yellow-400 font-mono font-bold">${amount.toLocaleString()} Monedas</span>
-            <button onclick="removeFromCart(${i})" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">X</button>
-        </div>`;
-    });
-    
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
-    totalEl.textContent = total.toLocaleString();
-    updatePaymentButton();
-}
-
-function updatePaymentButton() {
-    const payBtn = document.getElementById('btn-process-payment');
-    const payMethod = document.getElementById('payment-method');
-    if(!payBtn || !payMethod) return;
-    
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
-    const hasMethod = payMethod.value !== '';
-    
-    if(total > 0 && hasMethod) {
-        payBtn.disabled = false;
-        payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    } else {
-        payBtn.disabled = true;
-        payBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-}
-
-window.closeStore = function() {
-    document.getElementById('modal-store').classList.add('hidden');
-    shoppingCart = [];
-    renderCart();
-    const payMethod = document.getElementById('payment-method');
-    if(payMethod) payMethod.value = '';
-    const cardForm = document.getElementById('payment-card-form');
-    if(cardForm) cardForm.classList.add('hidden');
-}
-
-window.processPayment = function() {
-    const total = shoppingCart.reduce((a, b) => a + b, 0);
-    const payMethod = document.getElementById('payment-method');
-    if(!payMethod || payMethod.value === '') return showAlert("Selecciona un metodo de pago.");
-    if(total <= 0) return showAlert("El carrito esta vacio.");
-    
-    // Validar datos de tarjeta si es visa/mastercard
-    if(payMethod.value === 'visa' || payMethod.value === 'mastercard') {
-        const cardNum = document.getElementById('card-number').value.trim();
-        const cardExpiry = document.getElementById('card-expiry').value.trim();
-        const cardCvv = document.getElementById('card-cvv').value.trim();
-        const cardName = document.getElementById('card-name').value.trim();
-        if(!cardNum || !cardExpiry || !cardCvv || !cardName) {
-            return showAlert("Completa todos los datos de la tarjeta.");
-        }
-    }
-    
-    state.economy.premium += total;
-    shoppingCart = [];
-    saveState();
-    closeStore();
-    showAlert(`Pago procesado correctamente. +${total.toLocaleString()} Monedas Premium anadidas.`);
-}
-
+window.buyIAP = function() { document.getElementById('modal-store').classList.remove('hidden'); }
 window.confirmIAP = function() {
-    // Legacy - kept for compatibility
-    processPayment();
+    state.economy.premium += parseInt(document.getElementById('dev-coins-input').value);
+    saveState(); document.getElementById('modal-store').classList.add('hidden');
 }
 
 /* =========================================================================
@@ -1360,7 +1108,7 @@ window.goToTacticsFromMatch = function() {
     switchTab('tactics');
     
     const topBtn = document.getElementById('top-continue-btn');
-    topBtn.innerHTML = 'VOLVER AL PARTIDO';
+    topBtn.innerHTML = 'VOLVER AL PARTIDO ⏱';
     topBtn.className = "btn-continue shadow-lg bg-yellow-600";
     topBtn.onclick = returnToMatch;
 }
@@ -1370,7 +1118,7 @@ window.returnToMatch = function() {
     document.getElementById('match-modal').classList.remove('hidden');
     
     const topBtn = document.getElementById('top-continue-btn');
-    topBtn.innerHTML = 'CONTINUAR';
+    topBtn.innerHTML = 'CONTINUAR ⏭';
     topBtn.className = "btn-continue shadow-lg";
     topBtn.onclick = startMatch;
 }
@@ -1424,44 +1172,30 @@ function finishMatch(mG, oG) {
 
     state.history[state.stats.matchday.toString()] = results;
     
-    // Evaluar Apuestas de la jornada actual
+    // Evaluar Apuestas
     let betResults = [];
     state.activeBets.forEach(b => {
-        if(b.resolved) return; // Ya resuelta en jornada anterior
-        if(b.matchday !== state.stats.matchday) return; // No es de esta jornada
-        
         const actual = results.find(r => r.home === b.home && r.away === b.away);
         if(actual) {
             let actualWinner = actual.hG > actual.aG ? 'h' : (actual.aG > actual.hG ? 'a' : 'd');
             let predictedWinner = b.hG > b.aG ? 'h' : (b.aG > b.hG ? 'a' : 'd');
             
-            b.resolved = true;
-            
             if(actual.hG === b.hG && actual.aG === b.aG) {
                 let winAmt = b.amount * 2;
                 if(b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
-                b.won = true;
-                b.winnings = winAmt;
                 betResults.push(`Acierto EXACTO (${b.home}): +${winAmt}`);
             } else if (actualWinner === predictedWinner) {
                 let winAmt = Math.floor(b.amount * 1.5);
                 if(b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
-                b.won = true;
-                b.winnings = winAmt;
                 betResults.push(`Acierto GANADOR (${b.home}): +${winAmt}`);
             } else {
-                b.won = false;
-                b.winnings = 0;
                 betResults.push(`Fallo (${b.home}): -${b.amount}`);
             }
         }
     });
     
-    if(betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada ' + state.stats.matchday, betResults.join(' | '));
-    // Limpiar apuestas resueltas antiguas (mantener ultimas 20 para historial)
-    const resolvedBets = state.activeBets.filter(b => b.resolved);
-    const unresolvedBets = state.activeBets.filter(b => !b.resolved);
-    state.activeBets = [...unresolvedBets, ...resolvedBets.slice(-20)];
+    if(betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
+    state.activeBets = []; 
 
     state.playedTeams.push(currentOpponent.name);
     state.stats.matches++;
