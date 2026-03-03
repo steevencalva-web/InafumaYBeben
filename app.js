@@ -41,24 +41,24 @@ function calcPlayerOVR(p) {
     if(p.pos === 'POR') return Math.round((p.def*0.70) + (p.phy*0.20) + (p.pas*0.10));
     return 50;
 }
-PLAYERS_DB.forEach(p => { p.ovr = calcPlayerOVR(p); p.morale = 100; });
+PLAYERS_DB.forEach(p => { p.ovr = calcPlayerOVR(p); p.morale = 100; p.con = 100; }); // Añadido Condición (CON)
 
 /* =========================================================================
-   EQUIPOS IA (CON FORMAS Y COLORES PARA EL ESCUDO)
+   EQUIPOS IA
    ========================================================================= */
 const AI_TEAMS = [
-    { name: "Madrid Kings", ovr: 88, c1: "#ffffff", c2: "#94a3b8", shape: "shape-shield" },
+    { name: "Madrid Kings", ovr: 88, c1: "#ffffff", c2: "#e2e8f0", shape: "shape-shield" },
     { name: "Catalunya AC", ovr: 87, c1: "#b91c1c", c2: "#1d4ed8", shape: "shape-shield" },
-    { name: "Atletico Titan", ovr: 85, c1: "#b91c1c", c2: "#ffffff", shape: "shape-circle" },
+    { name: "Atletico Titan", ovr: 85, c1: "#ef4444", c2: "#ffffff", shape: "shape-circle" },
     { name: "Basque Lions", ovr: 82, c1: "#dc2626", c2: "#ffffff", shape: "shape-hexagon" },
     { name: "Sevilla Sur", ovr: 80, c1: "#ffffff", c2: "#dc2626", shape: "shape-shield" },
-    { name: "Valencia Bats", ovr: 78, c1: "#ffffff", c2: "#000000", shape: "shape-circle" },
+    { name: "Valencia Bats", ovr: 78, c1: "#ffffff", c2: "#0f172a", shape: "shape-circle" },
     { name: "Galicia CF", ovr: 76, c1: "#60a5fa", c2: "#ffffff", shape: "shape-shield" },
     { name: "Betis Norte", ovr: 75, c1: "#16a34a", c2: "#ffffff", shape: "shape-circle" },
     { name: "Villarreal Sun", ovr: 74, c1: "#eab308", c2: "#ca8a04", shape: "shape-shield" },
     { name: "Real Sebastian", ovr: 73, c1: "#1d4ed8", c2: "#ffffff", shape: "shape-circle" },
     { name: "Celta Sky", ovr: 71, c1: "#93c5fd", c2: "#ffffff", shape: "shape-shield" },
-    { name: "Mallorca Red", ovr: 70, c1: "#ef4444", c2: "#000000", shape: "shape-hexagon" },
+    { name: "Mallorca Red", ovr: 70, c1: "#ef4444", c2: "#0f172a", shape: "shape-hexagon" },
     { name: "Osasuna Bulls", ovr: 68, c1: "#991b1b", c2: "#1e293b", shape: "shape-shield" },
     { name: "Alaves Blue", ovr: 67, c1: "#1e3a8a", c2: "#ffffff", shape: "shape-circle" },
     { name: "Rayo Thunder", ovr: 66, c1: "#ffffff", c2: "#dc2626", shape: "shape-shield" },
@@ -75,7 +75,7 @@ function initLeague() {
 }
 
 /* =========================================================================
-   SISTEMA LOCAL, ALERTAS PERSONALIZADAS Y LIMPIEZA DE DATOS (NaN)
+   SISTEMA LOCAL, ALERTAS Y LIMPIEZA
    ========================================================================= */
 let UsersDB = JSON.parse(localStorage.getItem('inafuma_users_db')) || [];
 let state = null; 
@@ -111,13 +111,18 @@ function cleanState(s) {
     if(!s.league || s.league.length === 0) { 
         s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 }];
         AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld:0, w:0, d:0, l:0, gf:0, ga:0, pts:0, badge: ai }));
+    } else {
+        s.league.forEach(t => { if(!t.isUser && !t.badge) t.badge = AI_TEAMS.find(ai => ai.name === t.name) || AI_TEAMS[0]; });
     }
+
     if(!s.flags) s.flags = { canTrain: true, canTalk: true };
     if(!s.playedTeams) s.playedTeams = []; 
     if(!s.roster) s.roster = [];
+    // Inicializar condición (stamina) si no existe en viejas partidas
+    s.roster.forEach(p => { if(p.con === undefined) p.con = 100; });
     if(!s.lineup || s.lineup.length !== 11) s.lineup = new Array(11).fill(null);
     
-    if(s.team && !s.team.shape) { s.team.shape = "shape-shield"; s.team.c1 = s.team.color || "#2563eb"; s.team.c2 = "#1e293b"; }
+    if(s.team && !s.team.shape) { s.team.shape = "shape-shield"; s.team.c1 = s.team.color || "#e11d48"; s.team.c2 = "#1e293b"; }
     return s;
 }
 
@@ -129,7 +134,8 @@ window.onload = () => {
         if (found) state = cleanState(found);
     }
     routeView();
-    document.getElementById('date-display').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    const d = new Date();
+    document.getElementById('date-display').textContent = `${d.getDate()} ${d.toLocaleString('es', {month:'short'}).toUpperCase()} ${d.getFullYear()}`;
 };
 
 function saveState() { 
@@ -143,17 +149,14 @@ function saveState() {
 window.acceptCookies = function() { localStorage.setItem('inafuma_cookies', 'true'); document.getElementById('modal-cookies').classList.add('hidden'); }
 
 window.toggleAuth = function(mode) {
-    if(mode === 'login') {
-        document.getElementById('login-form').classList.remove('hidden');
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('tab-login').className = "flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold cursor-pointer";
-        document.getElementById('tab-register').className = "flex-1 pb-2 text-slate-400 hover:text-white font-bold cursor-pointer";
-    } else {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-        document.getElementById('tab-register').className = "flex-1 pb-2 text-blue-400 border-b-2 border-blue-400 font-bold cursor-pointer";
-        document.getElementById('tab-login').className = "flex-1 pb-2 text-slate-400 hover:text-white font-bold cursor-pointer";
-    }
+    document.getElementById('login-form').classList.toggle('hidden', mode!=='login');
+    document.getElementById('register-form').classList.toggle('hidden', mode!=='register');
+    document.getElementById('tab-login').classList.toggle('border-red-500', mode==='login');
+    document.getElementById('tab-login').classList.toggle('text-white', mode==='login');
+    document.getElementById('tab-login').classList.toggle('text-slate-500', mode!=='login');
+    document.getElementById('tab-register').classList.toggle('border-red-500', mode==='register');
+    document.getElementById('tab-register').classList.toggle('text-white', mode==='register');
+    document.getElementById('tab-register').classList.toggle('text-slate-500', mode!=='register');
 }
 
 document.getElementById('register-form').addEventListener('submit', (e) => {
@@ -166,11 +169,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
         auth: { user, pass }, team: null, economy: { coins: 50000000, premium: 0 },
         roster: [], lineup: new Array(11).fill(null), inbox: [], formation: '4-4-2', league: [], playedTeams: []
     });
-    
-    UsersDB.push(state);
-    localStorage.setItem('inafuma_active_user', user);
-    localStorage.setItem('inafuma_users_db', JSON.stringify(UsersDB));
-    routeView();
+    UsersDB.push(state); localStorage.setItem('inafuma_active_user', user); saveState(); routeView();
 });
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
@@ -178,24 +177,19 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     const user = document.getElementById('log-user').value;
     const pass = document.getElementById('log-pass').value;
     const foundUser = UsersDB.find(u => u.auth.user === user && u.auth.pass === pass);
-    if(foundUser) {
-        state = cleanState(foundUser);
-        localStorage.setItem('inafuma_active_user', user);
-        routeView();
-    } else showAlert("Credenciales incorrectas.");
+    if(foundUser) { state = cleanState(foundUser); localStorage.setItem('inafuma_active_user', user); routeView(); } 
+    else showAlert("Credenciales incorrectas.");
 });
 
-// Creador Visual de Escudos (Funda tu club)
 window.updatePreviewBadge = function() {
     const shape = document.getElementById('set-shape').value;
     const c1 = document.getElementById('set-c1').value;
     const c2 = document.getElementById('set-c2').value;
     const badge = document.getElementById('preview-badge');
-    const teamName = document.getElementById('set-team').value || "BEB";
-    
-    badge.className = `w-16 h-20 club-badge text-xs ${shape}`;
+    const teamName = document.getElementById('set-team').value || "CLUB";
+    badge.className = `w-12 h-14 club-badge text-[10px] ${shape}`;
     badge.style.background = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
-    badge.textContent = teamName.substring(0,3).toUpperCase();
+    badge.textContent = teamName.substring(0,4).toUpperCase();
 }
 
 document.getElementById('set-team').addEventListener('input', updatePreviewBadge);
@@ -211,16 +205,15 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     };
     state.league = initLeague();
     
-    // Regalo Inicial: Tu 11 Titular
     const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
     state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id))));
     state.lineup = [...initialIDs];
 
-    addEmail('Directiva', 'Bienvenido al Club', `Míster ${state.team.manager}, la temporada de LaLiga Tussi consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
+    addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, iniciamos un proyecto ambicioso. Tiene 50M de presupuesto. Demuestre su valía.`);
     saveState(); routeView();
 });
 
-window.logout = function() { state = null; localStorage.removeItem('inafuma_active_user'); routeView(); }
+window.logout = function() { state = null; localStorage.removeItem('inafuma_active_user'); location.reload(); }
 window.toggleProfileMenu = function() { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
 
 window.showSubpage = function(id) {
@@ -229,7 +222,6 @@ window.showSubpage = function(id) {
         document.getElementById('stat-goals').textContent = state.stats.goals;
         document.getElementById('stat-matches').textContent = state.stats.matches;
         document.getElementById('stat-trophies').textContent = state.stats.trophies;
-        document.getElementById('stat-rep').textContent = state.stats.rep;
         document.getElementById('stat-wins').textContent = state.stats.wins;
         document.getElementById('stat-draws').textContent = state.stats.draws;
         document.getElementById('stat-losses').textContent = state.stats.losses;
@@ -244,52 +236,79 @@ function routeView() {
     else { document.getElementById('app-layout').classList.remove('hidden'); updateUI(); switchTab('dash'); }
 }
 
+/* =========================================================================
+   UI & FUNCIONES PRINCIPALES
+   ========================================================================= */
 function addEmail(sender, subject, body) {
     const date = new Date().toLocaleDateString('es-ES', {day: 'numeric', month:'short'});
     state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
 }
 
 function renderInbox() {
-    const list = document.getElementById('inbox-list');
-    list.innerHTML = '';
-    if(state.inbox.length === 0) {
-        list.innerHTML = '<div class="text-slate-500 text-sm text-center italic mt-4">Sin noticias en el club.</div>';
-        return;
+    const listDash = document.getElementById('inbox-list');
+    const listFull = document.getElementById('inbox-full-list');
+    
+    let unreadCount = state.inbox.filter(m => !m.read).length;
+    const badge = document.getElementById('inbox-badge');
+    if(unreadCount > 0) { badge.textContent = unreadCount; badge.classList.remove('hidden'); } 
+    else { badge.classList.add('hidden'); }
+
+    let html = '';
+    if(state.inbox.length === 0) html = '<div class="text-slate-500 text-xs text-center p-4">Buzón vacío.</div>';
+    else {
+        state.inbox.forEach(mail => {
+            const opacity = mail.read ? 'opacity-60' : 'opacity-100';
+            const dot = mail.read ? '' : '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-2"></span>';
+            html += `
+            <div class="p-4 border-b border-[#313145] hover:bg-[#1e1e2d] cursor-pointer transition ${opacity}" onclick="readEmail(${mail.id})">
+                <div class="flex justify-between text-[10px] text-slate-400 mb-1"><span>${mail.sender}</span><span>${mail.date}</span></div>
+                <div class="text-sm font-bold text-white mb-1 truncate">${dot}${mail.subject}</div>
+                <div class="text-xs text-slate-400 truncate">${mail.body}</div>
+            </div>`;
+        });
     }
-    state.inbox.forEach(mail => {
-        const border = mail.read ? 'border-slate-600 opacity-60' : 'border-blue-500 glow-blue';
-        list.innerHTML += `
-        <div class="bg-slate-800 p-4 rounded-lg border ${border} cursor-pointer hover:bg-slate-700 transition mb-3" onclick="readEmail(${mail.id})">
-            <div class="flex justify-between items-baseline mb-2">
-                <span class="text-sm font-bold text-blue-400">${mail.sender}</span>
-                <span class="text-xs text-slate-400">${mail.date}</span>
-            </div>
-            <h4 class="text-lg font-bold text-white">${mail.subject}</h4>
-            <p class="text-sm text-slate-300 mt-2">${mail.body}</p>
-        </div>`;
-    });
+    
+    if(listDash) listDash.innerHTML = html;
+    if(listFull) listFull.innerHTML = html;
+
+    // Mini preview in Dash
+    const preview = document.getElementById('dash-inbox-preview');
+    if(preview && state.inbox.length > 0) {
+        preview.innerHTML = `<div class="text-xs text-slate-400 mb-1">${state.inbox[0].sender}</div><div class="font-bold text-white mb-2">${state.inbox[0].subject}</div><div class="text-xs text-slate-300 line-clamp-3">${state.inbox[0].body}</div>`;
+    } else if (preview) preview.innerHTML = `<div class="text-slate-500 text-xs">Sin mensajes</div>`;
 }
+
 window.readEmail = function(id) { const m = state.inbox.find(x => x.id === id); if(m) { m.read = true; saveState(); renderInbox(); } }
 
 window.switchTab = function(tabId) {
     document.querySelectorAll('.fm-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
-    document.getElementById('nav-' + tabId).classList.add('active');
+    const navBtn = document.getElementById('nav-' + tabId);
+    if(navBtn) navBtn.classList.add('active');
     
     if(tabId === 'market') filterMarket(currentMarketFilter);
     if(tabId === 'tactics') renderTactics();
     if(tabId === 'league') renderLeague();
     if(tabId === 'train') renderTrainStatus();
     if(tabId === 'talk') renderTalkStatus();
+    if(tabId === 'dash') updateUI();
 }
 
 function getStartingXI() { return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p !== undefined); }
 function getTeamOvr() {
     const xi = getStartingXI();
     if(xi.length === 0) return 0;
-    const sum = xi.reduce((acc, p) => acc + (p.ovr * (1 + ((p.morale - 50) / 200))), 0);
+    // Condición y Moral afectan el OVR real en el partido
+    const sum = xi.reduce((acc, p) => acc + (p.ovr * (1 + ((p.morale - 50) / 200)) * (p.con / 100)), 0);
     return Math.round(sum / xi.length);
+}
+
+function getAttrClass(val) {
+    if(val >= 85) return 'bg-[#10b981] text-white';
+    if(val >= 70) return 'bg-[#eab308] text-black';
+    if(val >= 50) return 'bg-[#f97316] text-white';
+    return 'bg-[#ef4444] text-white';
 }
 
 function getBadgeHTML(name, shape, c1, c2, extraClass="w-8 h-10 text-[10px]") {
@@ -304,18 +323,47 @@ function updateUI() {
     document.getElementById('ui-coins').textContent = formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
     document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
+    document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
     
+    document.getElementById('sidebar-teamname').textContent = state.team.name;
+    document.getElementById('sidebar-manager').textContent = state.team.manager;
     document.getElementById('top-teamname').textContent = state.team.name;
     document.getElementById('top-manager').textContent = state.team.manager;
+    document.getElementById('squad-mgr-name').textContent = state.team.manager;
     
-    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-10 h-12 text-sm shadow-md border-white/20");
-    document.getElementById('top-shield').outerHTML = `<div id="top-shield" class="border border-white/20">${badgeHTML}</div>`;
+    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow");
+    document.getElementById('top-shield').innerHTML = badgeHTML;
+    document.getElementById('sidebar-shield').innerHTML = badgeHTML;
+    
+    // Set Next Opponent
+    const unplayedTeams = state.league.filter(t => !t.isUser && state.playedTeams.filter(x => x === t.name).length < 2);
+    let nextOpp = unplayedTeams.length > 0 ? unplayedTeams[0] : null;
+    if(nextOpp) {
+        document.getElementById('ui-next-opp').textContent = nextOpp.name;
+        document.getElementById('dash-next-home').textContent = state.team.name;
+        document.getElementById('dash-next-away').textContent = nextOpp.name;
+        document.getElementById('dash-next-home-shield').innerHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-sm border border-white/20");
+        const oB = nextOpp.badge;
+        document.getElementById('dash-next-away-shield').innerHTML = getBadgeHTML(nextOpp.name, oB.shape, oB.c1, oB.c2, "w-full h-full text-sm border border-white/20");
+    } else {
+        document.getElementById('ui-next-opp').textContent = "Fin Temporada";
+    }
 
     document.getElementById('dash-ovr-big').textContent = getTeamOvr();
+    document.getElementById('dash-ovr').textContent = getTeamOvr();
     document.getElementById('dash-matches').textContent = state.stats.matches;
     document.getElementById('dash-wins').textContent = state.stats.wins;
     document.getElementById('dash-draws').textContent = state.stats.draws;
     document.getElementById('dash-losses').textContent = state.stats.losses;
+
+    // Calcular Posición y Forma para el Dashboard
+    const sorted = [...state.league].sort((a,b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+    const myPos = sorted.findIndex(t => t.isUser) + 1;
+    document.getElementById('dash-pos').textContent = myPos + "º";
+    
+    // Valor Plantilla
+    const totalVal = state.roster.reduce((sum, p) => sum + p.priceBasic, 0);
+    document.getElementById('dash-value').textContent = "€" + (totalVal/1000000).toFixed(1) + "M";
 
     renderInbox(); renderSquad();
     if(document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
@@ -326,21 +374,19 @@ function updateUI() {
    ========================================================================= */
 function renderLeague() {
     const tbody = document.getElementById('league-tbody');
+    if(!tbody) return;
     tbody.innerHTML = '';
-    const sorted = [...state.league].sort((a,b) => {
-        if(b.pts !== a.pts) return b.pts - a.pts;
-        return (b.gf - b.ga) - (a.gf - a.ga);
-    });
+    const sorted = [...state.league].sort((a,b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
 
     sorted.forEach((t, i) => {
-        const isUserClass = t.isUser ? 'user-row font-bold' : '';
+        const isUserClass = t.isUser ? 'user-row' : '';
         const badgeObj = t.isUser ? state.team : t.badge;
-        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto");
+        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto border border-white/10");
         
         tbody.innerHTML += `
         <tr class="${isUserClass}">
             <td>${i+1}</td>
-            <td class="text-center">${miniBadge}</td>
+            <td class="text-center p-1">${miniBadge}</td>
             <td class="text-white">${t.name}</td>
             <td>${t.pld}</td>
             <td>${t.w}</td>
@@ -349,7 +395,7 @@ function renderLeague() {
             <td>${t.gf}</td>
             <td>${t.ga}</td>
             <td>${t.gf - t.ga}</td>
-            <td class="text-yellow-400 font-bold font-gaming text-lg">${t.pts}</td>
+            <td class="text-white font-bold text-sm bg-slate-800/50 text-center">${t.pts}</td>
         </tr>`;
     });
 }
@@ -385,7 +431,10 @@ function updateTeamStats(team, gf, ga) {
 /* =========================================================================
    ENTRENAMIENTO Y CHARLA
    ========================================================================= */
-function renderTrainStatus() { document.getElementById('train-status').textContent = state.flags.canTrain ? "ESTADO: DISPONIBLE" : "ESTADO: SESIÓN COMPLETADA. JUEGA UN PARTIDO PARA AVANZAR."; }
+function renderTrainStatus() { 
+    const st = document.getElementById('train-status');
+    if(st) st.textContent = state.flags.canTrain ? "LISTO PARA ASIGNAR" : "SESIÓN COMPLETADA. JUEGA PARA AVANZAR."; 
+}
 
 window.executeWeeklyTraining = function() {
     if(!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
@@ -394,21 +443,27 @@ window.executeWeeklyTraining = function() {
     const days = ['mon','tue','wed','thu','fri'];
     days.forEach(d => {
         let type = document.getElementById(`train-${d}`).value;
-        if(type !== 'rest') {
-            state.roster.forEach(p => {
+        state.roster.forEach(p => {
+            if(type !== 'rest') {
                 if(type==='atk' && (p.pos==='DEL' || p.pos==='MED')) { p.sho++; p.pas++; }
                 if(type==='def' && (p.pos!=='DEL')) { p.def++; p.phy++; }
-                if(type==='phy') { p.pac++; p.phy++; p.morale = Math.max(0, p.morale-5); } 
-                p.ovr = calcPlayerOVR(p);
-            });
-        }
+                if(type==='phy') { p.pac++; p.phy++; }
+                p.con = Math.max(10, p.con - 5); // Entrenamiento cansa
+            } else {
+                p.con = Math.min(100, p.con + 15); // Descanso recupera
+            }
+            p.ovr = calcPlayerOVR(p);
+        });
     });
 
     state.flags.canTrain = false; saveState(); renderTrainStatus();
-    showAlert("Semana de entrenamiento completada con éxito. Los atributos han mejorado.");
+    showAlert("Programa completado. Los atributos han cambiado y la Condición Física (CON) se ha actualizado.");
 }
 
-function renderTalkStatus() { document.getElementById('talk-status').textContent = state.flags.canTalk ? "ESTADO: ESPERANDO TUS PALABRAS" : "ESTADO: LA PLANTILLA YA ESTÁ EN EL TÚNEL DE VESTUARIOS"; }
+function renderTalkStatus() { 
+    const st = document.getElementById('talk-status');
+    if(st) st.textContent = state.flags.canTalk ? "DISPONIBLE" : "COMPLETADO"; 
+}
 
 window.executeTalk = function(tone) {
     if(!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
@@ -441,7 +496,7 @@ window.executeTalk = function(tone) {
 }
 
 /* =========================================================================
-   PLANTILLA (ORDENADA)
+   PLANTILLA Y TÁCTICAS
    ========================================================================= */
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
@@ -449,37 +504,37 @@ function renderSquad() {
     tbody.innerHTML = '';
     
     const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
-    const sorted = [...state.roster].sort((a,b) => {
-        if(posOrder[a.pos] !== posOrder[b.pos]) return posOrder[a.pos] - posOrder[b.pos];
-        return b.ovr - a.ovr;
-    });
+    const sorted = [...state.roster].sort((a,b) => posOrder[a.pos] - posOrder[b.pos] || b.ovr - a.ovr);
     
     sorted.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
+        
+        // Corazón Condición FM Style
+        let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
         let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
+        
         tbody.innerHTML += `
         <tr>
-            <td><img src="${p.img}" class="player-avatar"></td>
+            <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded border border-slate-600 hover:bg-slate-600 text-white">ℹ</button></td>
             <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white">${p.name}</td>
-            <td class="font-gaming text-yellow-400 font-bold">${p.ovr}</td>
-            <td style="width: 100px;">
-                <div class="text-xs text-right mb-1">${p.morale}%</div>
-                <div class="w-full h-2 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
+            <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
+            <td class="font-bold">${conIcon} ${p.con}%</td>
+            <td style="width: 80px;">
+                <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
             </td>
-            <td class="text-slate-300 font-mono">${p.pac}</td>
-            <td class="text-slate-300 font-mono">${p.sho}</td>
-            <td class="text-slate-300 font-mono">${p.pas}</td>
-            <td class="text-slate-300 font-mono">${p.def}</td>
-            <td class="text-slate-300 font-mono">${p.phy}</td>
+            <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
+            <td><span class="attr-val ${getAttrClass(p.pac)}">${p.pac}</span></td>
+            <td><span class="attr-val ${getAttrClass(p.sho)}">${p.sho}</span></td>
+            <td><span class="attr-val ${getAttrClass(p.pas)}">${p.pas}</span></td>
+            <td><span class="attr-val ${getAttrClass(p.def)}">${p.def}</span></td>
+            <td><span class="attr-val ${getAttrClass(p.phy)}">${p.phy}</span></td>
         </tr>`;
     });
-    document.getElementById('squad-ovr').textContent = getTeamOvr();
+    const ovrTag = document.getElementById('squad-ovr');
+    if(ovrTag) ovrTag.textContent = getTeamOvr();
 }
 
-// --- TÁCTICAS Y DRAG & DROP INTELIGENTE ---
 let dragSrc = { id: null, slot: null };
-
 window.dragStart = function(e, pId, slotIndex) { 
     dragSrc = { id: pId, slot: slotIndex }; 
     setTimeout(() => e.target.classList.add('opacity-50'), 0); 
@@ -492,11 +547,9 @@ window.dropOnPitch = function(e, targetSlotIndex) {
     
     const targetPlayerId = state.lineup[targetSlotIndex]; 
     if (dragSrc.slot !== null) { 
-        // Movimiento de campo a campo (Intercambio)
         state.lineup[dragSrc.slot] = targetPlayerId; 
         state.lineup[targetSlotIndex] = dragSrc.id; 
     } else { 
-        // Movimiento del banquillo al campo (Entra suplente, sale titular automáticamente)
         state.lineup[targetSlotIndex] = dragSrc.id; 
     }
     saveState(); renderTactics();
@@ -540,7 +593,8 @@ window.autoFillLineup = function() {
 };
 
 function renderTactics() {
-    document.getElementById('tactics-formation').value = state.formation;
+    const formSelect = document.getElementById('tactics-formation');
+    if(formSelect) formSelect.value = state.formation;
     const pitch = document.getElementById('pitch-players');
     const benchContainer = document.getElementById('bench-list');
     if(!pitch || !benchContainer) return;
@@ -562,27 +616,34 @@ function renderTactics() {
         const player = state.roster.find(p => p.id === playerId);
         let innerHTML = '';
         if(player) {
+            let conColor = player.con >= 85 ? '#10b981' : player.con >= 60 ? '#eab308' : '#ef4444';
             innerHTML = `
                 <div class="pitch-ovr-tag">${player.ovr}</div>
-                <div class="pitch-shirt" style="background-image:url(${player.img})" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)"></div>
-                <div class="pitch-name">${player.name}</div>
+                <div class="pitch-shirt" style="background-image:url(${player.img}); border-color: ${conColor}" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)"></div>
+                <div class="pitch-name">${player.name.split(' ').pop()}</div>
             `;
         } else {
-            innerHTML = `<div class="pitch-shirt border-dashed bg-black/50 text-slate-400">+</div>`;
+            innerHTML = `<div class="pitch-shirt border-dashed bg-transparent opacity-50">+</div>`;
         }
         pitch.innerHTML += `<div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">${innerHTML}</div>`;
     });
+
+    document.getElementById('tactics-ovr').textContent = getTeamOvr();
 
     const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
     benchPlayers.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         benchContainer.innerHTML += `
-        <div class="bench-player flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700 mb-2" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
-            <div class="flex items-center gap-3">
-                <img src="${p.img}" class="w-8 h-8 rounded-full object-cover border border-slate-600">
-                <div><div class="text-white text-xs font-bold">${p.name}</div><span class="pos-badge ${pClass} text-[9px] w-auto px-2">${p.pos}</span></div>
+        <div class="bench-player" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
+            <div class="flex items-center gap-2">
+                <img src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
+                <span class="pos-badge ${pClass} text-[8px] w-auto px-1">${p.pos}</span>
+                <span class="text-white text-[10px] font-bold truncate">${p.name}</span>
             </div>
-            <span class="text-yellow-400 font-gaming font-bold bg-slate-800 px-2 py-1 rounded text-sm">${p.ovr}</span>
+            <div class="flex items-center gap-2">
+                <span class="text-[9px] text-slate-400" title="Condición">Con: ${p.con}%</span>
+                <span class="text-yellow-400 font-bold bg-[#111119] px-1.5 py-0.5 rounded text-[10px] border border-[#313145]">${p.ovr}</span>
+            </div>
         </div>`;
     });
 }
@@ -595,8 +656,8 @@ let currentMarketFilter = 'ALL';
 
 window.setMarketMode = function(mode) {
     marketMode = mode;
-    document.getElementById('mode-buy').className = mode === 'buy' ? "text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" : "text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm";
-    document.getElementById('mode-sell').className = mode === 'sell' ? "text-blue-400 font-bold border-b-2 border-blue-400 pb-1 uppercase tracking-widest text-sm" : "text-slate-400 font-bold hover:text-white pb-1 cursor-pointer uppercase tracking-widest text-sm";
+    document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold text-xs border-b-2 border-red-500 pb-1 uppercase" : "text-slate-500 hover:text-white font-bold text-xs pb-1 uppercase cursor-pointer";
+    document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold text-xs border-b-2 border-red-500 pb-1 uppercase" : "text-slate-500 hover:text-white font-bold text-xs pb-1 uppercase cursor-pointer";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
     filterMarket();
 };
@@ -617,7 +678,7 @@ window.filterMarket = function(pos) {
     if(searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
 
     if(items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6">No hay jugadores disponibles aquí.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">Ningún jugador coincide con los criterios.</td></tr>`;
         return;
     }
 
@@ -628,25 +689,28 @@ window.filterMarket = function(pos) {
             const formatM = (p.priceBasic/1000000).toFixed(1)+'M';
             tbody.innerHTML += `
             <tr>
-                <td><img src="${p.img}" class="player-avatar"></td>
-                <td class="font-bold text-white text-base">${p.name}</td>
+                <td class="w-12 text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
-                <td class="font-gaming text-yellow-400 font-bold text-xl">${p.ovr}</td>
-                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">REP: ${p.rep}</td>
-                <td><button class="btn-buy basic w-full" onclick="buyPlayer(${p.id}, 'basic')">FICHAR<br>€${formatM}</button></td>
-                <td><button class="btn-buy premium w-full" onclick="buyPlayer(${p.id}, 'prem')">FICHAR<br>◈ ${p.pricePrem}</button></td>
+                <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
+                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'}">★ ${p.rep}</td>
+                <td class="font-mono text-green-400">€${formatM}</td>
+                <td>
+                    <button class="btn-action w-full py-1 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">Fichar</button>
+                </td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6); 
             const formatM = (sellValue/1000000).toFixed(1)+'M';
             tbody.innerHTML += `
             <tr>
-                <td><img src="${p.img}" class="player-avatar"></td>
-                <td class="font-bold text-white text-base">${p.name}</td>
+                <td class="w-12 text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
+                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
-                <td class="font-gaming text-yellow-400 font-bold text-xl">${p.ovr}</td>
+                <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td style="display:none;"></td> 
-                <td colspan="2"><button class="btn-sell w-full" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER POR €${formatM}</button></td>
+                <td class="font-mono text-slate-400">Oferta: €${formatM}</td>
+                <td><button class="btn-sell w-full py-1" onclick="sellPlayer(${p.id}, ${sellValue})">Ofrecer a Clubes</button></td>
             </tr>`;
         }
     });
@@ -654,25 +718,29 @@ window.filterMarket = function(pos) {
 
 window.buyPlayer = function(id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if(state.stats.rep < p.rep) return showAlert(`No tienes reputación mundial suficiente (Req: ${p.rep}).`);
+    if(state.stats.rep < p.rep) return showAlert(`No cumples la Reputación Mundial requerida (★ ${p.rep}).`);
     
     if(curr === 'basic') {
-        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
+        if(state.economy.coins < p.priceBasic) return showAlert("Presupuesto de traspasos insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
         if(state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
         state.economy.premium -= p.pricePrem;
     }
 
-    state.roster.push(JSON.parse(JSON.stringify(p)));
+    let newPlayer = JSON.parse(JSON.stringify(p));
+    newPlayer.con = 100; // Asignar condición al comprar
+    
+    state.roster.push(newPlayer);
     const emptySlot = state.lineup.findIndex(slot => slot === null);
     if(emptySlot !== -1) state.lineup[emptySlot] = p.id;
-    addEmail('Director Deportivo', `Fichaje Confirmado: ${p.name}`, `Hemos cerrado el traspaso.`);
+    
+    addEmail('Director Deportivo', `Traspaso Completado: ${p.name}`, `Hemos llegado a un acuerdo económico y el jugador ya está a sus órdenes.`);
     saveState(); filterMarket();
 }
 
 window.sellPlayer = function(id, sellValue) {
-    showConfirm("¿Seguro que quieres vender a este jugador por el 60% de su valor?", () => {
+    showConfirm(`¿Aceptar la oferta de venta por €${(sellValue/1000000).toFixed(1)}M?`, () => {
         state.economy.coins += sellValue;
         state.roster = state.roster.filter(p => p.id !== id);
         for(let i=0; i<state.lineup.length; i++) { if(state.lineup[i] === id) state.lineup[i] = null; }
@@ -687,16 +755,19 @@ window.confirmIAP = function() {
 }
 
 /* =========================================================================
-   MOTOR DE PARTIDO Y TEMPORADAS (38 JORNADAS)
+   MOTOR DE PARTIDO AVANZADO (FM STYLE)
    ========================================================================= */
-let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0 };
+let matchState = { 
+    mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0,
+    stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
+};
 let currentOpponent = null;
 
 window.startMatch = function() {
     const xi = getStartingXI();
-    if(xi.length < 11) return showAlert(`Faltan jugadores. Usa "MEJOR 11" en Tácticas.`);
+    if(xi.length < 11) return showAlert(`Plantilla incompleta. Debes alinear a 11 jugadores en Tácticas.`);
 
-    // SISTEMA IDA Y VUELTA (2 PARTIDOS POR EQUIPO)
+    // LÓGICA DE 38 JORNADAS: Buscamos a un equipo contra el que hayamos jugado MENOS de 2 veces
     const unplayedTeams = state.league.filter(t => {
         if (t.isUser) return false;
         const timesPlayed = state.playedTeams.filter(x => x === t.name).length;
@@ -714,51 +785,86 @@ window.startMatch = function() {
     document.getElementById('match-modal').classList.remove('hidden');
     document.getElementById('match-post').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
+    document.getElementById('match-actions').classList.add('hidden');
     
     document.getElementById('sim-home-name').textContent = state.team.name;
-    const homeBadgeHtml = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-16 h-20 text-2xl border-2 border-white/20");
-    document.getElementById('sim-home-shield').outerHTML = `<div id="sim-home-shield">${homeBadgeHtml}</div>`;
+    const homeBadgeHtml = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-12 h-16 text-xs");
+    document.getElementById('sim-home-shield').innerHTML = homeBadgeHtml;
     
-    const oppBadgeHtml = getBadgeHTML(currentOpponent.name, currentOpponent.badge.shape, currentOpponent.badge.c1, currentOpponent.badge.c2, "w-16 h-20 text-2xl border-2 border-white/20 shadow-lg");
-    document.getElementById('sim-away-shield').outerHTML = `<div id="sim-away-shield">${oppBadgeHtml}</div>`;
+    const oppBadgeObj = currentOpponent.badge || AI_TEAMS.find(ai => ai.name === currentOpponent.name) || AI_TEAMS[0];
+    const oppBadgeHtml = getBadgeHTML(currentOpponent.name, oppBadgeObj.shape, oppBadgeObj.c1, oppBadgeObj.c2, "w-12 h-16 text-xs");
+    document.getElementById('sim-away-shield').innerHTML = oppBadgeHtml;
     
     const myOvr = getTeamOvr(); 
     document.getElementById('sim-home-ovr').textContent = myOvr;
     document.getElementById('sim-away-name').textContent = currentOpponent.name;
     document.getElementById('sim-away-ovr').textContent = currentOpponent.ovr;
     
+    // Bajar condición física por jugar el partido
+    state.roster.forEach(p => { if(state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
+
     matchState = {
         mG: 0, oG: 0, min: 0,
         myProb: 0.08 + ((myOvr - currentOpponent.ovr) * 0.003),
         oppProb: 0.08 - ((myOvr - currentOpponent.ovr) * 0.003),
-        interval: null, talkMod: 0
+        interval: null, talkMod: 0,
+        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
     };
 
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     document.getElementById('match-progress').style.width = "0%";
-    document.getElementById('match-narrative').innerHTML = "<div class='text-lg mb-2 text-white'>[PREVIA] Los equipos saltan al césped. ¡Arranca el partido!</div>";
+    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>Pitido inicial. Rueda el balón en LaLiga Tussi.</div>";
 
+    updateMatchStatsUI();
     runMatchLoop(45); 
+}
+
+function updateMatchStatsUI() {
+    document.getElementById('stat-poss-home').textContent = matchState.stats.hPoss + "%";
+    document.getElementById('stat-poss-away').textContent = matchState.stats.aPoss + "%";
+    document.getElementById('bar-poss-home').style.width = matchState.stats.hPoss + "%";
+    document.getElementById('bar-poss-away').style.width = matchState.stats.aPoss + "%";
+
+    document.getElementById('stat-shots-home').textContent = matchState.stats.hShots;
+    document.getElementById('stat-shots-away').textContent = matchState.stats.aShots;
+    
+    let totalShots = matchState.stats.hShots + matchState.stats.aShots;
+    let hShotP = totalShots > 0 ? (matchState.stats.hShots / totalShots) * 100 : 50;
+    let aShotP = totalShots > 0 ? (matchState.stats.aShots / totalShots) * 100 : 50;
+    
+    document.getElementById('bar-shots-home').style.width = hShotP + "%";
+    document.getElementById('bar-shots-away').style.width = aShotP + "%";
 }
 
 function runMatchLoop(targetMinute) {
     const logDiv = document.getElementById('match-narrative');
-    const commentary = ["Posesión larga buscando huecos.", "Disparo potente desviado.", "Falta táctica en el centro.", "Corte espectacular de la defensa.", "Juego muy físico en la medular.", "Centro al área que atrapa el portero."];
+    const commentary = [
+        "Controlando el ritmo del partido en el centro del campo.", 
+        "Pase filtrado peligroso que corta la defensa in extremis.", 
+        "Falta táctica para evitar un contragolpe rápido.", 
+        "Disparo lejano que se marcha por encima del larguero.", 
+        "Gran intervención del guardameta tras un remate raso.", 
+        "Saque de esquina cerrado que despeja la zaga."
+    ];
 
     matchState.interval = setInterval(() => {
         matchState.min += 3;
         document.getElementById('match-time').textContent = `${matchState.min}:00`;
         document.getElementById('match-progress').style.width = `${(matchState.min/90)*100}%`;
 
+        // Fluctuación de estadísticas
+        matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random()*11)-5)));
+        matchState.stats.aPoss = 100 - matchState.stats.hPoss;
+        updateMatchStatsUI();
+
         // DESCANSO
         if(matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
-            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 text-lg">45': ¡FINAL DE LA PRIMERA PARTE!</strong></div>`;
+            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Los equipos se retiran al túnel de vestuarios.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
+            document.getElementById('match-actions').classList.remove('hidden');
             document.getElementById('match-halftime').classList.remove('hidden');
-            document.getElementById('btn-animar').disabled = false;
-            document.getElementById('btn-exigir').disabled = false;
             return;
         }
 
@@ -774,40 +880,47 @@ function runMatchLoop(targetMinute) {
 
         if(rand < (activeMyProb * 0.4)) {
             matchState.mG++;
+            matchState.stats.hShots++;
             const xi = getStartingXI();
             const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
             const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random()*scorers.length)].name : "el equipo";
-            eventText = `<span class="text-blue-400 font-bold text-lg">¡GOLAZO! Disparo imparable de ${scorer}.</span>`;
+            eventText = `<span class="text-green-400 font-bold">¡GOL! Excelente definición de ${scorer}.</span>`;
         } else if (rand > 1 - (matchState.oppProb * 0.4)) {
             matchState.oG++;
-            eventText = `<span class="text-red-400 font-bold text-lg">¡Gol de ${currentOpponent.name}! Error defensivo.</span>`;
+            matchState.stats.aShots++;
+            eventText = `<span class="text-red-400 font-bold">¡Gol de ${currentOpponent.name}! Fallo imperdonable en la marca.</span>`;
+        } else if (rand < 0.3) {
+            matchState.stats.hShots++; // Fallo Local
+        } else if (rand > 0.7) {
+            matchState.stats.aShots++; // Fallo Visitante
         }
 
-        logDiv.innerHTML += `<div><strong class="text-white">${matchState.min}':</strong> ${eventText}</div>`;
+        logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
         logDiv.scrollTop = logDiv.scrollHeight; 
         document.getElementById('sim-home-score').textContent = matchState.mG;
         document.getElementById('sim-away-score').textContent = matchState.oG;
-    }, 400); 
+        updateMatchStatsUI();
+
+    }, 350); 
 }
 
 window.matchTalk = function(type) {
-    document.getElementById('btn-animar').disabled = true;
-    document.getElementById('btn-exigir').disabled = true;
     const logDiv = document.getElementById('match-narrative');
 
     if(type === 'animar') {
         matchState.talkMod = 0.01; 
-        logDiv.innerHTML += `<div class="text-blue-400 mt-2"><em>[VESTUARIO] Has animado al equipo. Parecen motivados.</em></div>`;
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">La charla motivacional parece haber surtido efecto positivo.</div>`;
     } else {
         if(Math.random() < 0.6) {
             matchState.talkMod = 0.02; 
-            logDiv.innerHTML += `<div class="text-green-400 mt-2"><em>[VESTUARIO] ¡Bronca monumental! Salen a por todas.</em></div>`;
+            logDiv.innerHTML += `<div class="text-green-400 mt-2 text-xs italic">El equipo reacciona bien a las exigencias del mánager.</div>`;
         } else {
             matchState.talkMod = -0.01; 
-            logDiv.innerHTML += `<div class="text-red-400 mt-2"><em>[VESTUARIO] Te has pasado. El equipo está nervioso.</em></div>`;
+            logDiv.innerHTML += `<div class="text-red-400 mt-2 text-xs italic">La plantilla parece bloqueada tras la dura charla.</div>`;
         }
     }
     logDiv.scrollTop = logDiv.scrollHeight;
+    document.getElementById('match-halftime').innerHTML = '<div class="text-xs text-slate-400 italic mb-4">Instrucciones enviadas.</div><button onclick="resumeMatch()" class="w-full bg-green-600 text-white font-bold py-2 rounded text-xs uppercase">Comenzar 2ª Parte</button>';
 }
 
 window.goToTacticsFromMatch = function() {
@@ -816,9 +929,9 @@ window.goToTacticsFromMatch = function() {
     switchTab('tactics');
     
     const topBtn = document.getElementById('top-continue-btn');
-    topBtn.innerHTML = 'VOLVER AL PARTIDO ⏱';
+    topBtn.innerHTML = 'VOLVER AL VESTUARIO ⏱';
     topBtn.onclick = returnToMatch;
-    topBtn.className = "btn-action px-6 py-2.5 text-sm flex items-center gap-2 glow-green bg-green-600";
+    topBtn.className = "btn-continue bg-yellow-600 shadow-lg";
 }
 
 window.returnToMatch = function() {
@@ -826,27 +939,32 @@ window.returnToMatch = function() {
     document.getElementById('match-modal').classList.remove('hidden');
     
     const topBtn = document.getElementById('top-continue-btn');
-    topBtn.innerHTML = 'CONTINUAR LIGA ⏭';
+    topBtn.innerHTML = 'CONTINUAR ⏭';
     topBtn.onclick = startMatch;
-    topBtn.className = "btn-action px-6 py-2.5 text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]";
+    topBtn.className = "btn-continue shadow-lg";
 }
 
 window.resumeMatch = function() {
+    document.getElementById('match-actions').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
+    
+    // Recalcular por si hubo cambios tácticos
     const newOvr = getTeamOvr(); 
-    document.getElementById('sim-home-ovr').textContent = newOvr;
     matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003); 
 
     const logDiv = document.getElementById('match-narrative');
-    logDiv.innerHTML += `<div class="mt-4"><strong class="text-white text-lg">45': ¡COMIENZA LA SEGUNDA PARTE!</strong></div>`;
+    logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la segunda mitad.</strong></div>`;
     logDiv.scrollTop = logDiv.scrollHeight; 
     runMatchLoop(90); 
 }
 
 function finishMatch(mG, oG) {
+    document.getElementById('match-actions').classList.remove('hidden');
     document.getElementById('match-post').classList.remove('hidden');
-    document.getElementById('match-narrative').innerHTML += `<div class="mt-4 text-yellow-400 font-bold text-2xl">¡FINAL DEL PARTIDO!</div>`;
-    document.getElementById('match-narrative').scrollTop = document.getElementById('match-narrative').scrollHeight;
+    
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
 
     let ptsEarned = 0; let coins = 0; let rep = 0;
 
@@ -873,11 +991,11 @@ function finishMatch(mG, oG) {
     state.flags.canTrain = true;
     state.flags.canTalk = true;
 
-    addEmail('Cuerpo Técnico', `Resumen Jornada`, `Resultado: ${mG}-${oG}. Ingresos: +€${(coins/1000000).toFixed(1)}M.`);
+    addEmail('Cuerpo Técnico', `Informe Post-Partido`, `Resultado: ${mG}-${oG}. Hemos ingresado €${(coins/1000000).toFixed(1)}M por taquilla y derechos.`);
     saveState();
     
     document.getElementById('match-coins').textContent = `+€${(coins/1000000).toFixed(1)}M`;
-    document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-sm ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">${rep > 0 ? '+' : ''}${rep} REP</span>`;
+    document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">Reputación: ${rep > 0 ? '+' : ''}${rep}</span>`;
 }
 
 window.endMatchAndReturn = function() {
@@ -908,25 +1026,28 @@ function endSeason() {
         document.getElementById('season-trophy').classList.remove('hidden');
         document.getElementById('season-no-trophy').classList.add('hidden');
         state.stats.trophies++;
-        addEmail('Directiva', '¡CAMPEONES DE LIGA!', 'Felicidades Míster, hemos ganado LaLiga Tussi. Su trofeo ya está en el palmarés.');
+        addEmail('Directiva', '¡CAMPEONES DE LIGA!', 'La afición está extasiada. Hemos conquistado LaLiga Tussi.');
     } else {
         document.getElementById('season-trophy').classList.add('hidden');
         document.getElementById('season-no-trophy').classList.remove('hidden');
         document.getElementById('season-pos').textContent = userPos + "º";
-        addEmail('Directiva', 'Fin de Temporada', `Hemos quedado en la posición ${userPos}. Esperamos mejores resultados la próxima temporada.`);
+        addEmail('Directiva', 'Revisión de Temporada', `Hemos finalizado en la posición ${userPos}. Debemos reforzar la plantilla para el próximo año.`);
     }
     saveState();
 }
 
 window.startNewSeason = function() {
     state.stats.matchday = 1;
-    state.playedTeams = [];
+    state.playedTeams = []; 
     state.league.forEach(t => {
         t.pld = 0; t.w = 0; t.d = 0; t.l = 0; t.gf = 0; t.ga = 0; t.pts = 0;
     });
     
+    // Resetear moral y condicion
+    state.roster.forEach(p => { p.morale = 100; p.con = 100; });
+    
     saveState();
     document.getElementById('modal-season-end').classList.add('hidden');
     switchTab('dash');
-    showAlert("¡Nueva temporada iniciada! Todo tu dinero y plantilla se ha conservado.");
+    showAlert("¡Arranca una nueva edición de LaLiga Tussi! Calendario y clasificaciones reiniciadas.");
 }
